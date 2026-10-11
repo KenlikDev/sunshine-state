@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Check required foundation documents
         shell: bash
@@ -35,5 +37,14 @@ jobs:
             test -s "$file" || { echo "Missing or empty required file: $file"; exit 1; }
           done
 
-      - name: Check for accidental whitespace errors
-        run: git diff --check
+      - name: Check changed lines for whitespace errors
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            git diff --check "origin/$GITHUB_BASE_REF...HEAD"
+          elif git rev-parse --verify HEAD^ >/dev/null 2>&1; then
+            git diff --check HEAD^ HEAD
+          else
+            git diff --check
+          fi
