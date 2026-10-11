@@ -1,5 +1,15 @@
 # Testing Strategy
 
+## Pinned engine and automated smoke tests
+
+The initial project baseline uses **Godot 4.7.2-stable**, the latest stable patch verified when this baseline was prepared. CI must use the same exact version as the local validation environment. Update the CI pin, project note, and this section together when upgrading the engine.
+
+The GitHub Actions smoke test performs two checks:
+1. Imports editor resources and validates the project in headless editor mode.
+2. Launches the configured main scene headlessly and exits after a short run.
+
+These checks verify project loading and bootstrap execution only. They do not prove gameplay correctness, export success, visual quality, or target-machine performance.
+
 ## Test layers
 
 ### Static and project checks
@@ -42,6 +52,7 @@ Run a scripted critical path:
 - performance in dense and quiet areas
 
 ## Test environment
+
 Pin the Godot version and test on a documented desktop environment. Keep automated checks deterministic; isolate random seeds where appropriate. Record OS, CPU, GPU, driver, resolution, and renderer for performance runs.
 
 ## Defect severity
@@ -51,4 +62,5 @@ Pin the Godot version and test on a documented desktop environment. Keep automat
 - P3: minor visual/audio defect or polish issue
 
 ## Release gate
+
 No open P0/P1 defects. Required automated tests pass. Critical path succeeds in the packaged build. Known P2/P3 defects are documented and accepted explicitly.
