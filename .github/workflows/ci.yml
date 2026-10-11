@@ -1,0 +1,71 @@
+name: Repository checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - develop
+      - main
+  workflow_dispatch:
+
+jobs:
+  docs-and-policy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check required foundation documents
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in \
+            README.md \
+            docs/vision.md \
+            docs/mvp-scope.md \
+            docs/architecture.md \
+            docs/gameplay-systems.md \
+            docs/art-pipeline.md \
+            docs/testing-strategy.md \
+            docs/performance-budgets.md \
+            docs/source-register.md \
+            docs/roadmap.md \
+            docs/development-workflow.md
+          do
+            test -s "$file" || { echo "Missing or empty required file: $file"; exit 1; }
+          done
+
+      - name: Check changed lines for whitespace errors
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            git diff --check "origin/$GITHUB_BASE_REF...HEAD"
+          elif git rev-parse --verify HEAD^ >/dev/null 2>&1; then
+            git diff --check HEAD^ HEAD
+          else
+            git diff --check
+          fi
+
+  godot-smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pinned Godot version
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.7.2
+          use-dotnet: false
+
+      - name: Report engine version
+        run: godot --version
+
+      - name: Import and validate project resources
+        run: godot --headless --editor --path . --quit
+
+      - name: Launch main scene headlessly
+        run: godot --headless --path . --quit-after 2
