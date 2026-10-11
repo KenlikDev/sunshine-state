@@ -1,5 +1,5 @@
 ; Sunshine State — initial project configuration.
-; Pin and record the exact stable Godot 4 version before gameplay implementation.
+; CI and initial validation use Godot 4.7.2-stable. Update the CI pin and this note together.
 
 config_version=5
 
