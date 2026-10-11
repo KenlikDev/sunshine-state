@@ -1,0 +1,29 @@
+# Godot generated/editor data
+.godot/
+.import/
+export.cfg
+export_presets.cfg
+
+# Blender backup and temporary files
+*.blend1
+*.blend2
+*.tmp
+*.bak
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs and local test artifacts
+*.log
+coverage/
+test-results/
+build/
+dist/
+
+# Secrets and local environment
+.env
+.env.*
+!.env.example

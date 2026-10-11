@@ -1,0 +1,39 @@
+name: Repository checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - develop
+      - main
+  workflow_dispatch:
+
+jobs:
+  docs-and-policy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check required foundation documents
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in \
+            README.md \
+            docs/vision.md \
+            docs/mvp-scope.md \
+            docs/architecture.md \
+            docs/gameplay-systems.md \
+            docs/art-pipeline.md \
+            docs/testing-strategy.md \
+            docs/performance-budgets.md \
+            docs/source-register.md \
+            docs/roadmap.md \
+            docs/development-workflow.md
+          do
+            test -s "$file" || { echo "Missing or empty required file: $file"; exit 1; }
+          done
+
+      - name: Check for accidental whitespace errors
+        run: git diff --check

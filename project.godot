@@ -1,0 +1,13 @@
+; Sunshine State — initial project configuration.
+; Pin and record the exact stable Godot 4 version before gameplay implementation.
+
+config_version=5
+
+[application]
+config/name="Sunshine State"
+config/description="Original single-player open-world action game. Foundation only; not a playable MVP."
+run/main_scene="res://scenes/bootstrap/main.tscn"
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
