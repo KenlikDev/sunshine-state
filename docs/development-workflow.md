@@ -5,7 +5,7 @@
 - `develop`: integration branch, managed by the repository owner.
 - `codex/<task-name>`: isolated implementation or documentation work.
 
-Do not make direct changes to `main). Keep changes focused and submit a pull request for review. The repository owner controls merges into `main` and `develop`.
+Do not make direct changes to `main`. Keep changes focused and submit a pull request for review. The repository owner controls merges into `main` and `develop`.
 
 ## Pull request requirements
 - State the user-visible or technical change.
