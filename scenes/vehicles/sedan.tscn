@@ -1,0 +1,113 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/vehicle_controller.gd" id="1_vehicle"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_chassis"]
+size = Vector3(1.9, 0.85, 3.8)
+
+[sub_resource type="BoxMesh" id="BoxMesh_chassis"]
+size = Vector3(1.9, 0.7, 3.8)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_chassis"]
+albedo_color = Color(0.72, 0.19, 0.11, 1)
+metallic = 0.22
+roughness = 0.38
+
+[sub_resource type="BoxMesh" id="BoxMesh_cabin"]
+size = Vector3(1.4, 0.48, 1.65)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cabin"]
+albedo_color = Color(0.10, 0.17, 0.20, 1)
+metallic = 0.12
+roughness = 0.2
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_interaction"]
+size = Vector3(2.65, 2.35, 4.6)
+
+[node name="PrototypeSedan" type="VehicleBody3D"]
+mass = 1100.0
+linear_damp = 0.08
+angular_damp = 1.2
+script = ExtResource("1_vehicle")
+
+[node name="ChassisCollision" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.12, 0)
+shape = SubResource("BoxShape3D_chassis")
+
+[node name="ChassisMesh" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.22, 0)
+mesh = SubResource("BoxMesh_chassis")
+material_override = SubResource("StandardMaterial3D_chassis")
+
+[node name="CabinMesh" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.72, -0.18)
+mesh = SubResource("BoxMesh_cabin")
+material_override = SubResource("StandardMaterial3D_cabin")
+
+[node name="InteractionArea" type="Area3D" parent="."]
+position = Vector3(0, 0.48, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea"]
+shape = SubResource("BoxShape3D_interaction")
+
+[node name="FrontLeftWheel" type="VehicleWheel3D" parent="."]
+position = Vector3(-0.76, -0.05, -1.25)
+wheel_radius = 0.32
+wheel_rest_length = 0.16
+wheel_friction_slip = 1.5
+suspension_stiffness = 25.0
+damping_compression = 0.83
+damping_relaxation = 0.88
+wheel_roll_influence = 0.08
+use_as_traction = false
+use_as_steering = true
+
+[node name="FrontRightWheel" type="VehicleWheel3D" parent="."]
+position = Vector3(0.76, -0.05, -1.25)
+wheel_radius = 0.32
+wheel_rest_length = 0.16
+wheel_friction_slip = 1.5
+suspension_stiffness = 25.0
+damping_compression = 0.83
+damping_relaxation = 0.88
+wheel_roll_influence = 0.08
+use_as_traction = false
+use_as_steering = true
+
+[node name="RearLeftWheel" type="VehicleWheel3D" parent="."]
+position = Vector3(-0.76, -0.05, 1.25)
+wheel_radius = 0.32
+wheel_rest_length = 0.16
+wheel_friction_slip = 1.5
+suspension_stiffness = 25.0
+damping_compression = 0.83
+damping_relaxation = 0.88
+wheel_roll_influence = 0.08
+use_as_traction = true
+use_as_steering = false
+
+[node name="RearRightWheel" type="VehicleWheel3D" parent="."]
+position = Vector3(0.76, -0.05, 1.25)
+wheel_radius = 0.32
+wheel_rest_length = 0.16
+wheel_friction_slip = 1.5
+suspension_stiffness = 25.0
+damping_compression = 0.83
+damping_relaxation = 0.88
+wheel_roll_influence = 0.08
+use_as_traction = true
+use_as_steering = false
+
+[node name="CameraPivot" type="Node3D" parent="."]
+position = Vector3(0, 1.5, 0)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CameraPivot"]
+spring_length = 5.5
+collision_mask = 1
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot/SpringArm3D"]
+current = false
+rotation_degrees = Vector3(8, 0, 0)
+fov = 78.0

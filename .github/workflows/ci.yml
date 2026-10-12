@@ -35,10 +35,13 @@ jobs:
             docs/roadmap.md \
             docs/development-workflow.md \
             docs/vertical-slice.md \
+            docs/vehicle-system.md \
             localization/ui.csv \
             scripts/ui/localization_service.gd \
             tests/test_vertical_slice.gd \
-            tests/test_vertical_slice.tscn
+            tests/test_vertical_slice.tscn \
+            tests/test_vehicle_system.gd \
+            tests/test_vehicle_system.tscn
           do
             test -s "$file" || { echo "Missing or empty required file: $file"; exit 1; }
           done
@@ -78,3 +81,6 @@ jobs:
 
       - name: Run vertical-slice regression checks
         run: godot --headless --path . res://tests/test_vertical_slice.tscn
+
+      - name: Run vehicle-system regression checks
+        run: godot --headless --path . res://tests/test_vehicle_system.tscn

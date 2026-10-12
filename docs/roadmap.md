@@ -5,8 +5,8 @@ Estimates are planning ranges, not delivery promises. Re-estimate after the firs
 | Milestone | Planned work | Exit gate | Status |
 |---|---|---|---|
 | M0 — Foundation | Repository conventions, scope, architecture, CI baseline | Foundation review and scope approval | Prepared for review |
-| M1 — Vertical slice | Third-person controller, camera, greybox district, interaction, bilingual HUD | Automated checks and repeatable exploration test pass | In progress |
-| M2 — Vehicles | Shared vehicle interface, one polished vehicle, then two variants | Enter/drive/exit/recovery tests pass | Not started |
+| M1 — Vertical slice | Third-person controller, camera, greybox district, interaction, bilingual HUD | Automated checks and repeatable exploration test pass | Automated gate passed; manual review pending |
+| M2 — Vehicles | Shared vehicle interface, first drivable prototype, then two variants | Enter/drive/exit/recovery tests pass | In progress |
 | M3 — Living district | Modular environment, pedestrian and traffic simulation | 15-minute stability test passes | Not started |
 | M4 — Wanted and combat | Weapon/damage loop, detection, pursuit, search/clear | Scripted wanted scenarios pass | Not started |
 | M5 — Missions and persistence | Three connected missions, economy, save/load | Full critical path passes after reload | Not started |
@@ -19,4 +19,4 @@ Do not build advanced systems on top of unstable interfaces. Vehicle, mission, a
 
 ## Implementation gate
 
-The current vertical slice is an intermediate milestone, not the complete MVP. The remaining required capabilities in docs/mvp-scope.md must be implemented and validated before calling the game an MVP or asking for the final MVP acceptance review.
+The current branch contains an intermediate vehicle prototype, not the complete MVP. At least three vehicle configurations and all remaining required capabilities in `docs/mvp-scope.md` must be implemented and validated before calling the game an MVP or asking for the final MVP acceptance review.
