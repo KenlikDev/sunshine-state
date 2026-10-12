@@ -36,7 +36,8 @@ jobs:
             docs/development-workflow.md \
             docs/vertical-slice.md \
             localization/ui.csv \
-            tests/test_vertical_slice.gd \\
+            scripts/ui/localization_service.gd \
+            tests/test_vertical_slice.gd \
             tests/test_vertical_slice.tscn
           do
             test -s "$file" || { echo "Missing or empty required file: $file"; exit 1; }
