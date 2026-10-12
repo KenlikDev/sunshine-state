@@ -10,7 +10,7 @@ M1 establishes the first interactive, playable foundation of Sunshine State befo
 - A bounded, connected coastal district with roads, sidewalks, blockout buildings, a beach, and basic directional lighting.
 - A shared interactable contract demonstrated by an information board.
 - An in-game HUD with controls, interaction prompts, status feedback, and English/Russian localization loaded from a CSV table by a dedicated runtime service.
-- A headless regression script that checks bootstrap composition, interaction availability, and Russian localization.
+- A headless regression scene that checks bootstrap composition, interaction availability, and Russian localization.
 
 ## Controls
 
@@ -27,7 +27,7 @@ M1 establishes the first interactive, playable foundation of Sunshine State befo
 
 ## Validation status
 
-The automated checks are run in GitHub Actions. A headless scene load is not a substitute for manual playtesting. Manual verification is still required for feel, camera clipping, collision edges, UI scaling, and the district's visual readability on the target machine.
+The automated checks are run in GitHub Actions by launching the project with the regression scene as the main scene. A headless scene load is not a substitute for manual playtesting. Manual verification is still required for feel, camera clipping, collision edges, UI scaling, and the district's visual readability on the target machine.
 
 ## Not included yet
 

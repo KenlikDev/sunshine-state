@@ -1,9 +1,9 @@
-extends SceneTree
+extends Node
 
 var _failures: Array[String] = []
 
 
-func _initialize() -> void:
+func _ready() -> void:
 	call_deferred("_run_tests")
 
 
@@ -13,15 +13,15 @@ func _run_tests() -> void:
 
 	if main_scene != null:
 		var instance: Node = main_scene.instantiate()
-		root.add_child(instance)
-		await process_frame
-		await physics_frame
+		add_child(instance)
+		await get_tree().process_frame
+		await get_tree().physics_frame
 
 		_check(instance.get_node_or_null("World") != null, "Bootstrap creates the world.")
 		_check(instance.get_node_or_null("Player") is CharacterBody3D, "Bootstrap creates a CharacterBody3D player.")
 		_check(instance.get_node_or_null("HUD") is CanvasLayer, "Bootstrap creates the HUD.")
 		_check(
-			not get_nodes_in_group("interactable").is_empty(),
+			not get_tree().get_nodes_in_group("interactable").is_empty(),
 			"District includes at least one interactable object."
 		)
 
@@ -30,23 +30,29 @@ func _run_tests() -> void:
 			_check(player.has_method("get_current_interaction_prompt_key"), "Player exposes the interaction prompt contract.")
 			_check(player.has_method("refresh_interaction_prompt"), "Player can refresh its prompt after a locale change.")
 
-		Localization.set_locale("ru")
-		var russian_objective: String = Localization.translate_key("HUD_OBJECTIVE")
-		_check(
-			russian_objective.contains("исследуйте район"),
-			"Russian UI translation is available at runtime."
-		)
-		Localization.set_locale("en")
+		var localization: Node = get_node_or_null("/root/Localization")
+		_check(localization != null, "Localization autoload is available to game scenes.")
+		if localization != null:
+			localization.call("set_locale", "ru")
+			var russian_objective: String = String(
+				localization.call("translate_key", "HUD_OBJECTIVE")
+			)
+			_check(
+				russian_objective.contains("исследуйте район"),
+				"Russian UI localization is loaded from the CSV table."
+			)
+			localization.call("set_locale", "en")
+
 		instance.queue_free()
-		await process_frame
+		await get_tree().process_frame
 
 	if _failures.is_empty():
 		print("Vertical-slice checks passed.")
-		quit(0)
+		get_tree().quit(0)
 	else:
 		for failure: String in _failures:
 			push_error(failure)
-		quit(1)
+		get_tree().quit(1)
 
 
 func _check(condition: bool, description: String) -> void:

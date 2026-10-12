@@ -36,7 +36,8 @@ jobs:
             docs/development-workflow.md \
             docs/vertical-slice.md \
             localization/ui.csv \
-            tests/test_vertical_slice.gd
+            tests/test_vertical_slice.gd \\
+            tests/test_vertical_slice.tscn
           do
             test -s "$file" || { echo "Missing or empty required file: $file"; exit 1; }
           done
@@ -75,4 +76,4 @@ jobs:
         run: godot --headless --path . --quit-after 2
 
       - name: Run vertical-slice regression checks
-        run: godot --headless --path . --script res://tests/test_vertical_slice.gd
+        run: godot --headless --path . res://tests/test_vertical_slice.tscn
