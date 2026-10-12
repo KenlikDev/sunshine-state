@@ -6,6 +6,7 @@ on:
     branches:
       - develop
       - main
+      - "codex/**"
   workflow_dispatch:
 
 jobs:
@@ -17,7 +18,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check required foundation documents
+      - name: Check required project documents
         shell: bash
         run: |
           set -euo pipefail
@@ -32,7 +33,12 @@ jobs:
             docs/performance-budgets.md \
             docs/source-register.md \
             docs/roadmap.md \
-            docs/development-workflow.md
+            docs/development-workflow.md \
+            docs/vertical-slice.md \
+            localization/ui.csv \
+            scripts/ui/localization_service.gd \
+            tests/test_vertical_slice.gd \
+            tests/test_vertical_slice.tscn
           do
             test -s "$file" || { echo "Missing or empty required file: $file"; exit 1; }
           done
@@ -69,3 +75,6 @@ jobs:
 
       - name: Launch main scene headlessly
         run: godot --headless --path . --quit-after 2
+
+      - name: Run vertical-slice regression checks
+        run: godot --headless --path . res://tests/test_vertical_slice.tscn

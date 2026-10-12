@@ -1,12 +1,60 @@
-; Sunshine State — initial project configuration.
-; CI and initial validation use Godot 4.7.2-stable. Update the CI pin and this note together.
+; Sunshine State project configuration.
+; The required engine baseline is Godot 4.7.2-stable. See docs/testing-strategy.md.
 
 config_version=5
 
 [application]
 config/name="Sunshine State"
-config/description="Original single-player open-world action game. Foundation only; not a playable MVP."
+config/description="Original single-player open-world action game. M1 playable greybox vertical slice."
 run/main_scene="res://scenes/bootstrap/main.tscn"
+
+[display]
+window/size/viewport_width=1600
+window/size/viewport_height=900
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+
+[input]
+move_forward={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":87)]
+}
+move_backward={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":83)]
+}
+move_left={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":65)]
+}
+move_right={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":68)]
+}
+sprint={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194325)]
+}
+jump={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":32)]
+}
+interact={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":69)]
+}
+toggle_language={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194337)]
+}
+ui_cancel={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194305)]
+}
+
+[autoload]
+Localization="*res://scripts/ui/localization_service.gd"
 
 [rendering]
 renderer/rendering_method="gl_compatibility"
