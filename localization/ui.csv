@@ -27,4 +27,3 @@ INTERACT_DAMAGE_PROPERTY,"damage property","повредить имуществ�
 MESSAGE_CRIME_REPORTED,"Crime reported. Police may be searching for you.","Преступление зарегистрировано. Полиция может искать вас."
 MESSAGE_CRIME_COOLDOWN,"Wait before repeating this property-damage action.","Подождите перед повторным повреждением имущества."
 MESSAGE_CRIME_INVALID_ACTOR,"This action requires a valid player.","Для этого действия нужен действующий персонаж."
-
