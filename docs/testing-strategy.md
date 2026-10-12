@@ -38,7 +38,7 @@ Cover pure logic and state transitions:
 - vehicle interaction raycast and entry/exit handoff
 - single-driver ownership and input ownership
 - throttle, reverse, steering, braking, and recovery checks
-- vehicle collision and safe exit positioning
+- vehicle collision feedback, recovery clearance, upright reset, and safe exit positioning
 - mission completion grants one reward exactly once
 - police detection creates and clears a pursuit correctly
 - save/load restores progression after restart

@@ -25,6 +25,8 @@ roughness = 0.2
 size = Vector3(2.65, 2.35, 4.6)
 
 [node name="PrototypeSedan" type="VehicleBody3D"]
+contact_monitor = true
+max_contacts_reported = 8
 mass = 1100.0
 linear_damp = 0.08
 angular_damp = 1.2

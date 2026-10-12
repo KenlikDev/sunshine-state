@@ -60,6 +60,65 @@ func _run_tests() -> void:
 				"Throttle input moves the vehicle forward through physics."
 			)
 
+			var barrier := StaticBody3D.new()
+			barrier.name = "VehicleRegressionBarrier"
+			barrier.position = Vector3(
+				vehicle.global_position.x,
+				1.0,
+				vehicle.global_position.z - 3.0
+			)
+			var barrier_collision := CollisionShape3D.new()
+			var barrier_shape := BoxShape3D.new()
+			barrier_shape.size = Vector3(5.0, 2.0, 1.0)
+			barrier_collision.shape = barrier_shape
+			barrier.add_child(barrier_collision)
+			instance.add_child(barrier)
+			await get_tree().physics_frame
+
+			var barrier_z: float = barrier.global_position.z
+			Input.action_press("move_forward")
+			for _frame: int in range(90):
+				await get_tree().physics_frame
+			Input.action_release("move_forward")
+			_check(
+				vehicle.global_position.z > barrier_z + 1.6,
+				"Vehicle chassis collides with a static barrier instead of passing through it."
+			)
+			_check(
+				_feedback_messages.has("MESSAGE_VEHICLE_IMPACT"),
+				"Horizontal vehicle impacts send throttled feedback."
+			)
+
+			vehicle.global_position = Vector3(
+				barrier.global_position.x,
+				0.65,
+				barrier.global_position.z + 1.8
+			)
+			vehicle.global_rotation = Vector3(1.1, vehicle.global_rotation.y, 1.0)
+			vehicle.linear_velocity = Vector3(7.0, 2.0, -3.0)
+			vehicle.angular_velocity = Vector3(1.2, 0.8, -0.4)
+			var position_before_recovery: Vector3 = vehicle.global_position
+			var recovered: bool = bool(vehicle.call("_attempt_recovery"))
+			_check(recovered, "Recovery finds a clear spot when the current vehicle footprint is blocked.")
+			if recovered:
+				_check(
+					vehicle.global_position.distance_to(position_before_recovery) > 2.0,
+					"Blocked recovery relocates the vehicle to a clear nearby position."
+				)
+				_check(
+					absf(vehicle.global_rotation.x) < 0.05 and absf(vehicle.global_rotation.z) < 0.05,
+					"Recovery returns a rolled vehicle to an upright orientation."
+				)
+				_check(
+					vehicle.linear_velocity.length() < 0.1 and vehicle.angular_velocity.length() < 0.1,
+					"Recovery clears linear and angular velocity."
+				)
+				_check(bool(vehicle.call("has_driver")), "Recovery preserves vehicle driver ownership.")
+				_check(
+					_feedback_messages.has("MESSAGE_VEHICLE_RECOVERED"),
+					"Successful recovery emits localized HUD feedback."
+				)
+
 			Input.action_press("interact")
 			for _frame: int in range(2):
 				await get_tree().physics_frame
