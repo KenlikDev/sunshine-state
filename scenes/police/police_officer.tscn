@@ -1,0 +1,43 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/police_controller.gd" id="1_police"]
+
+[sub_resource type="CapsuleShape3D" id="PoliceCollision"]
+radius = 0.38
+height = 1.9
+
+[sub_resource type="CapsuleMesh" id="PoliceBodyMesh"]
+radius = 0.38
+height = 1.9
+radial_segments = 12
+rings = 4
+
+[sub_resource type="StandardMaterial3D" id="PoliceBodyMaterial"]
+albedo_color = Color(0.08, 0.17, 0.36, 1)
+roughness = 0.88
+
+[sub_resource type="BoxMesh" id="PoliceHatMesh"]
+size = Vector3(0.62, 0.16, 0.62)
+
+[sub_resource type="StandardMaterial3D" id="PoliceHatMaterial"]
+albedo_color = Color(0.04, 0.08, 0.18, 1)
+roughness = 0.8
+
+[node name="PoliceOfficer" type="CharacterBody3D"]
+collision_layer = 1
+collision_mask = 1
+script = ExtResource("1_police")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.95, 0)
+shape = SubResource("PoliceCollision")
+
+[node name="BodyMesh" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.95, 0)
+mesh = SubResource("PoliceBodyMesh")
+material_override = SubResource("PoliceBodyMaterial")
+
+[node name="HatMesh" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.9, 0)
+mesh = SubResource("PoliceHatMesh")
+material_override = SubResource("PoliceHatMaterial")
