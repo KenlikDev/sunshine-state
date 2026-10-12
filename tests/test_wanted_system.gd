@@ -16,7 +16,7 @@ func _run_tests() -> void:
 		return
 
 	system.set("debug_logging", false)
-	system.wanted_state_changed.connect(_capture_state)
+	system.connect("wanted_state_changed", Callable(self, "_capture_state"))
 	system.call("clear_wanted", &"TEST_SETUP")
 	system.set("search_duration_seconds", 0.05)
 	system.set("decay_interval_seconds", 0.05)
@@ -26,8 +26,9 @@ func _run_tests() -> void:
 	)
 	_check(first_level == 2, "Crime severity raises the wanted level by the specified amount.")
 	_check(String(system.call("get_state_name")) == "SEARCHING", "Witnessed crimes start a search state.")
+	var last_known_position: Vector3 = system.call("get_last_known_player_position")
 	_check(
-		(system.call("get_last_known_player_position") as Vector3).is_equal_approx(Vector3(5.0, 0.0, 9.0)),
+		last_known_position.is_equal_approx(Vector3(5.0, 0.0, 9.0)),
 		"Crime registration stores the last-known player position."
 	)
 
