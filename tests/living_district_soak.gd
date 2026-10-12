@@ -28,7 +28,7 @@ func _run_soak_test() -> void:
 		await get_tree().physics_frame
 
 	if not _validate_population():
-		_finish(instance)
+		_finish(instance, 1)
 		return
 
 	print(
