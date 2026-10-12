@@ -46,7 +46,7 @@ interact={
 }
 toggle_language={
 "deadzone": 0.5,
-"events": [Object(InputEventKey,"physical_keycode":4194342)]
+"events": [Object(InputEventKey,"physical_keycode":4194337)]
 }
 ui_cancel={
 "deadzone": 0.5,

@@ -32,7 +32,7 @@ Cover pure logic and state transitions:
 
 ### Integration tests
 
-- player movement and camera input
+- player movement and camera input, interactable raycast discovery, and interaction feedback
 - world collision and boundary recovery
 - player interaction prompt and interaction feedback
 - player enter/exit vehicle
