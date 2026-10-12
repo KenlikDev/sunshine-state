@@ -8,7 +8,7 @@ The GitHub Actions workflow performs these checks:
 1. Imports editor resources in headless editor mode.
 2. Launches the configured main scene headlessly and exits after a short run.
 3. Runs the M1 vertical-slice regression scene for bootstrap composition, movement, interaction, and Russian localization.
-4. Runs the M2 vehicle regression scene for vehicle discovery, driver ownership, throttle movement, exit state restoration, and feedback.
+4. Runs the M2 vehicle regression scene for all three vehicle configurations, distinct power tuning, vehicle entry/driver ownership, throttle movement, braking deceleration, steering response, static-barrier collision, impact feedback, safe recovery, exit restoration, and HUD feedback.
 5. Checks required documents and changed-line whitespace.
 
 These checks verify project loading and selected contracts. They do not prove visual quality, feel, export success, or target-machine performance.
@@ -50,7 +50,7 @@ Run a scripted critical path:
 1. Start a new game.
 2. Explore the district and inspect the information board.
 3. Enter each of the sedan, compact coupe, and utility pickup, then drive, steer, brake, collide with a test obstacle, recover, and exit.
-4. Drive and test each required vehicle configuration after they are implemented.
+4. After gameplay controls are stable, manually compare steering response, braking distance, suspension, camera placement, collision handling, and recovery across the three prototypes.
 5. Complete mission one and collect its reward.
 6. Purchase an item or service.
 7. Complete the remaining missions.
