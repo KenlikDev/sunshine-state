@@ -1,6 +1,7 @@
 extends Node3D
 
 const INTERACTABLE_SCRIPT: Script = preload("res://scripts/gameplay/interactable.gd")
+const VEHICLE_SCENE: PackedScene = preload("res://scenes/vehicles/sedan.tscn")
 
 
 func _ready() -> void:
@@ -9,6 +10,7 @@ func _ready() -> void:
 	_create_buildings()
 	_create_coastline()
 	_create_information_board()
+	_create_test_vehicle()
 	_create_world_boundaries()
 
 
@@ -139,6 +141,13 @@ func _create_information_board() -> void:
 		Vector3(0.16, 0.7, 0.16),
 		post_material
 	)
+
+
+func _create_test_vehicle() -> void:
+	var vehicle: VehicleBody3D = VEHICLE_SCENE.instantiate() as VehicleBody3D
+	vehicle.name = "PrototypeSedan"
+	vehicle.position = Vector3(4.0, 0.6, -5.0)
+	add_child(vehicle)
 
 
 func _create_world_boundaries() -> void:
