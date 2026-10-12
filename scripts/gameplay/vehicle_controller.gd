@@ -115,14 +115,8 @@ func _emit_collision_feedback_if_needed() -> void:
 		return
 	if get_contact_count() <= 0:
 		return
-
-	var has_horizontal_impact: bool = false
-	for contact_index: int in range(get_contact_count()):
-		var normal: Vector3 = get_contact_local_normal(contact_index)
-		if absf(normal.y) < 0.65:
-			has_horizontal_impact = true
-			break
-	if not has_horizontal_impact:
+	var speed_drop: float = _speed_before_last_step - linear_velocity.length()
+	if speed_drop < 1.25:
 		return
 
 	var now_msec: int = Time.get_ticks_msec()
