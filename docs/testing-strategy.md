@@ -35,7 +35,8 @@ Cover pure logic and state transitions:
 
 - player movement and camera input, interactable raycast discovery, and interaction feedback
 - world collision and boundary recovery
-- vehicle interaction raycast and entry/exit handoff
+- vehicle interaction raycast and entry/exit handoff across sedan, compact coupe, and pickup
+- distinct vehicle tuning, physical braking deceleration, and steering path change
 - single-driver ownership and input ownership
 - throttle, reverse, steering, braking, and recovery checks
 - vehicle collision feedback, recovery clearance, upright reset, and safe exit positioning
@@ -48,7 +49,7 @@ Cover pure logic and state transitions:
 Run a scripted critical path:
 1. Start a new game.
 2. Explore the district and inspect the information board.
-3. Enter the prototype sedan, drive, steer, brake, and exit.
+3. Enter each of the sedan, compact coupe, and utility pickup, then drive, steer, brake, collide with a test obstacle, recover, and exit.
 4. Drive and test each required vehicle configuration after they are implemented.
 5. Complete mission one and collect its reward.
 6. Purchase an item or service.
