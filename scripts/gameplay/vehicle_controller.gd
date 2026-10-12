@@ -7,6 +7,7 @@ signal driver_changed(has_driver: bool)
 @export var max_steering_angle: float = 0.42
 @export var steering_speed: float = 2.2
 @export var max_speed_kph: float = 95.0
+@export var max_reverse_speed_kph: float = 35.0
 @export var mouse_sensitivity: float = 0.0025
 
 var _driver: Node3D
@@ -71,12 +72,15 @@ func _physics_process(delta: float) -> void:
 		Input.get_action_strength("move_left")
 		- Input.get_action_strength("move_right")
 	)
-	var speed_kph: float = linear_velocity.length() * 3.6
+	var longitudinal_speed_kph: float = -linear_velocity.dot(global_transform.basis.z) * 3.6
+	var at_forward_limit: bool = throttle > 0.0 and longitudinal_speed_kph >= max_speed_kph
+	var at_reverse_limit: bool = throttle < 0.0 and longitudinal_speed_kph <= -max_reverse_speed_kph
 
-	if throttle > 0.0 and speed_kph >= max_speed_kph:
+	if at_forward_limit or at_reverse_limit:
 		engine_force = 0.0
 	else:
-		engine_force = throttle * engine_power
+		# Positive input drives along local -Z; reverse input drives along local +Z.
+		engine_force = -throttle * engine_power
 
 	brake = Input.get_action_strength("jump") * brake_power
 	if absf(throttle) < 0.01:
