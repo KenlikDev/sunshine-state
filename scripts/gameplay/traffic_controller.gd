@@ -58,7 +58,7 @@ func _physics_process(delta: float) -> void:
 	if _reverse_remaining > 0.0:
 		_reverse_remaining = maxf(0.0, _reverse_remaining - delta)
 		_set_ai_state("RECOVERING")
-		direction = -global_transform.basis.z
+		direction = global_transform.basis.z
 		direction.y = 0.0
 		direction = direction.normalized()
 		velocity.x = direction.x * 1.5
