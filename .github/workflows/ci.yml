@@ -36,6 +36,13 @@ jobs:
             docs/development-workflow.md \
             docs/vertical-slice.md \
             docs/vehicle-system.md \
+            docs/living-district.md \
+            scripts/gameplay/pedestrian_controller.gd \
+            scripts/gameplay/traffic_controller.gd \
+            scenes/pedestrians/pedestrian.tscn \
+            scenes/traffic/traffic_vehicle.tscn \
+            tests/test_living_district.gd \
+            tests/test_living_district.tscn \
             scenes/vehicles/compact.tscn \
             scenes/vehicles/pickup.tscn \
             localization/ui.csv \
@@ -86,3 +93,6 @@ jobs:
 
       - name: Run vehicle-system regression checks
         run: godot --headless --path . res://tests/test_vehicle_system.tscn
+
+      - name: Run living-district regression checks
+        run: godot --headless --path . res://tests/test_living_district.tscn
