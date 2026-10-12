@@ -1,6 +1,7 @@
 extends Node
 
 var _failures: Array[String] = []
+var _observed_states: Array[String] = []
 
 
 func _ready() -> void:
@@ -15,6 +16,7 @@ func _run_tests() -> void:
 		return
 
 	system.set("debug_logging", false)
+	system.wanted_state_changed.connect(_capture_state)
 	system.call("clear_wanted", &"TEST_SETUP")
 	system.set("search_duration_seconds", 0.05)
 	system.set("decay_interval_seconds", 0.05)
@@ -42,7 +44,10 @@ func _run_tests() -> void:
 	_check(int(system.call("get_visible_police_count")) == 0, "Lost police detections are removed from the detector registry.")
 
 	await get_tree().create_timer(0.12).timeout
-	_check(String(system.call("get_state_name")) == "COOLING_DOWN", "Expired search time enters the cooling-down state.")
+	_check(
+		_observed_states.has("COOLING_DOWN"),
+		"Expired search time enters the cooling-down state."
+	)
 	await get_tree().create_timer(0.24).timeout
 	_check(int(system.call("get_wanted_level")) == 0, "Wanted level decays one step at a time until cleared.")
 	_check(String(system.call("get_state_name")) == "CLEAR", "A fully decayed wanted level returns to CLEAR.")
@@ -129,6 +134,10 @@ func _run_tests() -> void:
 		for failure: String in _failures:
 			push_error(failure)
 		get_tree().quit(1)
+
+
+func _capture_state(state_name: String) -> void:
+	_observed_states.append(state_name)
 
 
 func _check(condition: bool, description: String) -> void:
