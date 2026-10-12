@@ -43,6 +43,14 @@ jobs:
             docs/vertical-slice.md \
             docs/vehicle-system.md \
             docs/living-district.md \
+            docs/wanted-system.md \
+            scripts/gameplay/wanted_system.gd \
+            scripts/gameplay/police_controller.gd \
+            scripts/gameplay/crime_interactable.gd \
+            scenes/police/police_officer.tscn \
+            scenes/crime/graffiti_spot.tscn \
+            tests/test_wanted_system.gd \
+            tests/test_wanted_system.tscn \
             scripts/gameplay/pedestrian_controller.gd \
             scripts/gameplay/traffic_controller.gd \
             scenes/pedestrians/pedestrian.tscn \
@@ -104,6 +112,9 @@ jobs:
 
       - name: Run living-district regression checks
         run: godot --headless --path . res://tests/test_living_district.tscn
+
+      - name: Run wanted-system regression checks
+        run: godot --headless --path . res://tests/test_wanted_system.tscn
 
   living-district-soak:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_living_district_soak }}
