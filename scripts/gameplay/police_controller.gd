@@ -62,10 +62,8 @@ func _physics_process(delta: float) -> void:
 			movement_speed = pursuit_speed
 		elif wanted_state == "SEARCHING" or wanted_state == "PURSUIT":
 			_set_ai_state("SEARCHING")
-			direction = Vector3(
-				(_wanted_system.call("get_last_known_player_position") as Vector3)
-				- global_position
-			)
+			var last_known_position: Vector3 = _wanted_system.call("get_last_known_player_position")
+			direction = last_known_position - global_position
 			direction.y = 0.0
 			movement_speed = search_speed
 		else:
