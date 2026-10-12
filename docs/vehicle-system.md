@@ -11,6 +11,8 @@ M2 introduces the first drivable vehicle and establishes a clear boundary betwee
 - The on-foot controller stops processing movement while the player is in a vehicle.
 - The vehicle controller owns throttle, reverse, braking, steering, and camera look while occupied.
 - Exiting searches nearby candidate positions and uses a capsule overlap query to avoid placing the player inside blocking geometry.
+- Pressing R while driving searches for a nearby clear recovery position, uses ground raycasts and a chassis overlap check, levels the vehicle, and clears linear/angular velocity. Recovery is refused when no safe candidate is available.
+- Significant horizontal contacts emit throttled HUD feedback; ordinary ground contact does not trigger collision messages.
 - The vehicle is a `VehicleBody3D` with four `VehicleWheel3D` nodes and a separate interaction area.
 
 ## Controls
@@ -23,14 +25,15 @@ M2 introduces the first drivable vehicle and establishes a clear boundary betwee
 | Space | Jump | Brake |
 | Mouse | Orbit player camera | Orbit vehicle camera |
 | E | Interact / enter vehicle | Exit vehicle |
+| R | Reserved | Recover a blocked or overturned vehicle |
 | Escape | Release mouse cursor | Release mouse cursor |
 | F6 | Toggle English/Russian | Toggle English/Russian |
 
 ## Validation
 
-GitHub Actions imports the project and runs a dedicated vehicle regression scene. The automated checks cover vehicle discovery, entry, driver ownership, player visibility and collision handoff, forward motion under throttle, exit state restoration, and entry/exit feedback.
+GitHub Actions imports the project and runs a dedicated vehicle regression scene. The automated checks cover vehicle discovery, entry, driver ownership, player visibility and collision handoff, forward motion under throttle, static barrier collision, impact feedback, blocked-footprint recovery, upright orientation restoration, velocity reset, exit state restoration, and entry/exit feedback.
 
-These checks do not prove driving feel. Manual testing must still check steering response, braking distance, collision behaviour, suspension stability, camera placement, and recovery on uneven terrain.
+These checks do not prove driving feel. Manual testing must still check steering response, braking distance, collision behaviour, suspension stability, camera placement, and recovery on uneven terrain. The R recovery control is a gameplay assist and is not a substitute for validating suspension and collision response.
 
 ## Known limitations
 

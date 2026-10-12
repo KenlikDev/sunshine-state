@@ -44,6 +44,10 @@ interact={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"physical_keycode":69)]
 }
+vehicle_recover={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":82)]
+}
 toggle_language={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"physical_keycode":4194337)]

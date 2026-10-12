@@ -8,9 +8,15 @@ signal driver_changed(has_driver: bool)
 @export var steering_speed: float = 2.2
 @export var max_speed_kph: float = 95.0
 @export var max_reverse_speed_kph: float = 35.0
+@export var impact_speed_threshold: float = 2.8
+@export var impact_feedback_cooldown_ms: int = 1200
+
+const RECOVERY_ACTION: StringName = &"vehicle_recover"
 @export var mouse_sensitivity: float = 0.0025
 
 var _driver: Node3D
+var _speed_before_last_step: float = 0.0
+var _last_impact_feedback_msec: int = -1200
 @onready var _camera_pivot: Node3D = $CameraPivot
 @onready var _vehicle_camera: Camera3D = $CameraPivot/SpringArm3D/Camera3D
 
@@ -58,6 +64,13 @@ func _physics_process(delta: float) -> void:
 		engine_force = 0.0
 		brake = 4.0
 		steering = move_toward(steering, 0.0, steering_speed * delta)
+		_speed_before_last_step = linear_velocity.length()
+		return
+
+	if Input.is_action_just_pressed(RECOVERY_ACTION):
+		if not _attempt_recovery():
+			_driver.call("notify_interaction_feedback", "MESSAGE_VEHICLE_RECOVERY_BLOCKED")
+		_speed_before_last_step = linear_velocity.length()
 		return
 
 	if Input.is_action_just_pressed("interact"):
@@ -91,6 +104,97 @@ func _physics_process(delta: float) -> void:
 		steering_input * max_steering_angle,
 		steering_speed * delta
 	)
+	_emit_collision_feedback_if_needed()
+	_speed_before_last_step = linear_velocity.length()
+
+
+func _emit_collision_feedback_if_needed() -> void:
+	if not is_instance_valid(_driver):
+		return
+	if _speed_before_last_step < impact_speed_threshold:
+		return
+	if get_contact_count() <= 0:
+		return
+
+	var has_horizontal_impact: bool = false
+	for contact_index: int in range(get_contact_count()):
+		var normal: Vector3 = get_contact_local_normal(contact_index)
+		if absf(normal.y) < 0.65:
+			has_horizontal_impact = true
+			break
+	if not has_horizontal_impact:
+		return
+
+	var now_msec: int = Time.get_ticks_msec()
+	if now_msec - _last_impact_feedback_msec < impact_feedback_cooldown_ms:
+		return
+	_last_impact_feedback_msec = now_msec
+	_driver.call("notify_interaction_feedback", "MESSAGE_VEHICLE_IMPACT")
+
+
+func _attempt_recovery() -> bool:
+	if not is_instance_valid(_driver):
+		return false
+
+	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
+	var flat_basis: Basis = Basis(Vector3.UP, global_rotation.y)
+	var chassis_shape := BoxShape3D.new()
+	chassis_shape.size = Vector3(1.9, 0.95, 3.8)
+
+	var overlap_query := PhysicsShapeQueryParameters3D.new()
+	overlap_query.shape = chassis_shape
+	overlap_query.collision_mask = collision_mask
+	overlap_query.collide_with_areas = false
+	overlap_query.exclude = [get_rid()]
+
+	var planar_right: Vector3 = flat_basis.x
+	var planar_forward: Vector3 = -flat_basis.z
+	var offsets: Array[Vector3] = [
+		Vector3.ZERO,
+		planar_right * 3.3,
+		-planar_right * 3.3,
+		planar_forward * 4.2,
+		-planar_forward * 4.2,
+		(planar_right + planar_forward).normalized() * 3.4,
+		(planar_right - planar_forward).normalized() * 3.4,
+		(-planar_right + planar_forward).normalized() * 3.4,
+		(-planar_right - planar_forward).normalized() * 3.4
+	]
+
+	for offset: Vector3 in offsets:
+		var candidate_xz: Vector3 = global_position + offset
+		candidate_xz.y = 0.0
+
+		var ray_query := PhysicsRayQueryParameters3D.create(
+			candidate_xz + Vector3.UP * 12.0,
+			candidate_xz - Vector3.UP * 20.0,
+			collision_mask
+		)
+		ray_query.exclude = [get_rid()]
+		var ground_hit: Dictionary = space_state.intersect_ray(ray_query)
+		if ground_hit.is_empty():
+			continue
+
+		var ground_position: Vector3 = ground_hit["position"]
+		var recovery_position: Vector3 = Vector3(
+			candidate_xz.x,
+			ground_position.y + 0.65,
+			candidate_xz.z
+		)
+		overlap_query.transform = Transform3D(flat_basis, recovery_position)
+		if not space_state.intersect_shape(overlap_query, 1).is_empty():
+			continue
+
+		global_transform = Transform3D(flat_basis, recovery_position)
+		linear_velocity = Vector3.ZERO
+		angular_velocity = Vector3.ZERO
+		sleeping = false
+		_speed_before_last_step = 0.0
+		_last_impact_feedback_msec = Time.get_ticks_msec()
+		_driver.call("notify_interaction_feedback", "MESSAGE_VEHICLE_RECOVERED")
+		return true
+
+	return false
 
 
 func _unhandled_input(event: InputEvent) -> void:
