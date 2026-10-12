@@ -4,6 +4,8 @@ const INTERACTABLE_SCRIPT: Script = preload("res://scripts/gameplay/interactable
 const VEHICLE_SCENE: PackedScene = preload("res://scenes/vehicles/sedan.tscn")
 const COMPACT_SCENE: PackedScene = preload("res://scenes/vehicles/compact.tscn")
 const PICKUP_SCENE: PackedScene = preload("res://scenes/vehicles/pickup.tscn")
+const PEDESTRIAN_SCENE: PackedScene = preload("res://scenes/pedestrians/pedestrian.tscn")
+const TRAFFIC_SCENE: PackedScene = preload("res://scenes/traffic/traffic_vehicle.tscn")
 
 
 func _ready() -> void:
@@ -13,6 +15,8 @@ func _ready() -> void:
 	_create_coastline()
 	_create_information_board()
 	_create_test_vehicle()
+	_create_pedestrians()
+	_create_traffic()
 	_create_world_boundaries()
 
 
@@ -160,6 +164,107 @@ func _create_test_vehicle() -> void:
 	pickup.name = "UtilityPickup"
 	pickup.position = Vector3(0.0, 0.65, -18.0)
 	add_child(pickup)
+
+
+func _create_pedestrians() -> void:
+	var east_route := PackedVector3Array([
+		Vector3(7.9, 0.0, -64.0),
+		Vector3(7.9, 0.0, 64.0),
+		Vector3(9.1, 0.0, 64.0),
+		Vector3(9.1, 0.0, -64.0)
+	])
+	var west_route := PackedVector3Array([
+		Vector3(-7.9, 0.0, 64.0),
+		Vector3(-7.9, 0.0, -64.0),
+		Vector3(-9.1, 0.0, -64.0),
+		Vector3(-9.1, 0.0, 64.0)
+	])
+
+	_spawn_pedestrian("PedestrianEast01", east_route, 0, Color(0.75, 0.28, 0.18, 1.0))
+	_spawn_pedestrian("PedestrianEast02", east_route, 2, Color(0.18, 0.38, 0.72, 1.0))
+	_spawn_pedestrian("PedestrianWest01", west_route, 0, Color(0.83, 0.68, 0.24, 1.0))
+	_spawn_pedestrian("PedestrianWest02", west_route, 2, Color(0.3, 0.58, 0.38, 1.0))
+
+
+func _spawn_pedestrian(
+	node_name: String,
+	route: PackedVector3Array,
+	start_waypoint: int,
+	clothing_color: Color
+) -> void:
+	var pedestrian: CharacterBody3D = PEDESTRIAN_SCENE.instantiate() as CharacterBody3D
+	pedestrian.name = node_name
+	pedestrian.set("route_points", route)
+	pedestrian.set("initial_waypoint_index", start_waypoint)
+	pedestrian.set("clothing_color", clothing_color)
+	pedestrian.position = route[start_waypoint]
+	add_child(pedestrian)
+
+
+func _create_traffic() -> void:
+	var north_south_west := PackedVector3Array([
+		Vector3(-2.0, 0.65, -68.0),
+		Vector3(-2.0, 0.65, 68.0)
+	])
+	var north_south_east := PackedVector3Array([
+		Vector3(2.0, 0.65, -68.0),
+		Vector3(2.0, 0.65, 68.0)
+	])
+	var east_west_north := PackedVector3Array([
+		Vector3(-78.0, 0.65, -2.0),
+		Vector3(78.0, 0.65, -2.0)
+	])
+	var east_west_south := PackedVector3Array([
+		Vector3(-78.0, 0.65, 2.0),
+		Vector3(78.0, 0.65, 2.0)
+	])
+
+	_spawn_traffic(
+		"TrafficNorthbound",
+		north_south_west,
+		0,
+		false,
+		Color(0.19, 0.46, 0.68, 1.0)
+	)
+	_spawn_traffic(
+		"TrafficSouthbound",
+		north_south_east,
+		0,
+		true,
+		Color(0.68, 0.23, 0.16, 1.0)
+	)
+	_spawn_traffic(
+		"TrafficEastbound",
+		east_west_north,
+		1,
+		false,
+		Color(0.23, 0.56, 0.38, 1.0)
+	)
+	_spawn_traffic(
+		"TrafficWestbound",
+		east_west_south,
+		1,
+		true,
+		Color(0.72, 0.52, 0.15, 1.0)
+	)
+
+
+func _spawn_traffic(
+	node_name: String,
+	route: PackedVector3Array,
+	route_axis: int,
+	start_at_end: bool,
+	body_color: Color
+) -> void:
+	var traffic: CharacterBody3D = TRAFFIC_SCENE.instantiate() as CharacterBody3D
+	traffic.name = node_name
+	traffic.set("route_points", route)
+	traffic.set("route_axis", route_axis)
+	traffic.set("start_at_end", start_at_end)
+	traffic.set("body_color", body_color)
+	var start_index: int = route.size() - 1 if start_at_end else 0
+	traffic.position = route[start_index]
+	add_child(traffic)
 
 
 func _create_world_boundaries() -> void:
