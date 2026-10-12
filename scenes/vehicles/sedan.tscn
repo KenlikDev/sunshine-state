@@ -31,6 +31,9 @@ mass = 1100.0
 linear_damp = 0.08
 angular_damp = 1.2
 script = ExtResource("1_vehicle")
+recovery_chassis_size = Vector3(1.9, 0.95, 3.8)
+visual_wheel_radius = 0.32
+visual_wheel_width = 0.22
 
 [node name="ChassisCollision" type="CollisionShape3D" parent="."]
 position = Vector3(0, 0.12, 0)
