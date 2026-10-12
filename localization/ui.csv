@@ -18,3 +18,13 @@ MESSAGE_VEHICLE_OCCUPIED,"This vehicle is already occupied.","Этот авто�
 MESSAGE_VEHICLE_IMPACT,"Vehicle impact detected. Check your surroundings.","Столкновение! Проверьте обстановку."
 MESSAGE_VEHICLE_RECOVERED,"Vehicle recovered. You can drive again.","Автомобиль восстановлен. Можно продолжать движение."
 MESSAGE_VEHICLE_RECOVERY_BLOCKED,"No safe recovery position nearby. Move away from obstacles and try again.","Рядом нет безопасного места для восстановления. Отъедьте от препятствий и попробуйте снова."
+HUD_WANTED_LABEL,Wanted,Розыск
+WANTED_STATE_CLEAR,Clear,ПОДОЗРЕНИЙ НЕТ
+WANTED_STATE_PURSUIT,Pursuit,ПОГОНЯ
+WANTED_STATE_SEARCHING,Searching,ПОИСК
+WANTED_STATE_COOLING_DOWN,Cooling down,РОЗЫСК СНИЖАЕТСЯ
+INTERACT_DAMAGE_PROPERTY,"damage property","повредить имущество"
+MESSAGE_CRIME_REPORTED,"Crime reported. Police may be searching for you.","Преступление зарегистрировано. Полиция может искать вас."
+MESSAGE_CRIME_COOLDOWN,"Wait before repeating this property-damage action.","Подождите перед повторным повреждением имущества."
+MESSAGE_CRIME_INVALID_ACTOR,"This action requires a valid player.","Для этого действия нужен действующий персонаж."
+
