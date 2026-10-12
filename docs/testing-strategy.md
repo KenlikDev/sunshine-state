@@ -41,6 +41,8 @@ Cover pure logic and state transitions:
 - throttle, reverse, steering, braking, and recovery checks
 - vehicle collision feedback, recovery clearance, upright reset, and safe exit positioning
 - pedestrian route progression, alert-state response, bounded agent population, traffic route progression, junction yielding, and district-boundary checks
+- crime event severity and wanted-level transitions
+- police detection, pursuit, occlusion/search, reacquisition, decay, and explicit wanted clearing
 - mission completion grants one reward exactly once
 - police detection creates and clears a pursuit correctly
 - save/load restores progression after restart
