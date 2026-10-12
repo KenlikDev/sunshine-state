@@ -78,6 +78,40 @@ func _run_tests() -> void:
 				"Pedestrians react to a nearby player with the alert state."
 			)
 
+		var recovery_traffic: Node3D = instance.get_node_or_null("World/TrafficEastbound") as Node3D
+		if is_instance_valid(player) and is_instance_valid(recovery_traffic):
+			recovery_traffic.global_position = Vector3(-50.0, 0.65, -2.0)
+			recovery_traffic.global_rotation = Vector3(0.0, -PI / 2.0, 0.0)
+			player.global_position = Vector3(-55.0, 0.0, -2.0)
+
+			var obstacle := StaticBody3D.new()
+			obstacle.name = "TrafficRecoveryRegressionObstacle"
+			obstacle.position = recovery_traffic.global_position + Vector3(3.0, 0.35, 0.0)
+			var obstacle_collision := CollisionShape3D.new()
+			var obstacle_shape := BoxShape3D.new()
+			obstacle_shape.size = Vector3(0.8, 2.0, 5.0)
+			obstacle_collision.shape = obstacle_shape
+			obstacle.add_child(obstacle_collision)
+			instance.add_child(obstacle)
+
+			var saw_waiting: bool = false
+			var saw_recovering: bool = false
+			var recovery_start: Vector3 = recovery_traffic.global_position
+			for _frame: int in range(300):
+				await get_tree().physics_frame
+				var state_name: String = String(recovery_traffic.call("get_ai_state"))
+				saw_waiting = saw_waiting or state_name == "WAITING"
+				saw_recovering = saw_recovering or state_name == "RECOVERING"
+
+			_check(saw_waiting, "Traffic waits when a nearby obstacle blocks its forward route.")
+			_check(saw_recovering, "Traffic uses a bounded reverse-and-retry recovery after a sustained blockage.")
+			_check(
+				recovery_traffic.global_position.x < recovery_start.x - 0.2,
+				"Traffic recovery moves the vehicle backwards from a blocked route."
+			)
+			obstacle.queue_free()
+			await get_tree().physics_frame
+
 		for traffic_node: Node in get_tree().get_nodes_in_group("traffic_vehicles"):
 			var position: Vector3 = (traffic_node as Node3D).global_position
 			_check(absf(position.x) < 88.0 and absf(position.z) < 78.0, "Traffic stays inside the district boundaries.")
