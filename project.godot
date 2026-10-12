@@ -53,8 +53,8 @@ ui_cancel={
 "events": [Object(InputEventKey,"physical_keycode":4194305)]
 }
 
-[internationalization]
-locale/translations=PackedStringArray("res://localization/ui.csv")
+[autoload]
+Localization="*res://scripts/ui/localization_service.gd"
 
 [rendering]
 renderer/rendering_method="gl_compatibility"

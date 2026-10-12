@@ -7,7 +7,7 @@ The initial project baseline uses **Godot 4.7.2-stable**, released on 18 August 
 The GitHub Actions workflow performs these checks:
 1. Imports editor resources in headless editor mode.
 2. Launches the configured main scene headlessly and exits after a short run.
-3. Runs the M1 vertical-slice regression script, which checks scene composition, the interactable contract, and Russian translation availability.
+3. Runs the M1 vertical-slice regression script, which checks scene composition, the interactable contract, and Russian localization loaded through the CSV-backed localization service.
 4. Checks required documents and changed-line whitespace.
 
 These checks verify project loading and selected contracts. They do not prove visual quality, feel, export success, or target-machine performance.

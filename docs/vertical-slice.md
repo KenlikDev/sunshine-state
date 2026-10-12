@@ -9,7 +9,7 @@ M1 establishes the first interactive, playable foundation of Sunshine State befo
 - Third-person CharacterBody3D with walking, sprinting, jumping, collision, and camera orbit.
 - A bounded, connected coastal district with roads, sidewalks, blockout buildings, a beach, and basic directional lighting.
 - A shared interactable contract demonstrated by an information board.
-- An in-game HUD with controls, interaction prompts, status feedback, and English/Russian localization.
+- An in-game HUD with controls, interaction prompts, status feedback, and English/Russian localization loaded from a CSV table by a dedicated runtime service.
 - A headless regression script that checks bootstrap composition, interaction availability, and Russian localization.
 
 ## Controls

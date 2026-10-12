@@ -126,9 +126,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _toggle_locale() -> void:
-	var current_locale: String = TranslationServer.get_locale()
+	var current_locale: String = Localization.get_locale()
 	var next_locale: String = "ru" if current_locale.begins_with("en") else "en"
-	TranslationServer.set_locale(next_locale)
+	Localization.set_locale(next_locale)
 	_refresh_localized_texts()
 	if is_instance_valid(_player):
 		_player.call("refresh_interaction_prompt")
@@ -137,15 +137,15 @@ func _toggle_locale() -> void:
 func _refresh_localized_texts() -> void:
 	if not is_instance_valid(_title_label):
 		return
-	_title_label.text = tr("HUD_TITLE")
-	_objective_label.text = tr("HUD_OBJECTIVE")
-	_controls_label.text = tr("HUD_CONTROLS")
+	_title_label.text = Localization.translate_key("HUD_TITLE")
+	_objective_label.text = Localization.translate_key("HUD_OBJECTIVE")
+	_controls_label.text = Localization.translate_key("HUD_CONTROLS")
 	_language_button.text = "%s: %s" % [
-		tr("HUD_LANGUAGE_LABEL"),
-		"RU" if TranslationServer.get_locale().begins_with("ru") else "EN"
+		Localization.translate_key("HUD_LANGUAGE_LABEL"),
+		"RU" if Localization.get_locale().begins_with("ru") else "EN"
 	]
-	_language_button.tooltip_text = tr("HUD_LANGUAGE_HINT")
-	_status_label.text = tr(_status_key)
+	_language_button.tooltip_text = Localization.translate_key("HUD_LANGUAGE_HINT")
+	_status_label.text = Localization.translate_key(_status_key)
 	_refresh_interaction_prompt()
 
 
@@ -155,7 +155,7 @@ func _refresh_interaction_prompt() -> void:
 	if _prompt_key.is_empty():
 		_prompt_label.text = ""
 	else:
-		_prompt_label.text = tr("HUD_INTERACT_PROMPT") % tr(_prompt_key)
+		_prompt_label.text = Localization.format_key("HUD_INTERACT_PROMPT", [Localization.translate_key(_prompt_key)])
 
 
 func _on_interaction_prompt_changed(prompt_key: String) -> void:
@@ -166,4 +166,4 @@ func _on_interaction_prompt_changed(prompt_key: String) -> void:
 func _on_interaction_feedback(message_key: String) -> void:
 	_status_key = message_key
 	if is_instance_valid(_status_label):
-		_status_label.text = tr(_status_key)
+		_status_label.text = Localization.translate_key(_status_key)

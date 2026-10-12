@@ -6,7 +6,7 @@ const HUD_SCENE: PackedScene = preload("res://scenes/ui/game_hud.tscn")
 
 
 func _ready() -> void:
-	TranslationServer.set_locale("en")
+	Localization.set_locale("en")
 
 	var world: Node3D = WORLD_SCENE.instantiate()
 	world.name = "World"

@@ -30,13 +30,13 @@ func _run_tests() -> void:
 			_check(player.has_method("get_current_interaction_prompt_key"), "Player exposes the interaction prompt contract.")
 			_check(player.has_method("refresh_interaction_prompt"), "Player can refresh its prompt after a locale change.")
 
-		TranslationServer.set_locale("ru")
-		var russian_objective: String = TranslationServer.translate("HUD_OBJECTIVE")
+		Localization.set_locale("ru")
+		var russian_objective: String = Localization.translate_key("HUD_OBJECTIVE")
 		_check(
 			russian_objective.contains("исследуйте район"),
 			"Russian UI translation is available at runtime."
 		)
-		TranslationServer.set_locale("en")
+		Localization.set_locale("en")
 		instance.queue_free()
 		await process_frame
 
