@@ -6,7 +6,7 @@ Estimates are planning ranges, not delivery promises. Re-estimate after the firs
 |---|---|---|---|
 | M0 — Foundation | Repository conventions, scope, architecture, CI baseline | Foundation review and scope approval | Prepared for review |
 | M1 — Vertical slice | Third-person controller, camera, greybox district, interaction, bilingual HUD | Automated checks and repeatable exploration test pass | Automated gate passed; manual review pending |
-| M2 — Vehicles | Shared vehicle interface, first drivable prototype, then two variants | Enter/drive/exit/recovery tests pass | In progress |
+| M2 — Vehicles | Shared vehicle interface, sedan/compact/pickup prototypes, collision response and recovery | Enter/drive/exit/recovery tests pass | In progress |
 | M3 — Living district | Modular environment, pedestrian and traffic simulation | 15-minute stability test passes | Not started |
 | M4 — Wanted and combat | Weapon/damage loop, detection, pursuit, search/clear | Scripted wanted scenarios pass | Not started |
 | M5 — Missions and persistence | Three connected missions, economy, save/load | Full critical path passes after reload | Not started |
