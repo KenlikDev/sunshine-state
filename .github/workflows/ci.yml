@@ -8,6 +8,12 @@ on:
       - main
       - "codex/**"
   workflow_dispatch:
+    inputs:
+      run_living_district_soak:
+        description: "Run the 15-minute living-district stability test"
+        type: boolean
+        required: true
+        default: false
 
 jobs:
   docs-and-policy:
@@ -43,6 +49,8 @@ jobs:
             scenes/traffic/traffic_vehicle.tscn \
             tests/test_living_district.gd \
             tests/test_living_district.tscn \
+            tests/living_district_soak.gd \
+            tests/living_district_soak.tscn \
             scenes/vehicles/compact.tscn \
             scenes/vehicles/pickup.tscn \
             localization/ui.csv \
@@ -96,3 +104,20 @@ jobs:
 
       - name: Run living-district regression checks
         run: godot --headless --path . res://tests/test_living_district.tscn
+
+  living-district-soak:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_living_district_soak }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pinned Godot version
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.7.2
+          use-dotnet: false
+
+      - name: Run 15-minute living-district soak test
+        run: godot --headless --path . res://tests/living_district_soak.tscn
