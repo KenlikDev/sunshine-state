@@ -1,7 +1,26 @@
-extends Node
+extends Node3D
 
-## Minimal application entry point for validating the initial Godot project.
-## Gameplay systems should be added in focused modules after architecture review.
+const WORLD_SCENE: PackedScene = preload("res://scenes/world/greybox_district.tscn")
+const PLAYER_SCENE: PackedScene = preload("res://scenes/player/player.tscn")
+const HUD_SCENE: PackedScene = preload("res://scenes/ui/game_hud.tscn")
+
 
 func _ready() -> void:
-    print("Sunshine State foundation booted. No gameplay systems are implemented yet.")
+	TranslationServer.set_locale("en")
+
+	var world: Node3D = WORLD_SCENE.instantiate()
+	world.name = "World"
+	add_child(world)
+
+	var player: CharacterBody3D = PLAYER_SCENE.instantiate()
+	player.name = "Player"
+	player.position = Vector3(0.0, 0.0, 12.0)
+	add_child(player)
+
+	var hud: CanvasLayer = HUD_SCENE.instantiate()
+	hud.name = "HUD"
+	add_child(hud)
+	hud.call("bind_player", player)
+
+	if DisplayServer.get_name() != "headless":
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED

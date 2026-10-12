@@ -1,0 +1,10 @@
+keys,en,ru
+HUD_TITLE,Sunshine State,Sunshine State
+HUD_OBJECTIVE,"Objective: Explore the district and inspect the information board","Цель: исследуйте район и осмотрите информационный стенд"
+HUD_CONTROLS,"WASD Move · Shift Sprint · Space Jump · Mouse Look · E Interact · Esc Release Mouse · F6 Language","WASD — движение · Shift — бег · Space — прыжок · мышь — камера · E — взаимодействие · Esc — освободить мышь · F6 — язык"
+HUD_LANGUAGE_LABEL,Language,Язык
+HUD_LANGUAGE_HINT,"Toggle English/Russian (F6)","Переключить английский/русский (F6)"
+HUD_READY,"Ready. Walk up to the information board.","Готово. Подойдите к информационному стенду."
+HUD_INTERACT_PROMPT,"Press E to %s","Нажмите E, чтобы: %s"
+INTERACT_READ_BOARD,"inspect the information board","осмотреть информационный стенд"
+MESSAGE_BOARD_READ,"District information inspected. Exploration prototype active.","Информация района просмотрена. Прототип исследования работает."

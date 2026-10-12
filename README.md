@@ -1,32 +1,30 @@
 # Sunshine State
 
-Sunshine State is an original, single-player, third-person open-world crime-action game built with Godot 4, with Blender used for 3D asset creation.
+Sunshine State is an original, single-player, third-person open-world crime-action game built with Godot 4 and Blender. The project is developed in focused milestones with documented interfaces, automated checks, and owner-controlled merges.
 
-The project aims to develop a playable, systems-driven open world through deliberate milestones, documented technical decisions, and repeatable validation. It is an independent project and will not use proprietary GTA assets, code, branding, or other protected material.
+## Project status
 
-## Project Status
+**Current milestone:** M1 — first playable vertical slice in progress.
 
-**Stage:** Foundation and MVP definition.
+The current implementation branch introduces a controllable third-person character, a bounded greybox coastal district, one interactable information board, and an English/Russian HUD. This is an intermediate prototype, not the complete MVP.
 
-The current priority is to establish the project vision, define a realistic MVP scope, document the technical architecture and production pipeline, and prepare a minimal Godot project structure. This repository is not yet a playable MVP.
+The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). Vehicles, NPCs and traffic, wanted/police systems, combat, missions, economy, save/load, final art, audio, and packaged release validation are still required.
 
-## Development Principles
+## Run locally
 
-- Plan and review scope before implementation.
-- Build in small, verifiable increments.
-- Keep source code, developer documentation, and code comments in English.
-- Treat Russian as a planned in-game localization, not as the language of source files or developer documentation.
-- Do not claim a build or test passed unless it was actually run and its result recorded.
-- Develop on focused feature branches and submit changes for review; the repository owner controls merges.
-- Prefer original assets and clearly documented third-party resources with appropriate licenses.
+1. Install [Godot 4.7.2-stable](https://godotengine.org/download/archive/4.7.2-stable/).
+2. Clone the repository and open project.godot in Godot.
+3. Run the project from the editor (F5).
 
-## Planned Technology
+## Controls
 
-- **Engine:** Godot 4
-- **3D asset creation:** Blender
-- **Version control and automation:** Git and GitHub Actions
-
-Exact engine versions, platform targets, and dependencies must be pinned and validated as implementation begins.
+- W A S D: move
+- Left Shift: sprint
+- Space: jump
+- Mouse: orbit the camera
+- E: interact with the information board when the prompt appears
+- Escape: release the cursor; click the game view to capture it again
+- F6: toggle English/Russian UI language
 
 ## Documentation
 
@@ -34,6 +32,7 @@ Exact engine versions, platform targets, and dependencies must be pinned and val
 - [MVP scope and acceptance criteria](docs/mvp-scope.md)
 - [Architecture](docs/architecture.md)
 - [Gameplay systems](docs/gameplay-systems.md)
+- [Vertical slice and controls](docs/vertical-slice.md)
 - [Art and asset pipeline](docs/art-pipeline.md)
 - [Testing strategy](docs/testing-strategy.md)
 - [Performance budgets](docs/performance-budgets.md)
@@ -41,16 +40,15 @@ Exact engine versions, platform targets, and dependencies must be pinned and val
 - [Roadmap](docs/roadmap.md)
 - [Branching and contribution workflow](docs/development-workflow.md)
 - [Architecture decision records](docs/adr/README.md)
-- [Foundation status and validation gaps](docs/foundation-status.md)
 
-## Proposed Branch Model
+## Development principles
 
-- `main`: reviewed release-quality history only
-- `develop`: integration branch managed by the repository owner
-- `codex/*`: isolated work branches for individual tasks
+- Source code, identifiers, comments, and developer documentation are in English.
+- Player-facing text is stored separately in translation resources; English and Russian are supported by the current HUD.
+- Build in small, verifiable increments; never claim an unrun test passed.
+- Develop on isolated codex/* branches. The repository owner controls main, develop, and all merges.
+- Use original or appropriately licensed assets only.
 
-Do not merge a milestone until its acceptance criteria and required checks pass. The repository owner retains final merge authority.
+## Validation
 
-## Current Limitations
-
-This package is documentation and repository scaffolding only. It does not contain a playable game, finished 3D assets, or a verified Godot export. Those claims must not be made until implementation and validation are complete.
+GitHub Actions runs Godot headless resource import, a main-scene smoke test, and the vertical-slice regression script. Manual visual and input testing is still required; the game is not yet a packaged release build.
