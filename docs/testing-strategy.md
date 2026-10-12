@@ -40,6 +40,7 @@ Cover pure logic and state transitions:
 - single-driver ownership and input ownership
 - throttle, reverse, steering, braking, and recovery checks
 - vehicle collision feedback, recovery clearance, upright reset, and safe exit positioning
+- pedestrian route progression, alert-state response, bounded agent population, traffic route progression, junction yielding, and district-boundary checks
 - mission completion grants one reward exactly once
 - police detection creates and clears a pursuit correctly
 - save/load restores progression after restart
@@ -48,7 +49,7 @@ Cover pure logic and state transitions:
 
 Run a scripted critical path:
 1. Start a new game.
-2. Explore the district and inspect the information board.
+2. Explore the district, inspect the information board, and observe pedestrian/traffic behaviour.
 3. Enter each of the sedan, compact coupe, and utility pickup, then drive, steer, brake, collide with a test obstacle, recover, and exit.
 4. After gameplay controls are stable, manually compare steering response, braking distance, suspension, camera placement, collision handling, and recovery across the three prototypes.
 5. Complete mission one and collect its reward.
@@ -59,6 +60,8 @@ Run a scripted critical path:
 10. Finish the final mission and reach the completion state.
 
 ### Manual test passes
+
+- 15-minute living-district soak test with fixed agent counts, route progress, junction yielding, and no systemic traffic deadlock
 
 - keyboard/mouse and supported controller
 - camera clipping and inaccessible geometry
