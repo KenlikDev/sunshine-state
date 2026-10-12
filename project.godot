@@ -59,6 +59,7 @@ ui_cancel={
 
 [autoload]
 Localization="*res://scripts/ui/localization_service.gd"
+WantedSystem="*res://scripts/gameplay/wanted_system.gd"
 
 [rendering]
 renderer/rendering_method="gl_compatibility"

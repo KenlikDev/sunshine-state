@@ -7,6 +7,7 @@ var _controls_label: Label
 var _prompt_label: Label
 var _status_label: Label
 var _language_button: Button
+var _wanted_label: Label
 var _prompt_key: String = ""
 var _status_key: String = "HUD_READY"
 
@@ -64,6 +65,22 @@ func _ready() -> void:
 	_language_button.custom_minimum_size = Vector2(108.0, 42.0)
 	_language_button.pressed.connect(_toggle_locale)
 	screen.add_child(_language_button)
+
+	_wanted_label = Label.new()
+	_wanted_label.name = "WantedStatus"
+	_wanted_label.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_wanted_label.offset_left = -330.0
+	_wanted_label.offset_top = 76.0
+	_wanted_label.offset_right = -24.0
+	_wanted_label.offset_bottom = 108.0
+	_wanted_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_wanted_label.add_theme_font_size_override("font_size", 16)
+	_wanted_label.add_theme_color_override("font_color", Color(0.96, 0.83, 0.34))
+	_wanted_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	screen.add_child(_wanted_label)
+
+	WantedSystem.wanted_level_changed.connect(_on_wanted_level_changed)
+	WantedSystem.wanted_state_changed.connect(_on_wanted_state_changed)
 
 	var crosshair := Label.new()
 	crosshair.name = "Crosshair"
@@ -147,6 +164,7 @@ func _refresh_localized_texts() -> void:
 	_language_button.tooltip_text = Localization.translate_key("HUD_LANGUAGE_HINT")
 	_status_label.text = Localization.translate_key(_status_key)
 	_refresh_interaction_prompt()
+	_refresh_wanted_status()
 
 
 func _refresh_interaction_prompt() -> void:
@@ -167,3 +185,31 @@ func _on_interaction_feedback(message_key: String) -> void:
 	_status_key = message_key
 	if is_instance_valid(_status_label):
 		_status_label.text = Localization.translate_key(_status_key)
+
+
+func _refresh_wanted_status() -> void:
+	if not is_instance_valid(_wanted_label):
+		return
+
+	var wanted_level: int = int(WantedSystem.call("get_wanted_level"))
+	if wanted_level <= 0:
+		_wanted_label.text = ""
+		_wanted_label.visible = false
+		return
+
+	var state_name: String = String(WantedSystem.call("get_state_name"))
+	var state_key: String = "WANTED_STATE_" + state_name
+	_wanted_label.text = "%s %d/5 · %s" % [
+		Localization.translate_key("HUD_WANTED_LABEL"),
+		wanted_level,
+		Localization.translate_key(state_key)
+	]
+	_wanted_label.visible = true
+
+
+func _on_wanted_level_changed(_level: int) -> void:
+	_refresh_wanted_status()
+
+
+func _on_wanted_state_changed(_state_name: String) -> void:
+	_refresh_wanted_status()
