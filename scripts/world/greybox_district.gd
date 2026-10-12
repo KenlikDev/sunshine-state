@@ -113,7 +113,7 @@ func _create_information_board() -> void:
 
 	var board := StaticBody3D.new()
 	board.name = "DistrictInformationBoard"
-	board.position = Vector3(0.0, 1.05, 7.4)
+	board.position = Vector3(0.0, 1.05, 7.7)
 	board.set_script(INTERACTABLE_SCRIPT)
 	board.set("interaction_prompt_key", "INTERACT_READ_BOARD")
 	board.set("interaction_message_key", "MESSAGE_BOARD_READ")
@@ -135,7 +135,7 @@ func _create_information_board() -> void:
 
 	_add_static_box(
 		"InformationBoardPost",
-		Vector3(0.0, 0.35, 7.52),
+		Vector3(0.0, 0.35, 7.82),
 		Vector3(0.16, 0.7, 0.16),
 		post_material
 	)
