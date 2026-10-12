@@ -121,7 +121,18 @@ func _run_tests() -> void:
 				"Traffic moves backwards during the recovery state instead of pushing into the obstacle."
 			)
 			obstacle.queue_free()
-			await get_tree().physics_frame
+			for _frame: int in range(100):
+				await get_tree().physics_frame
+			_check(
+				String(recovery_traffic.call("get_ai_state")) == "DRIVING",
+				"Traffic resumes its route after the blocking obstacle is removed."
+			)
+
+		if is_instance_valid(first_pedestrian):
+			_check(
+				String(first_pedestrian.call("get_ai_state")) == "PATROL",
+				"Pedestrian returns to its patrol route after the player leaves the alert radius."
+			)
 
 		for traffic_node: Node in get_tree().get_nodes_in_group("traffic_vehicles"):
 			var position: Vector3 = (traffic_node as Node3D).global_position
