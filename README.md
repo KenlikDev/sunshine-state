@@ -4,11 +4,11 @@ Sunshine State is an original, single-player, third-person open-world crime-acti
 
 ## Project status
 
-**Current milestone:** M2 — vehicle integration in progress.
+**Current milestone:** M3 — living-district simulation in progress.
 
-The current branch contains a controllable third-person character, a bounded greybox coastal district, an information board, an English/Russian HUD, and three drivable vehicle prototypes (sedan, compact coupe, and utility pickup). This is an intermediate prototype, not the complete MVP.
+The current branch contains a controllable third-person character, a bounded greybox coastal district, an information board, an English/Russian HUD, three drivable vehicle prototypes (sedan, compact coupe, and utility pickup), four route-following pedestrians, and four background traffic agents. This is an intermediate prototype, not the complete MVP.
 
-The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). The three vehicle types are greybox prototypes and still need manual handling and visual review. NPCs and traffic, wanted/police systems, combat, missions, economy, save/load, final art, audio, and packaged release validation remain required.
+The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). The three vehicle types are greybox prototypes and still need manual handling and visual review. Pedestrian and traffic agents are an early bounded simulation prototype; the required 15-minute stability test is not yet complete. NPCs and traffic, wanted/police systems, combat, missions, economy, save/load, final art, audio, and packaged release validation remain required.
 
 ## Run locally
 
@@ -35,6 +35,7 @@ The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). Th
 - [Gameplay systems](docs/gameplay-systems.md)
 - [Vertical slice and controls](docs/vertical-slice.md)
 - [Vehicle system and controls](docs/vehicle-system.md)
+- [Living district simulation](docs/living-district.md)
 - [Art and asset pipeline](docs/art-pipeline.md)
 - [Testing strategy](docs/testing-strategy.md)
 - [Performance budgets](docs/performance-budgets.md)
@@ -53,4 +54,4 @@ The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). Th
 
 ## Validation
 
-GitHub Actions runs Godot headless resource import, a main-scene smoke test, vertical-slice regression tests, and vehicle-system regression tests. Manual vehicle handling tests and export checks are still required; the game is not yet a packaged release build.
+GitHub Actions runs Godot headless resource import, a main-scene smoke test, vertical-slice, vehicle-system, and living-district regression tests. An opt-in manual workflow runs the 15-minute living-district soak test; it has not yet been accepted as passed. Manual vehicle handling tests and export checks are still required; the game is not yet a packaged release build.

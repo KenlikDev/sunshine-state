@@ -1,0 +1,155 @@
+extends Node
+
+var _failures: Array[String] = []
+
+
+func _ready() -> void:
+	call_deferred("_run_tests")
+
+
+func _run_tests() -> void:
+	var main_scene: PackedScene = load("res://scenes/bootstrap/main.tscn")
+	_check(main_scene != null, "Main scene resource loads.")
+
+	if main_scene != null:
+		var instance: Node = main_scene.instantiate()
+		add_child(instance)
+		for _frame: int in range(6):
+			await get_tree().physics_frame
+
+		var player: CharacterBody3D = instance.get_node_or_null("Player") as CharacterBody3D
+		var pedestrians: Array[Node] = get_tree().get_nodes_in_group("pedestrians")
+		var traffic: Array[Node] = get_tree().get_nodes_in_group("traffic_vehicles")
+		_check(player != null, "Main scene creates the player.")
+		_check(player != null and player.is_in_group("player"), "Player is registered for nearby AI perception.")
+		_check(pedestrians.size() == 4, "District starts with a bounded set of four pedestrians.")
+		_check(traffic.size() == 4, "District starts with a bounded set of four traffic vehicles.")
+
+		var first_pedestrian: Node3D
+		var first_traffic: Node3D
+		if not pedestrians.is_empty():
+			first_pedestrian = pedestrians[0] as Node3D
+		if not traffic.is_empty():
+			first_traffic = traffic[0] as Node3D
+
+		var pedestrian_start: Vector3 = first_pedestrian.global_position if is_instance_valid(first_pedestrian) else Vector3.ZERO
+		var traffic_start: Vector3 = first_traffic.global_position if is_instance_valid(first_traffic) else Vector3.ZERO
+
+		for _frame: int in range(180):
+			await get_tree().physics_frame
+
+		_check(
+			get_tree().get_nodes_in_group("pedestrians").size() == 4,
+			"Pedestrian population stays bounded during the route simulation."
+		)
+		_check(
+			get_tree().get_nodes_in_group("traffic_vehicles").size() == 4,
+			"Traffic population stays bounded during the route simulation."
+		)
+		if is_instance_valid(first_pedestrian):
+			_check(
+				first_pedestrian.global_position.distance_to(pedestrian_start) > 0.25,
+				"Pedestrian agents advance along their authored routes."
+			)
+		if is_instance_valid(first_traffic):
+			_check(
+				first_traffic.global_position.distance_to(traffic_start) > 1.0,
+				"Traffic agents advance along their authored road routes."
+			)
+
+		var north_south: Node3D = instance.get_node_or_null("World/TrafficNorthbound") as Node3D
+		var east_west: Node3D = instance.get_node_or_null("World/TrafficEastbound") as Node3D
+		if is_instance_valid(north_south) and is_instance_valid(east_west):
+			north_south.global_position = Vector3(-2.0, 0.65, -8.0)
+			east_west.global_position = Vector3(-8.0, 0.65, -2.0)
+			for _frame: int in range(3):
+				await get_tree().physics_frame
+			_check(
+				String(east_west.call("get_ai_state")) == "YIELDING",
+				"East-west traffic yields to nearby north-south traffic at the junction."
+			)
+
+		if is_instance_valid(player) and is_instance_valid(first_pedestrian):
+			player.global_position = first_pedestrian.global_position + Vector3(0.0, 0.0, 2.0)
+			for _frame: int in range(3):
+				await get_tree().physics_frame
+			_check(
+				String(first_pedestrian.call("get_ai_state")) == "ALERT",
+				"Pedestrians react to a nearby player with the alert state."
+			)
+
+		var recovery_traffic: Node3D = instance.get_node_or_null("World/TrafficEastbound") as Node3D
+		if is_instance_valid(player) and is_instance_valid(recovery_traffic):
+			recovery_traffic.global_position = Vector3(-50.0, 0.65, -2.0)
+			recovery_traffic.global_rotation = Vector3(0.0, -PI / 2.0, 0.0)
+			player.global_position = Vector3(-55.0, 0.0, -2.0)
+
+			var obstacle := StaticBody3D.new()
+			obstacle.name = "TrafficRecoveryRegressionObstacle"
+			obstacle.position = recovery_traffic.global_position + Vector3(3.0, 0.35, 0.0)
+			var obstacle_collision := CollisionShape3D.new()
+			var obstacle_shape := BoxShape3D.new()
+			obstacle_shape.size = Vector3(0.8, 2.0, 5.0)
+			obstacle_collision.shape = obstacle_shape
+			obstacle.add_child(obstacle_collision)
+			instance.add_child(obstacle)
+
+			var saw_waiting: bool = false
+			var saw_recovering: bool = false
+			var saw_reverse_motion: bool = false
+			var in_recovery_phase: bool = false
+			var recovery_phase_start_x: float = recovery_traffic.global_position.x
+			for _frame: int in range(300):
+				await get_tree().physics_frame
+				var state_name: String = String(recovery_traffic.call("get_ai_state"))
+				saw_waiting = saw_waiting or state_name == "WAITING"
+
+				if state_name == "RECOVERING":
+					saw_recovering = true
+					if not in_recovery_phase:
+						recovery_phase_start_x = recovery_traffic.global_position.x
+						in_recovery_phase = true
+					elif recovery_traffic.global_position.x < recovery_phase_start_x - 0.05:
+						saw_reverse_motion = true
+				else:
+					in_recovery_phase = false
+
+			_check(saw_waiting, "Traffic waits when a nearby obstacle blocks its forward route.")
+			_check(saw_recovering, "Traffic uses a bounded reverse-and-retry recovery after a sustained blockage.")
+			_check(
+				saw_reverse_motion,
+				"Traffic moves backwards during the recovery state instead of pushing into the obstacle."
+			)
+			obstacle.queue_free()
+			for _frame: int in range(100):
+				await get_tree().physics_frame
+			_check(
+				String(recovery_traffic.call("get_ai_state")) == "DRIVING",
+				"Traffic resumes its route after the blocking obstacle is removed."
+			)
+
+		if is_instance_valid(first_pedestrian):
+			_check(
+				String(first_pedestrian.call("get_ai_state")) == "PATROL",
+				"Pedestrian returns to its patrol route after the player leaves the alert radius."
+			)
+
+		for traffic_node: Node in get_tree().get_nodes_in_group("traffic_vehicles"):
+			var position: Vector3 = (traffic_node as Node3D).global_position
+			_check(absf(position.x) < 88.0 and absf(position.z) < 78.0, "Traffic stays inside the district boundaries.")
+
+		instance.queue_free()
+		await get_tree().process_frame
+
+	if _failures.is_empty():
+		print("Living-district checks passed.")
+		get_tree().quit(0)
+	else:
+		for failure: String in _failures:
+			push_error(failure)
+		get_tree().quit(1)
+
+
+func _check(condition: bool, description: String) -> void:
+	if not condition:
+		_failures.append(description)
