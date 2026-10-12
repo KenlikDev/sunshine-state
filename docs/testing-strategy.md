@@ -61,7 +61,7 @@ Run a scripted critical path:
 
 ### Manual test passes
 
-- 15-minute living-district soak test with fixed agent counts, route progress, junction yielding, and no systemic traffic deadlock
+- 15-minute living-district soak test with fixed agent counts, route progress, junction yielding, and no systemic traffic deadlock. Run locally with `godot --headless --path . res://tests/living_district_soak.tscn` or dispatch GitHub Actions with `run_living_district_soak` enabled.
 
 - keyboard/mouse and supported controller
 - camera clipping and inaccessible geometry
