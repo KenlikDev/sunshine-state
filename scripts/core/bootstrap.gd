@@ -15,6 +15,7 @@ func _ready() -> void:
 	var player: CharacterBody3D = PLAYER_SCENE.instantiate()
 	player.name = "Player"
 	player.position = Vector3(0.0, 0.0, 12.0)
+	player.add_to_group("player")
 	add_child(player)
 
 	var hud: CanvasLayer = HUD_SCENE.instantiate()
