@@ -10,6 +10,9 @@ signal driver_changed(has_driver: bool)
 @export var max_reverse_speed_kph: float = 35.0
 @export var impact_speed_threshold: float = 2.8
 @export var impact_feedback_cooldown_ms: int = 1200
+@export var recovery_chassis_size: Vector3 = Vector3(1.9, 0.95, 3.8)
+@export var visual_wheel_radius: float = 0.32
+@export var visual_wheel_width: float = 0.22
 
 const RECOVERY_ACTION: StringName = &"vehicle_recover"
 @export var mouse_sensitivity: float = 0.0025
@@ -133,7 +136,7 @@ func _attempt_recovery() -> bool:
 	var space_state: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
 	var flat_basis: Basis = Basis(Vector3.UP, global_rotation.y)
 	var chassis_shape := BoxShape3D.new()
-	chassis_shape.size = Vector3(1.9, 0.95, 3.8)
+	chassis_shape.size = recovery_chassis_size
 
 	var overlap_query := PhysicsShapeQueryParameters3D.new()
 	overlap_query.shape = chassis_shape
@@ -264,9 +267,9 @@ func _create_wheel_visuals() -> void:
 			continue
 
 		var tire_mesh := CylinderMesh.new()
-		tire_mesh.top_radius = 0.32
-		tire_mesh.bottom_radius = 0.32
-		tire_mesh.height = 0.22
+		tire_mesh.top_radius = visual_wheel_radius
+		tire_mesh.bottom_radius = visual_wheel_radius
+		tire_mesh.height = visual_wheel_width
 		tire_mesh.radial_segments = 16
 
 		var tire := MeshInstance3D.new()

@@ -6,9 +6,9 @@ Sunshine State is an original, single-player, third-person open-world crime-acti
 
 **Current milestone:** M2 — vehicle integration in progress.
 
-The current branch contains a controllable third-person character, a bounded greybox coastal district, an information board, an English/Russian HUD, and the first drivable vehicle prototype. This is an intermediate prototype, not the complete MVP.
+The current branch contains a controllable third-person character, a bounded greybox coastal district, an information board, an English/Russian HUD, and three drivable vehicle prototypes (sedan, compact coupe, and utility pickup). This is an intermediate prototype, not the complete MVP.
 
-The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). The first vehicle is a prototype, not the complete vehicle requirement. NPCs and traffic, wanted/police systems, combat, missions, economy, save/load, final art, audio, and packaged release validation remain required.
+The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). The three vehicle types are greybox prototypes and still need manual handling and visual review. NPCs and traffic, wanted/police systems, combat, missions, economy, save/load, final art, audio, and packaged release validation remain required.
 
 ## Run locally
 
@@ -23,6 +23,7 @@ The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). Th
 - Space: jump on foot; brake in a vehicle
 - Mouse: orbit the active camera
 - E: interact, enter a vehicle, or exit the current vehicle
+- R: recover the current vehicle if blocked or overturned
 - Escape: release the cursor; click the game view to capture it again
 - F6: toggle English/Russian UI language
 

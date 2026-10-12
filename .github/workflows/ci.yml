@@ -36,6 +36,8 @@ jobs:
             docs/development-workflow.md \
             docs/vertical-slice.md \
             docs/vehicle-system.md \
+            scenes/vehicles/compact.tscn \
+            scenes/vehicles/pickup.tscn \
             localization/ui.csv \
             scripts/ui/localization_service.gd \
             tests/test_vertical_slice.gd \

@@ -1,0 +1,136 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/vehicle_controller.gd" id="1_vehicle"]
+
+[sub_resource type="BoxShape3D" id="PickupChassisShape"]
+size = Vector3(2.1, 0.9, 4.5)
+
+[sub_resource type="BoxMesh" id="PickupChassisMesh"]
+size = Vector3(2.1, 0.78, 4.5)
+
+[sub_resource type="StandardMaterial3D" id="PickupPaint"]
+albedo_color = Color(0.72, 0.42, 0.12, 1)
+metallic = 0.18
+roughness = 0.44
+
+[sub_resource type="BoxMesh" id="PickupCabinMesh"]
+size = Vector3(1.62, 0.68, 1.82)
+
+[sub_resource type="StandardMaterial3D" id="PickupGlass"]
+albedo_color = Color(0.08, 0.15, 0.19, 1)
+metallic = 0.1
+roughness = 0.23
+
+[sub_resource type="BoxMesh" id="PickupBedMesh"]
+size = Vector3(1.82, 0.42, 1.55)
+
+[sub_resource type="StandardMaterial3D" id="PickupBedMaterial"]
+albedo_color = Color(0.25, 0.26, 0.24, 1)
+roughness = 0.9
+
+[sub_resource type="BoxShape3D" id="PickupInteractionShape"]
+size = Vector3(2.85, 2.8, 5.25)
+
+[node name="UtilityPickup" type="VehicleBody3D"]
+contact_monitor = true
+max_contacts_reported = 8
+mass = 1600.0
+linear_damp = 0.1
+angular_damp = 1.35
+script = ExtResource("1_vehicle")
+engine_power = 3000.0
+brake_power = 78.0
+max_steering_angle = 0.36
+steering_speed = 1.8
+max_speed_kph = 102.0
+max_reverse_speed_kph = 32.0
+recovery_chassis_size = Vector3(2.1, 1.0, 4.5)
+visual_wheel_radius = 0.38
+visual_wheel_width = 0.25
+
+[node name="ChassisCollision" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.12, 0)
+shape = SubResource("PickupChassisShape")
+
+[node name="ChassisMesh" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.22, 0)
+mesh = SubResource("PickupChassisMesh")
+material_override = SubResource("PickupPaint")
+
+[node name="CabinMesh" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.86, -0.52)
+mesh = SubResource("PickupCabinMesh")
+material_override = SubResource("PickupGlass")
+
+[node name="BedMesh" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.62, 1.25)
+mesh = SubResource("PickupBedMesh")
+material_override = SubResource("PickupBedMaterial")
+
+[node name="InteractionArea" type="Area3D" parent="."]
+position = Vector3(0, 0.5, 0)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea"]
+shape = SubResource("PickupInteractionShape")
+
+[node name="FrontLeftWheel" type="VehicleWheel3D" parent="."]
+position = Vector3(-0.84, -0.06, -1.48)
+wheel_radius = 0.38
+wheel_rest_length = 0.18
+wheel_friction_slip = 1.45
+suspension_stiffness = 23.0
+damping_compression = 0.82
+damping_relaxation = 0.89
+wheel_roll_influence = 0.1
+use_as_traction = false
+use_as_steering = true
+
+[node name="FrontRightWheel" type="VehicleWheel3D" parent="."]
+position = Vector3(0.84, -0.06, -1.48)
+wheel_radius = 0.38
+wheel_rest_length = 0.18
+wheel_friction_slip = 1.45
+suspension_stiffness = 23.0
+damping_compression = 0.82
+damping_relaxation = 0.89
+wheel_roll_influence = 0.1
+use_as_traction = false
+use_as_steering = true
+
+[node name="RearLeftWheel" type="VehicleWheel3D" parent="."]
+position = Vector3(-0.84, -0.06, 1.48)
+wheel_radius = 0.38
+wheel_rest_length = 0.18
+wheel_friction_slip = 1.45
+suspension_stiffness = 23.0
+damping_compression = 0.82
+damping_relaxation = 0.89
+wheel_roll_influence = 0.1
+use_as_traction = true
+use_as_steering = false
+
+[node name="RearRightWheel" type="VehicleWheel3D" parent="."]
+position = Vector3(0.84, -0.06, 1.48)
+wheel_radius = 0.38
+wheel_rest_length = 0.18
+wheel_friction_slip = 1.45
+suspension_stiffness = 23.0
+damping_compression = 0.82
+damping_relaxation = 0.89
+wheel_roll_influence = 0.1
+use_as_traction = true
+use_as_steering = false
+
+[node name="CameraPivot" type="Node3D" parent="."]
+position = Vector3(0, 1.65, 0)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CameraPivot"]
+spring_length = 6.2
+collision_mask = 1
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot/SpringArm3D"]
+current = false
+rotation_degrees = Vector3(8, 0, 0)
+fov = 78.0

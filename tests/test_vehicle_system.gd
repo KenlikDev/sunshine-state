@@ -22,10 +22,24 @@ func _run_tests() -> void:
 		var player: CharacterBody3D = instance.get_node_or_null("Player") as CharacterBody3D
 		var vehicles: Array[Node] = get_tree().get_nodes_in_group("vehicles")
 		_check(player != null, "Main scene creates the player.")
-		_check(not vehicles.is_empty(), "District contains a vehicle.")
+		_check(vehicles.size() == 3, "District contains three distinct vehicle configurations.")
 
-		if player != null and not vehicles.is_empty():
-			var vehicle: VehicleBody3D = vehicles[0] as VehicleBody3D
+		var sedan: VehicleBody3D = instance.get_node_or_null("World/PrototypeSedan") as VehicleBody3D
+		var compact: VehicleBody3D = instance.get_node_or_null("World/CompactCoupe") as VehicleBody3D
+		var pickup: VehicleBody3D = instance.get_node_or_null("World/UtilityPickup") as VehicleBody3D
+		_check(sedan != null, "District includes the sedan configuration.")
+		_check(compact != null, "District includes the compact configuration.")
+		_check(pickup != null, "District includes the utility pickup configuration.")
+		if sedan != null and compact != null and pickup != null:
+			_check(
+				not is_equal_approx(float(sedan.get("engine_power")), float(compact.get("engine_power")))
+				and not is_equal_approx(float(sedan.get("engine_power")), float(pickup.get("engine_power")))
+				and not is_equal_approx(float(compact.get("engine_power")), float(pickup.get("engine_power"))),
+				"Each vehicle configuration has distinct power tuning."
+			)
+
+		if player != null and sedan != null:
+			var vehicle: VehicleBody3D = sedan
 			_check(vehicle != null, "Prototype vehicle uses VehicleBody3D.")
 			_check(vehicle.has_method("interact"), "Vehicle implements the shared interaction contract.")
 			_check(vehicle.has_method("take_driver"), "Vehicle exposes explicit driver ownership.")
@@ -60,13 +74,40 @@ func _run_tests() -> void:
 				"Throttle input moves the vehicle forward through physics."
 			)
 
+			var speed_before_braking: float = vehicle.linear_velocity.length()
+			Input.action_press("jump")
+			for _frame: int in range(20):
+				await get_tree().physics_frame
+			Input.action_release("jump")
+			_check(
+				vehicle.linear_velocity.length() < speed_before_braking - 0.5,
+				"Brake input reduces the vehicle's physical velocity."
+			)
+
+			var x_before_steering: float = vehicle.global_position.x
+			Input.action_press("move_forward")
+			Input.action_press("move_left")
+			for _frame: int in range(60):
+				await get_tree().physics_frame
+			Input.action_release("move_forward")
+			Input.action_release("move_left")
+			_check(
+				absf(vehicle.global_position.x - x_before_steering) > 0.1,
+				"Steering input changes the vehicle's path."
+			)
+			_check(
+				absf(vehicle.steering) > 0.05,
+				"Steering input reaches the front-wheel steering control."
+			)
+
 			var barrier := StaticBody3D.new()
 			barrier.name = "VehicleRegressionBarrier"
-			barrier.position = Vector3(
-				vehicle.global_position.x,
-				1.0,
-				vehicle.global_position.z - 3.0
-			)
+			var forward_direction: Vector3 = -vehicle.global_transform.basis.z
+			forward_direction.y = 0.0
+			forward_direction = forward_direction.normalized()
+			barrier.position = vehicle.global_position + forward_direction * 3.0
+			barrier.position.y = 1.0
+			barrier.rotation.y = vehicle.global_rotation.y
 			var barrier_collision := CollisionShape3D.new()
 			var barrier_shape := BoxShape3D.new()
 			barrier_shape.size = Vector3(5.0, 2.0, 1.0)
@@ -75,13 +116,13 @@ func _run_tests() -> void:
 			instance.add_child(barrier)
 			await get_tree().physics_frame
 
-			var barrier_z: float = barrier.global_position.z
 			Input.action_press("move_forward")
 			for _frame: int in range(90):
 				await get_tree().physics_frame
 			Input.action_release("move_forward")
+			var barrier_clearance: float = (barrier.global_position - vehicle.global_position).dot(forward_direction)
 			_check(
-				vehicle.global_position.z > barrier_z + 1.6,
+				barrier_clearance > 1.0,
 				"Vehicle chassis collides with a static barrier instead of passing through it."
 			)
 			_check(
@@ -89,11 +130,8 @@ func _run_tests() -> void:
 				"Horizontal vehicle impacts send throttled feedback."
 			)
 
-			vehicle.global_position = Vector3(
-				barrier.global_position.x,
-				0.65,
-				barrier.global_position.z + 1.8
-			)
+			vehicle.global_position = barrier.global_position - forward_direction * 1.8
+			vehicle.global_position.y = 0.65
 			vehicle.global_rotation = Vector3(1.1, vehicle.global_rotation.y, 1.0)
 			vehicle.linear_velocity = Vector3(7.0, 2.0, -3.0)
 			vehicle.angular_velocity = Vector3(1.2, 0.8, -0.4)
