@@ -6,6 +6,8 @@ const COMPACT_SCENE: PackedScene = preload("res://scenes/vehicles/compact.tscn")
 const PICKUP_SCENE: PackedScene = preload("res://scenes/vehicles/pickup.tscn")
 const PEDESTRIAN_SCENE: PackedScene = preload("res://scenes/pedestrians/pedestrian.tscn")
 const TRAFFIC_SCENE: PackedScene = preload("res://scenes/traffic/traffic_vehicle.tscn")
+const POLICE_SCENE: PackedScene = preload("res://scenes/police/police_officer.tscn")
+const CRIME_SCENE: PackedScene = preload("res://scenes/crime/graffiti_spot.tscn")
 
 
 func _ready() -> void:
@@ -14,6 +16,8 @@ func _ready() -> void:
 	_create_buildings()
 	_create_coastline()
 	_create_information_board()
+	_create_crime_site()
+	_create_police()
 	_create_test_vehicle()
 	_create_pedestrians()
 	_create_traffic()
@@ -147,6 +151,28 @@ func _create_information_board() -> void:
 		Vector3(0.16, 0.7, 0.16),
 		post_material
 	)
+
+
+func _create_crime_site() -> void:
+	var crime_site: StaticBody3D = CRIME_SCENE.instantiate() as StaticBody3D
+	crime_site.name = "GraffitiSpot"
+	crime_site.position = Vector3(-4.0, 1.0, 8.0)
+	add_child(crime_site)
+
+
+func _create_police() -> void:
+	var patrol_route := PackedVector3Array([
+		Vector3(14.0, 0.0, 18.0),
+		Vector3(14.0, 0.0, -18.0),
+		Vector3(20.0, 0.0, -18.0),
+		Vector3(20.0, 0.0, 18.0)
+	])
+	var officer: CharacterBody3D = POLICE_SCENE.instantiate() as CharacterBody3D
+	officer.name = "PoliceOfficer01"
+	officer.set("route_points", patrol_route)
+	officer.set("initial_waypoint_index", 0)
+	officer.position = patrol_route[0]
+	add_child(officer)
 
 
 func _create_test_vehicle() -> void:
