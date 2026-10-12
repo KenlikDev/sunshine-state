@@ -1,0 +1,45 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/traffic_controller.gd" id="1_traffic"]
+
+[sub_resource type="BoxShape3D" id="TrafficCollision"]
+size = Vector3(1.8, 0.8, 3.6)
+
+[sub_resource type="BoxMesh" id="TrafficBodyMesh"]
+size = Vector3(1.8, 0.72, 3.6)
+
+[sub_resource type="StandardMaterial3D" id="TrafficBodyMaterial"]
+albedo_color = Color(0.23, 0.48, 0.72, 1)
+roughness = 0.56
+metallic = 0.08
+
+[sub_resource type="BoxMesh" id="TrafficCabinMesh"]
+size = Vector3(1.42, 0.44, 1.55)
+
+[sub_resource type="StandardMaterial3D" id="TrafficGlassMaterial"]
+albedo_color = Color(0.08, 0.15, 0.2, 1)
+roughness = 0.22
+metallic = 0.1
+
+[node name="TrafficVehicle" type="CharacterBody3D"]
+collision_layer = 1
+collision_mask = 1
+script = ExtResource("1_traffic")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("TrafficCollision")
+
+[node name="BodyMesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("TrafficBodyMesh")
+material_override = SubResource("TrafficBodyMaterial")
+
+[node name="CabinMesh" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.52, -0.16)
+mesh = SubResource("TrafficCabinMesh")
+material_override = SubResource("TrafficGlassMaterial")
+
+[node name="ObstacleRay" type="RayCast3D" parent="."]
+position = Vector3(0, 0.18, 0)
+target_position = Vector3(0, 0, -4.5)
+collision_mask = 1
+enabled = true
