@@ -55,6 +55,17 @@ func _run_tests() -> void:
 			for _frame: int in range(60):
 				await get_tree().physics_frame
 			Input.action_release("move_forward")
+			print(
+				"Vehicle diagnostic: start_z=", initial_z,
+				" end_z=", vehicle.global_position.z,
+				" y=", vehicle.global_position.y,
+				" velocity=", vehicle.linear_velocity,
+				" engine_force=", vehicle.engine_force,
+				" front_contact=",
+				(vehicle.get_node("FrontLeftWheel") as VehicleWheel3D).is_in_contact(),
+				" rear_contact=",
+				(vehicle.get_node("RearLeftWheel") as VehicleWheel3D).is_in_contact()
+			)
 			_check(
 				vehicle.global_position.z < initial_z - 0.1,
 				"Throttle input moves the vehicle forward through physics."
