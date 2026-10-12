@@ -2,13 +2,14 @@
 
 ## Pinned engine and automated smoke tests
 
-The initial project baseline uses **Godot 4.7.2-stable**, released on 18 August 2026. CI uses the same exact version as the checked-in project configuration. Update the CI pin, project note, and this section together when upgrading the engine.
+The initial project baseline uses **Godot 4.7.2-stable**. CI uses the same exact version as the checked-in project configuration. Update the CI pin, project note, and this section together when upgrading the engine.
 
 The GitHub Actions workflow performs these checks:
 1. Imports editor resources in headless editor mode.
 2. Launches the configured main scene headlessly and exits after a short run.
-3. Runs the M1 vertical-slice regression test scene, which checks scene composition, the interactable contract, and Russian localization loaded through the CSV-backed localization service.
-4. Checks required documents and changed-line whitespace.
+3. Runs the M1 vertical-slice regression scene for bootstrap composition, movement, interaction, and Russian localization.
+4. Runs the M2 vehicle regression scene for vehicle discovery, driver ownership, throttle movement, exit state restoration, and feedback.
+5. Checks required documents and changed-line whitespace.
 
 These checks verify project loading and selected contracts. They do not prove visual quality, feel, export success, or target-machine performance.
 
@@ -34,9 +35,10 @@ Cover pure logic and state transitions:
 
 - player movement and camera input, interactable raycast discovery, and interaction feedback
 - world collision and boundary recovery
-- player interaction prompt and interaction feedback
-- player enter/exit vehicle
-- vehicle collision and recovery
+- vehicle interaction raycast and entry/exit handoff
+- single-driver ownership and input ownership
+- throttle, reverse, steering, braking, and recovery checks
+- vehicle collision and safe exit positioning
 - mission completion grants one reward exactly once
 - police detection creates and clears a pursuit correctly
 - save/load restores progression after restart
@@ -46,18 +48,20 @@ Cover pure logic and state transitions:
 Run a scripted critical path:
 1. Start a new game.
 2. Explore the district and inspect the information board.
-3. Drive and test each required vehicle.
-4. Complete mission one and collect its reward.
-5. Purchase an item or service.
-6. Complete the remaining missions.
-7. Save and quit.
-8. Relaunch and verify mission/economy state.
-9. Finish the final mission and reach the completion state.
+3. Enter the prototype sedan, drive, steer, brake, and exit.
+4. Drive and test each required vehicle configuration after they are implemented.
+5. Complete mission one and collect its reward.
+6. Purchase an item or service.
+7. Complete the remaining missions.
+8. Save and quit.
+9. Relaunch and verify mission/economy state.
+10. Finish the final mission and reach the completion state.
 
 ### Manual test passes
 
 - keyboard/mouse and supported controller
 - camera clipping and inaccessible geometry
+- vehicle steering, braking, suspension, collisions, and safe exit clearance
 - NPC/traffic stuck recovery
 - audio and UI feedback
 - resolution changes and graphics settings
