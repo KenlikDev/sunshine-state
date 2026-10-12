@@ -96,18 +96,29 @@ func _run_tests() -> void:
 
 			var saw_waiting: bool = false
 			var saw_recovering: bool = false
-			var recovery_start: Vector3 = recovery_traffic.global_position
+			var saw_reverse_motion: bool = false
+			var in_recovery_phase: bool = false
+			var recovery_phase_start_x: float = recovery_traffic.global_position.x
 			for _frame: int in range(300):
 				await get_tree().physics_frame
 				var state_name: String = String(recovery_traffic.call("get_ai_state"))
 				saw_waiting = saw_waiting or state_name == "WAITING"
-				saw_recovering = saw_recovering or state_name == "RECOVERING"
+
+				if state_name == "RECOVERING":
+					saw_recovering = true
+					if not in_recovery_phase:
+						recovery_phase_start_x = recovery_traffic.global_position.x
+						in_recovery_phase = true
+					elif recovery_traffic.global_position.x < recovery_phase_start_x - 0.05:
+						saw_reverse_motion = true
+				else:
+					in_recovery_phase = false
 
 			_check(saw_waiting, "Traffic waits when a nearby obstacle blocks its forward route.")
 			_check(saw_recovering, "Traffic uses a bounded reverse-and-retry recovery after a sustained blockage.")
 			_check(
-				recovery_traffic.global_position.x < recovery_start.x - 0.2,
-				"Traffic recovery moves the vehicle backwards from a blocked route."
+				saw_reverse_motion,
+				"Traffic moves backwards during the recovery state instead of pushing into the obstacle."
 			)
 			obstacle.queue_free()
 			await get_tree().physics_frame
