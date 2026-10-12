@@ -33,6 +33,12 @@ The M3 regression scene checks:
 - road-route movement and district bounds
 - north-south right-of-way at the main junction
 
+## Running the long-duration soak test
+
+Run `godot --headless --path . res://tests/living_district_soak.tscn` from the project root to perform the default 15-minute run locally. The script checks population counts, route movement, district bounds, and prolonged agent stalls throughout the run.
+
+GitHub Actions also exposes an opt-in manual workflow input named `run_living_district_soak`. Dispatch the `Repository checks` workflow with that input enabled to run the long-duration test on a pinned Godot 4.7.2 runner. The default push/PR workflow intentionally uses the shorter regression test instead.
+
 ## Remaining acceptance work
 
 The MVP acceptance criterion still requires a repeatable 15-minute simulation run. The long-duration pass must record the Godot version, OS, CPU/GPU, renderer, and resolution, and confirm there is no NPC accumulation, unbounded spawning, or systemic traffic deadlock. Camera avoidance, path coverage, performance and interactions with player-driven vehicles also require manual testing.
