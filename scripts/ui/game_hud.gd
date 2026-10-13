@@ -8,6 +8,7 @@ var _prompt_label: Label
 var _status_label: Label
 var _language_button: Button
 var _wanted_label: Label
+var _combat_label: Label
 var _prompt_key: String = ""
 var _status_key: String = "HUD_READY"
 
@@ -54,6 +55,13 @@ func _ready() -> void:
 	_controls_label.add_theme_font_size_override("font_size", 13)
 	_controls_label.add_theme_color_override("font_color", Color(0.70, 0.76, 0.79))
 	stack.add_child(_controls_label)
+
+	_combat_label = Label.new()
+	_combat_label.name = "CombatStatus"
+	_combat_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_combat_label.add_theme_font_size_override("font_size", 14)
+	_combat_label.add_theme_color_override("font_color", Color(0.96, 0.83, 0.34))
+	stack.add_child(_combat_label)
 
 	_language_button = Button.new()
 	_language_button.name = "LanguageButton"
@@ -132,8 +140,16 @@ func bind_player(player: Node3D) -> void:
 		_player.connect("interaction_prompt_changed", _on_interaction_prompt_changed)
 	if _player.has_signal("interaction_feedback"):
 		_player.connect("interaction_feedback", _on_interaction_feedback)
+	var health_component: Node = _player.get_node_or_null("Damageable")
+	if is_instance_valid(health_component):
+		health_component.connect("health_changed", Callable(self, "_on_health_changed"))
+	var weapon_component: Node = _player.get_node_or_null("WeaponController")
+	if is_instance_valid(weapon_component):
+		weapon_component.connect("ammo_changed", Callable(self, "_on_ammo_changed"))
 	_prompt_key = String(_player.call("get_current_interaction_prompt_key"))
 	_refresh_interaction_prompt()
+	_refresh_combat_status()
+	_refresh_wanted_status()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -213,3 +229,30 @@ func _on_wanted_level_changed(_level: int) -> void:
 
 func _on_wanted_state_changed(_state_name: String) -> void:
 	_refresh_wanted_status()
+
+
+
+func _refresh_combat_status() -> void:
+	if not is_instance_valid(_combat_label) or not is_instance_valid(_player):
+		return
+	var health_component: Node = _player.get_node_or_null("Damageable")
+	var weapon_component: Node = _player.get_node_or_null("WeaponController")
+	if not is_instance_valid(health_component) or not is_instance_valid(weapon_component):
+		_combat_label.text = ""
+		return
+	_combat_label.text = "%s %d/%d  ·  %s %d/%d" % [
+		Localization.translate_key("HUD_HEALTH_LABEL"),
+		int(health_component.get("current_health")),
+		int(health_component.get("max_health")),
+		Localization.translate_key("HUD_AMMO_LABEL"),
+		int(weapon_component.call("get_current_ammo")),
+		int(weapon_component.call("get_reserve_ammo"))
+	]
+
+
+func _on_health_changed(_current_health: int, _max_health: int) -> void:
+	_refresh_combat_status()
+
+
+func _on_ammo_changed(_current_ammo: int, _reserve_ammo: int) -> void:
+	_refresh_combat_status()

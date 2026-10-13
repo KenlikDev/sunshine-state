@@ -8,7 +8,7 @@ Estimates are planning ranges, not delivery promises. Re-estimate after the firs
 | M1 — Vertical slice | Third-person controller, camera, greybox district, interaction, bilingual HUD | Automated checks and repeatable exploration test pass | Automated gate passed; manual review pending |
 | M2 — Vehicles | Shared vehicle interface, sedan/compact/pickup prototypes, collision response and recovery | Automated driving, collision, recovery tests pass; manual handling review remains | Prototype gate passed; manual review pending |
 | M3 — Living district | Authored pedestrian routes, player-alert state, road traffic routes, junction yield and bounded population | 15-minute stability test passes | In progress |
-| M4 — Wanted and combat | Authoritative crime/wanted state, police detection/pursuit/search/decay; then weapon and damage loop | Scripted wanted and combat scenarios pass | Wanted/police foundation in progress; combat not started |
+| M4 — Wanted and combat | Authoritative wanted state, police pursuit/search, single-weapon combat, damage and player respawn | Scripted wanted/combat scenarios pass; manual combat review complete | Wanted/police and combat prototypes implemented; regression review in progress |
 | M5 — Missions and persistence | Three connected missions, economy, save/load | Full critical path passes after reload | Not started |
 | M6 — Presentation | Original Blender assets, lighting, UI, audio | Art/UX review and performance capture pass | Not started |
 | M7 — Release candidate | Regression, export, clean-machine test, documentation | No P0/P1 defects; acceptance checklist signed off | Not started |

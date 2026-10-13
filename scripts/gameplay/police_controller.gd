@@ -10,9 +10,13 @@ signal ai_state_changed(state_name: String)
 @export var vision_range: float = 30.0
 @export var stop_distance: float = 1.6
 @export var turn_speed: float = 4.0
+@export var attack_range: float = 2.0
+@export var attack_damage: int = 12
+@export var attack_cooldown_ms: int = 1500
 
 var _ai_state: String = "PATROL"
 var _route_index: int = 0
+var _last_attack_msec: int = -1500
 var _gravity: float = float(ProjectSettings.get_setting("physics/3d/default_gravity"))
 
 @onready var _wanted_system: Node = get_node("/root/WantedSystem")
@@ -71,6 +75,9 @@ func _physics_process(delta: float) -> void:
 			direction = _get_patrol_direction()
 			movement_speed = patrol_speed
 
+	if sees_player:
+		try_attack_player(player)
+
 	_apply_motion(direction, movement_speed, delta)
 
 
@@ -103,6 +110,31 @@ func _has_line_of_sight(player: Node3D) -> bool:
 		hit_node = hit_node.get_parent()
 
 	return false
+
+
+func try_attack_player(player: Node3D) -> bool:
+	if not is_instance_valid(player) or not player.has_method("is_incapacitated"):
+		return false
+	if bool(player.call("is_incapacitated")) or bool(player.call("is_in_vehicle")):
+		return false
+	if int(_wanted_system.call("get_wanted_level")) <= 0:
+		return false
+	if global_position.distance_to(player.global_position) > attack_range:
+		return false
+	if not _has_line_of_sight(player):
+		return false
+
+	var now_msec: int = Time.get_ticks_msec()
+	if now_msec - _last_attack_msec < attack_cooldown_ms:
+		return false
+
+	var damageable: Node = player.get_node_or_null("Damageable")
+	if not is_instance_valid(damageable):
+		return false
+
+	_last_attack_msec = now_msec
+	damageable.call("apply_damage", attack_damage, self)
+	return true
 
 
 func _get_patrol_direction() -> Vector3:

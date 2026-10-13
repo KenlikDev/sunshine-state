@@ -44,6 +44,11 @@ jobs:
             docs/vehicle-system.md \
             docs/living-district.md \
             docs/wanted-system.md \
+            docs/combat-system.md \
+            scripts/gameplay/damageable.gd \
+            scripts/gameplay/weapon_controller.gd \
+            tests/test_combat_system.gd \
+            tests/test_combat_system.tscn \
             scripts/gameplay/wanted_system.gd \
             scripts/gameplay/police_controller.gd \
             scripts/gameplay/crime_interactable.gd \
@@ -115,6 +120,9 @@ jobs:
 
       - name: Run wanted-system regression checks
         run: godot --headless --path . res://tests/test_wanted_system.tscn
+
+      - name: Run combat-system regression checks
+        run: timeout 45s godot --headless --path . res://tests/test_combat_system.tscn
 
   living-district-soak:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_living_district_soak }}
