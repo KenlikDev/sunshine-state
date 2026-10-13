@@ -27,6 +27,8 @@ func _ready() -> void:
 	_build_ui()
 	SettingsService.locale_changed.connect(_on_locale_changed)
 	_refresh_texts()
+	if DisplayServer.get_name() != "headless":
+		_new_game_button.grab_focus()
 
 
 func _build_ui() -> void:
@@ -219,6 +221,10 @@ func _enter_game() -> void:
 func _toggle_settings() -> void:
 	_settings_center.visible = not _settings_center.visible
 	$MenuCenter.visible = not _settings_center.visible
+	if _settings_center.visible:
+		_language_button.grab_focus()
+	else:
+		_settings_button.grab_focus()
 
 
 func _toggle_locale() -> void:
