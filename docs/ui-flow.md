@@ -18,8 +18,8 @@ The language remains a presentation setting and does not alter mission, economy,
 
 ## Automated coverage
 
-The UI-flow regression validates menu/scene loading, conditional Continue enablement, settings panel open/close, locale updates, sensitivity updates, pause state, opening settings while paused, and returning to live gameplay.
+The UI-flow regression validates menu loading, Continue disabled without a save and enabled with one, new-game confirmation/cancel without losing in-memory progression, settings panel open/close, locale and sensitivity persistence, resolution/fullscreen/master-volume persistence, pause state, opening settings while paused, and returning to live gameplay.
 
 ## Remaining work
 
-Controller navigation, remappable controls, resolution/fullscreen options, accessibility settings, audio controls, an explicit confirmation when starting over an existing save, polished visual transitions, sound/music, and packaged-build UX review remain outstanding. The presentation increment is not a release-ready UI.
+Controller navigation, remappable controls, accessibility settings, separate music/effects controls, polished visual transitions, sound/music, and packaged-build UX review remain outstanding. The presentation increment is not a release-ready UI.
