@@ -10,11 +10,14 @@ signal interaction_feedback(message_key: String)
 @export var jump_velocity: float = 4.8
 @export var mouse_sensitivity: float = 0.0025
 @export var interaction_distance: float = 4.5
+@export_range(0.1, 15.0, 0.1) var respawn_delay_seconds: float = 1.5
 
 var _gravity: float = float(ProjectSettings.get_setting("physics/3d/default_gravity"))
 var _current_interactable: Node3D
 var _current_prompt_key: String = ""
 var _current_vehicle: Node3D
+var _spawn_transform: Transform3D
+var _is_incapacitated: bool = false
 
 @onready var _camera_pivot: Node3D = $CameraPivot
 @onready var _interaction_ray: RayCast3D = $CameraPivot/InteractionRay
@@ -24,6 +27,7 @@ var _current_vehicle: Node3D
 
 
 func _ready() -> void:
+	_spawn_transform = global_transform
 	_interaction_ray.add_exception(self)
 	_interaction_ray.target_position = Vector3(0.0, 0.0, -interaction_distance)
 	_interaction_ray.collide_with_areas = true
@@ -31,6 +35,8 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _is_incapacitated:
+		return
 	if is_instance_valid(_current_vehicle):
 		return
 
@@ -50,6 +56,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if _is_incapacitated:
+		velocity = Vector3.ZERO
+		return
 	if is_instance_valid(_current_vehicle):
 		return
 
@@ -166,3 +175,39 @@ func get_current_interaction_prompt_key() -> String:
 
 func refresh_interaction_prompt() -> void:
 	_update_interactable()
+
+
+
+func is_incapacitated() -> bool:
+	return _is_incapacitated
+
+
+func on_damaged_actor_died(_instigator: Node) -> void:
+	if _is_incapacitated:
+		return
+	_is_incapacitated = true
+	velocity = Vector3.ZERO
+	_player_mesh.visible = false
+	_player_collision.set_deferred("disabled", true)
+	interaction_prompt_changed.emit("")
+	_current_interactable = null
+	_current_prompt_key = ""
+	WantedSystem.clear_wanted(&"PLAYER_DEATH")
+	_respawn_after_delay()
+
+
+func _respawn_after_delay() -> void:
+	await get_tree().create_timer(respawn_delay_seconds).timeout
+	if not is_inside_tree():
+		return
+
+	global_transform = _spawn_transform
+	velocity = Vector3.ZERO
+	var damageable: Node = get_node_or_null("Damageable")
+	if is_instance_valid(damageable):
+		damageable.call("restore_full_health")
+	_player_collision.set_deferred("disabled", false)
+	_player_mesh.visible = true
+	_is_incapacitated = false
+	_player_camera.make_current()
+	interaction_feedback.emit("MESSAGE_PLAYER_RESPAWNED")
