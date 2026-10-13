@@ -123,11 +123,11 @@ func _run_tests() -> void:
 	_check(not bool(weapon.call("request_reload")), "Reload is rejected with no reserve ammo.")
 
 	Input.action_press("aim_weapon")
-	await get_tree().process_frame
+	await get_tree().create_timer(0.05).timeout
 	_check(bool(weapon.call("get_is_aiming")), "Aim input enters aim mode.")
 	_check(is_equal_approx(camera.fov, float(weapon.get("aim_fov"))), "Aim mode narrows the field of view.")
 	Input.action_release("aim_weapon")
-	await get_tree().process_frame
+	await get_tree().create_timer(0.05).timeout
 	_check(not bool(weapon.call("get_is_aiming")), "Releasing aim exits aim mode.")
 	_check(is_equal_approx(camera.fov, float(weapon.get("default_fov"))), "Aim exit restores default field of view.")
 
