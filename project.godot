@@ -60,6 +60,22 @@ reload_weapon={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"physical_keycode":84)]
 }
+use_first_aid_kit={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":72)]
+}
+save_game={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194336)]
+}
+restart_mission={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194339)]
+}
+load_game={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194340)]
+}
 toggle_language={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"physical_keycode":4194337)]
@@ -72,6 +88,9 @@ ui_cancel={
 [autoload]
 Localization="*res://scripts/ui/localization_service.gd"
 WantedSystem="*res://scripts/gameplay/wanted_system.gd"
+EconomyService="*res://scripts/systems/economy_service.gd"
+MissionService="*res://scripts/systems/mission_service.gd"
+SaveService="*res://scripts/systems/save_service.gd"
 
 [rendering]
 renderer/rendering_method="gl_compatibility"

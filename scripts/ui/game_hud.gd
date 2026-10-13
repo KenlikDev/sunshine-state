@@ -89,6 +89,11 @@ func _ready() -> void:
 
 	WantedSystem.wanted_level_changed.connect(_on_wanted_level_changed)
 	WantedSystem.wanted_state_changed.connect(_on_wanted_state_changed)
+	MissionService.mission_state_changed.connect(_on_mission_state_changed)
+	MissionService.mission_completed.connect(_on_mission_completed)
+	MissionService.mission_failed.connect(_on_mission_failed)
+	MissionService.mission_restarted.connect(_on_mission_restarted)
+	SaveService.save_status_changed.connect(_on_save_status_changed)
 
 	var crosshair := Label.new()
 	crosshair.name = "Crosshair"
@@ -146,6 +151,8 @@ func bind_player(player: Node3D) -> void:
 	var weapon_component: Node = _player.get_node_or_null("WeaponController")
 	if is_instance_valid(weapon_component):
 		weapon_component.connect("ammo_changed", Callable(self, "_on_ammo_changed"))
+	EconomyService.balance_changed.connect(_on_economy_balance_changed)
+	EconomyService.inventory_changed.connect(_on_economy_inventory_changed)
 	_prompt_key = String(_player.call("get_current_interaction_prompt_key"))
 	_refresh_interaction_prompt()
 	_refresh_combat_status()
@@ -181,6 +188,7 @@ func _refresh_localized_texts() -> void:
 	_status_label.text = Localization.translate_key(_status_key)
 	_refresh_interaction_prompt()
 	_refresh_wanted_status()
+	_refresh_mission_status()
 
 
 func _refresh_interaction_prompt() -> void:
@@ -240,13 +248,17 @@ func _refresh_combat_status() -> void:
 	if not is_instance_valid(health_component) or not is_instance_valid(weapon_component):
 		_combat_label.text = ""
 		return
-	_combat_label.text = "%s %d/%d  ·  %s %d/%d" % [
+	_combat_label.text = "%s %d/%d  ·  %s %d/%d  ·  %s $%d  ·  %s %d" % [
 		Localization.translate_key("HUD_HEALTH_LABEL"),
 		int(health_component.get("current_health")),
 		int(health_component.get("max_health")),
 		Localization.translate_key("HUD_AMMO_LABEL"),
 		int(weapon_component.call("get_current_ammo")),
-		int(weapon_component.call("get_reserve_ammo"))
+		int(weapon_component.call("get_reserve_ammo")),
+		Localization.translate_key("HUD_MONEY_LABEL"),
+		EconomyService.get_balance(),
+		Localization.translate_key("HUD_FIRST_AID_LABEL"),
+		EconomyService.get_item_count("first_aid_kit")
 	]
 
 
@@ -255,4 +267,60 @@ func _on_health_changed(_current_health: int, _max_health: int) -> void:
 
 
 func _on_ammo_changed(_current_ammo: int, _reserve_ammo: int) -> void:
+	_refresh_combat_status()
+
+
+
+func _refresh_mission_status() -> void:
+	if not is_instance_valid(_objective_label):
+		return
+	var mission: Dictionary = MissionService.get_active_mission()
+	if mission.is_empty():
+		_objective_label.text = Localization.translate_key("HUD_ALL_MISSIONS_COMPLETE")
+		return
+
+	var title: String = Localization.translate_key(String(mission.get("title_key", "HUD_OBJECTIVE")))
+	var objective: String = Localization.translate_key(String(mission.get("objective_key", "HUD_OBJECTIVE")))
+	var state: String = String(mission.get("state", "ACTIVE"))
+	_objective_label.text = "%s\n%s" % [title, objective]
+	if state == "FAILED":
+		_objective_label.text += "\n" + Localization.translate_key("HUD_MISSION_FAILED_HINT")
+
+
+func _on_mission_state_changed(_mission_id: String, _state: String) -> void:
+	_refresh_mission_status()
+
+
+func _on_mission_completed(_mission_id: String, _reward: int) -> void:
+	_status_key = "MESSAGE_MISSION_COMPLETED"
+	if is_instance_valid(_status_label):
+		_status_label.text = Localization.translate_key(_status_key)
+	_refresh_mission_status()
+
+
+func _on_mission_failed(_mission_id: String, reason_key: String) -> void:
+	_status_key = reason_key
+	if is_instance_valid(_status_label):
+		_status_label.text = Localization.translate_key(_status_key)
+	_refresh_mission_status()
+
+
+func _on_mission_restarted(_mission_id: String) -> void:
+	_status_key = "MESSAGE_MISSION_RESTARTED"
+	if is_instance_valid(_status_label):
+		_status_label.text = Localization.translate_key(_status_key)
+	_refresh_mission_status()
+
+
+func _on_save_status_changed(message_key: String) -> void:
+	_status_key = message_key
+	if is_instance_valid(_status_label):
+		_status_label.text = Localization.translate_key(_status_key)
+
+
+func _on_economy_balance_changed(_balance: int) -> void:
+	_refresh_combat_status()
+
+
+func _on_economy_inventory_changed(_item_id: String, _count: int) -> void:
 	_refresh_combat_status()

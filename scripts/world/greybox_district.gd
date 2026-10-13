@@ -8,6 +8,7 @@ const PEDESTRIAN_SCENE: PackedScene = preload("res://scenes/pedestrians/pedestri
 const TRAFFIC_SCENE: PackedScene = preload("res://scenes/traffic/traffic_vehicle.tscn")
 const POLICE_SCENE: PackedScene = preload("res://scenes/police/police_officer.tscn")
 const CRIME_SCENE: PackedScene = preload("res://scenes/crime/graffiti_spot.tscn")
+const SHOP_SCENE: PackedScene = preload("res://scenes/economy/shop_interactable.tscn")
 
 
 func _ready() -> void:
@@ -17,6 +18,7 @@ func _ready() -> void:
 	_create_coastline()
 	_create_information_board()
 	_create_crime_site()
+	_create_shops()
 	_create_police()
 	_create_test_vehicle()
 	_create_pedestrians()
@@ -158,6 +160,20 @@ func _create_crime_site() -> void:
 	crime_site.name = "GraffitiSpot"
 	crime_site.position = Vector3(-4.0, 1.0, 8.0)
 	add_child(crime_site)
+
+
+func _create_shops() -> void:
+	_spawn_shop("FirstAidVendor", Vector3(-15.0, 0.9, 12.0), "first_aid_kit")
+	_spawn_shop("VehicleServiceDesk", Vector3(15.0, 0.9, 12.0), "vehicle_repair")
+
+
+func _spawn_shop(node_name: String, shop_position: Vector3, item_id: String) -> void:
+	var shop: StaticBody3D = SHOP_SCENE.instantiate() as StaticBody3D
+	shop.name = node_name
+	shop.position = shop_position
+	shop.set("item_id", item_id)
+	shop.add_to_group("interactable")
+	add_child(shop)
 
 
 func _create_police() -> void:

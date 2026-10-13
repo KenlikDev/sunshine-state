@@ -173,6 +173,76 @@ func _set_state(next_state: WantedState, reason: String) -> void:
 	wanted_state_changed.emit(state_name)
 
 
+func get_save_data() -> Dictionary:
+	return {
+		"wanted_level": _wanted_level,
+		"last_known_position": {
+			"x": _last_known_player_position.x,
+			"y": _last_known_player_position.y,
+			"z": _last_known_player_position.z
+		},
+		"state": get_state_name()
+	}
+
+
+func is_save_data_valid(data: Variant) -> bool:
+	if not data is Dictionary:
+		return false
+	var payload: Dictionary = data
+	var level_value: Variant = payload.get("wanted_level", null)
+	if not _is_integral_number(level_value, MAX_WANTED_LEVEL):
+		return false
+	var position_value: Variant = payload.get("last_known_position", null)
+	if not position_value is Dictionary:
+		return false
+	for axis: String in ["x", "y", "z"]:
+		var axis_value: Variant = position_value.get(axis, null)
+		if typeof(axis_value) != TYPE_INT and typeof(axis_value) != TYPE_FLOAT:
+			return false
+	if typeof(payload.get("state", null)) != TYPE_STRING:
+		return false
+	if not ["CLEAR", "PURSUIT", "SEARCHING", "COOLING_DOWN"].has(String(payload["state"])):
+		return false
+	return true
+
+
+func _is_integral_number(value: Variant, maximum: int) -> bool:
+	if typeof(value) != TYPE_INT and typeof(value) != TYPE_FLOAT:
+		return false
+	var numeric_value: float = float(value)
+	if numeric_value < 0.0 or numeric_value > float(maximum):
+		return false
+	return is_equal_approx(numeric_value, roundf(numeric_value))
+
+
+func load_save_data(data: Dictionary) -> bool:
+	if not is_save_data_valid(data):
+		return false
+
+	var previous_level: int = _wanted_level
+	_wanted_level = clampi(int(data["wanted_level"]), 0, MAX_WANTED_LEVEL)
+	var saved_position: Dictionary = data["last_known_position"]
+	_last_known_player_position = Vector3(
+		float(saved_position["x"]),
+		float(saved_position["y"]),
+		float(saved_position["z"])
+	)
+	_visible_police.clear()
+	if previous_level != _wanted_level:
+		wanted_level_changed.emit(_wanted_level)
+
+	if _wanted_level <= 0:
+		_last_known_player_position = Vector3.ZERO
+		_search_remaining = 0.0
+		_decay_remaining = 0.0
+		_set_state(WantedState.CLEAR, "wanted state loaded from save")
+	else:
+		_search_remaining = search_duration_seconds
+		_decay_remaining = decay_interval_seconds
+		_set_state(WantedState.SEARCHING, "loaded save requires police to reacquire the player")
+	return true
+
+
 func _log_event(message: String) -> void:
 	if debug_logging:
 		print("[WantedSystem] ", message)

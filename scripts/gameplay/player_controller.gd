@@ -90,6 +90,10 @@ func _physics_process(delta: float) -> void:
 
 	if Input.is_action_just_pressed("interact"):
 		_try_interact()
+	if Input.is_action_just_pressed("use_first_aid_kit"):
+		var feedback_key: String = use_first_aid_kit()
+		if not feedback_key.is_empty():
+			interaction_feedback.emit(feedback_key)
 
 
 func _update_interactable() -> void:
@@ -178,6 +182,30 @@ func refresh_interaction_prompt() -> void:
 
 
 
+func use_first_aid_kit() -> String:
+	if _is_incapacitated or is_in_vehicle():
+		return "MESSAGE_HEAL_UNAVAILABLE"
+
+	var health: Node = get_node_or_null("Damageable")
+	if not is_instance_valid(health):
+		return "MESSAGE_HEAL_UNAVAILABLE"
+	var current_health: int = int(health.get("current_health"))
+	var max_health: int = int(health.get("max_health"))
+	if current_health >= max_health:
+		return "MESSAGE_HEALTH_FULL"
+
+	var item: Dictionary = EconomyService.get_item_definition("first_aid_kit")
+	if item.is_empty() or EconomyService.get_item_count("first_aid_kit") <= 0:
+		return "MESSAGE_NO_FIRST_AID"
+
+	var healing_amount: int = maxi(1, int(item.get("healing_amount", 50)))
+	if not EconomyService.consume_item("first_aid_kit"):
+		return "MESSAGE_NO_FIRST_AID"
+	if not bool(health.call("apply_healing", healing_amount)):
+		return "MESSAGE_HEAL_UNAVAILABLE"
+	return "MESSAGE_FIRST_AID_USED"
+
+
 func is_incapacitated() -> bool:
 	return _is_incapacitated
 
@@ -193,6 +221,7 @@ func on_damaged_actor_died(_instigator: Node) -> void:
 	_current_interactable = null
 	_current_prompt_key = ""
 	WantedSystem.clear_wanted(&"PLAYER_DEATH")
+	MissionService.record_event(&"PLAYER_DEATH", &"PLAYER")
 	var respawn_timer: SceneTreeTimer = get_tree().create_timer(respawn_delay_seconds)
 	respawn_timer.timeout.connect(_finish_respawn, CONNECT_ONE_SHOT)
 

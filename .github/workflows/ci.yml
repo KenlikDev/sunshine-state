@@ -45,6 +45,16 @@ jobs:
             docs/living-district.md \
             docs/wanted-system.md \
             docs/combat-system.md \
+            docs/progression-system.md \
+            scripts/systems/economy_service.gd \
+            scripts/systems/mission_service.gd \
+            scripts/systems/save_service.gd \
+            scripts/gameplay/shop_interactable.gd \
+            data/items/items.json \
+            data/missions/missions.json \
+            scenes/economy/shop_interactable.tscn \
+            tests/test_progression_system.gd \
+            tests/test_progression_system.tscn \
             scripts/gameplay/damageable.gd \
             scripts/gameplay/weapon_controller.gd \
             tests/test_combat_system.gd \
@@ -123,6 +133,9 @@ jobs:
 
       - name: Run combat-system regression checks
         run: timeout 45s godot --headless --path . res://tests/test_combat_system.tscn
+
+      - name: Run progression-system regression checks
+        run: timeout 45s godot --headless --path . res://tests/test_progression_system.tscn
 
   living-district-soak:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_living_district_soak }}

@@ -47,7 +47,7 @@ Cover pure logic and state transitions:
 - NPC death, police attack conditions, player incapacitation, wanted reset, and respawn
 - mission completion grants one reward exactly once
 - police detection creates and clears a pursuit correctly
-- save/load restores progression after restart
+- save/load restores progression after restart; corrupt primary save recovery uses the last known-good backup
 
 ### Acceptance tests
 
