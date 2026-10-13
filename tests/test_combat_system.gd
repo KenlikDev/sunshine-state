@@ -12,6 +12,7 @@ func _ready() -> void:
 
 
 func _run_tests() -> void:
+	print("Combat test stage: bootstrap")
 	var wanted: Node = get_node_or_null("/root/WantedSystem")
 	if is_instance_valid(wanted):
 		wanted.set("debug_logging", false)
@@ -79,6 +80,7 @@ func _run_tests() -> void:
 	_check(int(weapon.call("get_current_ammo")) == 2, "A shot consumes one round.")
 	_check(int(target_health.get("current_health")) == 35, "Raycast damage is deterministic.")
 	_check(_shot_targets.has("CombatRegressionTarget"), "Shot telemetry identifies the hit target.")
+	print("Combat test stage: firing and hit detection")
 	_check(not bool(weapon.call("fire_weapon")), "Fire cooldown rejects an immediate repeat.")
 	_check(int(target_health.get("current_health")) == 35, "A rejected shot cannot apply damage twice.")
 
@@ -109,6 +111,7 @@ func _run_tests() -> void:
 	weapon.set("weapon_range", 80.0)
 	distant_target.queue_free()
 
+	print("Combat test stage: reload and aiming")
 	weapon.set("magazine_capacity", 12)
 	weapon.set("current_ammo", 0)
 	weapon.set("reserve_ammo", 6)
@@ -128,6 +131,7 @@ func _run_tests() -> void:
 	_check(not bool(weapon.call("get_is_aiming")), "Releasing aim exits aim mode.")
 	_check(is_equal_approx(camera.fov, float(weapon.get("default_fov"))), "Aim exit restores default field of view.")
 
+	print("Combat test stage: police attack and player respawn")
 	if is_instance_valid(wanted):
 		wanted.call("report_crime", &"COMBAT_TEST", 1, player.global_position, true, &"COMBAT_REGRESSION")
 		var officers: Array[Node] = get_tree().get_nodes_in_group("police")
