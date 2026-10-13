@@ -34,7 +34,8 @@ func get_item_definition(item_id: String) -> Dictionary:
 	var definition: Variant = _catalog.get(item_id, {})
 	if not definition is Dictionary:
 		return {}
-	return (definition as Dictionary).duplicate(true)
+	var item_definition: Dictionary = definition
+	return item_definition.duplicate(true)
 
 
 func get_catalog_ids() -> Array[String]:
@@ -143,7 +144,8 @@ func load_save_data(data: Dictionary) -> bool:
 		return false
 
 	_balance = int(data["balance"])
-	_inventory = (data["inventory"] as Dictionary).duplicate(true)
+	var inventory_data: Dictionary = data["inventory"]
+	_inventory = inventory_data.duplicate(true)
 	_processed_transactions.clear()
 	for transaction_id: Variant in data["processed_transactions"]:
 		_processed_transactions[String(transaction_id)] = true
@@ -175,7 +177,8 @@ func _load_catalog() -> void:
 	if not parsed is Dictionary:
 		push_error("Item catalog must be a JSON object.")
 		return
-	var item_list: Variant = (parsed as Dictionary).get("items", null)
+	var catalog_data: Dictionary = parsed
+	var item_list: Variant = catalog_data.get("items", null)
 	if not item_list is Array:
 		push_error("Item catalog must contain an items array.")
 		return
