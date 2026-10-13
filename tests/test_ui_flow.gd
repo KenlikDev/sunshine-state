@@ -11,6 +11,7 @@ func _ready() -> void:
 
 
 func _run_tests() -> void:
+	SaveService.delete_save_files()
 	var original_locale: String = SettingsService.get_locale()
 	var original_sensitivity: float = SettingsService.get_mouse_sensitivity()
 	SettingsService.set_locale("en")
@@ -42,6 +43,7 @@ func _run_tests() -> void:
 			continue_button.disabled == not SaveService.has_valid_save(),
 			"Continue is enabled only when a valid primary or backup save exists."
 		)
+		_check(continue_button.disabled, "Continue is disabled in a clean profile without a save.")
 
 	if settings_button != null:
 		settings_button.pressed.emit()
@@ -97,8 +99,43 @@ func _run_tests() -> void:
 		_check(not get_tree().paused, "Escape resumes gameplay and restores scene processing.")
 		pause_menu.queue_free()
 
+	_check(SaveService.save_game(false), "The UI regression can create a valid save for overwrite-protection checks.")
+	var save_menu: Control = menu_scene.instantiate() as Control
+	add_child(save_menu)
+	await get_tree().process_frame
+	var save_continue_button: Button = save_menu.find_child("ContinueButton", true, false) as Button
+	var new_game_button: Button = save_menu.find_child("NewGameButton", true, false) as Button
+	var confirmation: ConfirmationDialog = save_menu.find_child("NewGameConfirmation", true, false) as ConfirmationDialog
+	_check(
+		save_continue_button != null and not save_continue_button.disabled,
+		"Continue becomes available when a valid save exists."
+	)
+	var balance_before_new_game: int = EconomyService.get_balance()
+	var mission_before_new_game: String = MissionService.get_current_mission_id()
+	if new_game_button != null:
+		new_game_button.pressed.emit()
+	_check(
+		confirmation != null and confirmation.visible,
+		"Starting over asks for explicit confirmation when a save exists."
+	)
+	_check(
+		EconomyService.get_balance() == balance_before_new_game
+		and MissionService.get_current_mission_id() == mission_before_new_game,
+		"Opening the confirmation dialog does not reset active progression."
+	)
+	if confirmation != null:
+		confirmation.get_cancel_button().pressed.emit()
+		_check(not confirmation.visible, "Cancel closes the new-game confirmation dialog.")
+	_check(
+		EconomyService.get_balance() == balance_before_new_game
+		and MissionService.get_current_mission_id() == mission_before_new_game,
+		"Canceling the confirmation leaves existing progression untouched."
+	)
+
 	SettingsService.set_locale(original_locale)
 	SettingsService.set_mouse_sensitivity(original_sensitivity)
+	SaveService.delete_save_files()
+	save_menu.queue_free()
 	menu.queue_free()
 	await get_tree().process_frame
 	_finish(0 if _failures.is_empty() else 1)
