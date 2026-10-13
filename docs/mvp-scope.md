@@ -10,7 +10,7 @@ The items below are required scope, not a claim that they are implemented. If a 
 - One connected, walkable and drivable fictional coastal-city district.
 - Clearly readable roads, sidewalks, building blocks, landmarks, and a coastal or beach area.
 - Collision coverage for traversable geometry and reliable world boundaries.
-- Basic day/night variation. Basic weather is included only after lighting and exposure remain stable.
+- Basic day/night variation via a shared world clock and environment lighting controller. Basic weather is included only after lighting and exposure remain stable.
 
 **Acceptance:** the player can navigate the complete MVP area without falling through geometry, reaching unintended voids, or encountering a progression-blocking dead end.
 
