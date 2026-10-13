@@ -43,6 +43,8 @@ Cover pure logic and state transitions:
 - pedestrian route progression, alert-state response, bounded agent population, traffic route progression, junction yielding, and district-boundary checks
 - crime event severity and wanted-level transitions
 - police detection, pursuit, occlusion/search, reacquisition, decay, and explicit wanted clearing
+- weapon raycasts, damage application, rate-of-fire, ammunition/reload, and aim state
+- NPC death, police attack conditions, player incapacitation, wanted reset, and respawn
 - mission completion grants one reward exactly once
 - police detection creates and clears a pursuit correctly
 - save/load restores progression after restart
