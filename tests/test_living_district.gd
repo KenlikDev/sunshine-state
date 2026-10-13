@@ -30,6 +30,11 @@ func _run_tests() -> void:
 			day_night.call("set_time_of_day", 0.0)
 			var midnight_energy: float = sunlight.light_energy
 			var midnight_background: Color = environment.environment.background_color
+			print(
+				"Day-night diagnostic: midday=", midday_background.to_html(),
+				" midnight=", midnight_background.to_html(),
+				" sun_energy=", midday_energy, " -> ", midnight_energy
+			)
 			_check(midday_energy > midnight_energy, "Midday sunlight is brighter than midnight.")
 			_check(not midday_background.is_equal_approx(midday_background), "Night changes the sky background color.")
 			_check(
