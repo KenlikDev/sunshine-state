@@ -18,6 +18,24 @@ func _run_tests() -> void:
 			await get_tree().physics_frame
 
 		var player: CharacterBody3D = instance.get_node_or_null("Player") as CharacterBody3D
+		var day_night: Node = instance.get_node_or_null("World/DayNightCycle")
+		var environment: WorldEnvironment = instance.get_node_or_null("World/WorldEnvironment") as WorldEnvironment
+		var sunlight: DirectionalLight3D = instance.get_node_or_null("World/Sunlight") as DirectionalLight3D
+		_check(day_night != null, "The world contains a real-time day-night controller.")
+		_check(environment != null and sunlight != null, "Day-night control has environment and sunlight targets.")
+		if day_night != null and environment != null and sunlight != null:
+			day_night.call("set_time_of_day", 12.0)
+			var midday_energy: float = sunlight.light_energy
+			var midday_background: Color = environment.environment.background_color
+			day_night.call("set_time_of_day", 0.0)
+			var midnight_energy: float = sunlight.light_energy
+			var midnight_background: Color = environment.environment.background_color
+			_check(midday_energy > midnight_energy, "Midday sunlight is brighter than midnight.")
+			_check(not midday_background.is_equal_approx(midday_background), "Night changes the sky background color.")
+			_check(
+				float(day_night.call("get_time_of_day")) < 0.001,
+				"Time-of-day can be set deterministically for tests."
+			)
 		var pedestrians: Array[Node] = get_tree().get_nodes_in_group("pedestrians")
 		var traffic: Array[Node] = get_tree().get_nodes_in_group("traffic_vehicles")
 		_check(player != null, "Main scene creates the player.")
