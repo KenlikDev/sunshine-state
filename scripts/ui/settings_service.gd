@@ -149,5 +149,3 @@ func _apply_display_settings() -> void:
 	else:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 		DisplayServer.window_set_size(RESOLUTION_PRESETS[_resolution_index])
-
-
