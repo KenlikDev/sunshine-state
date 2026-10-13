@@ -38,6 +38,14 @@ func apply_damage(amount: int, instigator: Node = null) -> bool:
 	return true
 
 
+func apply_healing(amount: int) -> bool:
+	if is_dead or amount <= 0 or current_health >= max_health:
+		return false
+	current_health = mini(max_health, current_health + amount)
+	health_changed.emit(current_health, max_health)
+	return true
+
+
 func restore_full_health() -> void:
 	is_dead = false
 	current_health = max_health
