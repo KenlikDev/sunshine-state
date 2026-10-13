@@ -190,7 +190,7 @@ func is_save_data_valid(data: Variant) -> bool:
 		return false
 	var payload: Dictionary = data
 	var level_value: Variant = payload.get("wanted_level", null)
-	if typeof(level_value) != TYPE_INT or int(level_value) < 0 or int(level_value) > MAX_WANTED_LEVEL:
+	if not _is_integral_number(level_value, MAX_WANTED_LEVEL):
 		return false
 	var position_value: Variant = payload.get("last_known_position", null)
 	if not position_value is Dictionary:
@@ -204,6 +204,15 @@ func is_save_data_valid(data: Variant) -> bool:
 	if not ["CLEAR", "PURSUIT", "SEARCHING", "COOLING_DOWN"].has(String(payload["state"])):
 		return false
 	return true
+
+
+func _is_integral_number(value: Variant, maximum: int) -> bool:
+	if typeof(value) != TYPE_INT and typeof(value) != TYPE_FLOAT:
+		return false
+	var numeric_value: float = float(value)
+	if numeric_value < 0.0 or numeric_value > float(maximum):
+		return false
+	return is_equal_approx(numeric_value, roundf(numeric_value))
 
 
 func load_save_data(data: Dictionary) -> bool:
