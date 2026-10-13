@@ -111,13 +111,10 @@ func is_save_data_valid(data: Variant) -> bool:
 		return false
 	var payload: Dictionary = data
 	var balance_value: Variant = payload.get("balance", null)
-	if typeof(balance_value) != TYPE_INT and typeof(balance_value) != TYPE_FLOAT:
-		push_warning("Economy validation failed: balance has type %s." % type_string(typeof(balance_value)))
+	if not _is_integral_number(balance_value, MAX_BALANCE):
+		push_warning("Economy validation failed: balance is not a bounded whole number.")
 		return false
 	var balance: int = int(balance_value)
-	if balance < 0 or balance > MAX_BALANCE:
-		push_warning("Economy validation failed: balance is outside allowed bounds.")
-		return false
 
 	var inventory: Variant = payload.get("inventory", null)
 	if not inventory is Dictionary:
@@ -128,7 +125,7 @@ func is_save_data_valid(data: Variant) -> bool:
 			push_warning("Economy validation failed: unknown inventory item '%s'." % String(item_id))
 			return false
 		var count_value: Variant = inventory[item_id]
-		if typeof(count_value) != TYPE_INT or int(count_value) < 0 or int(count_value) > 100000:
+		if not _is_integral_number(count_value, 100000):
 			push_warning("Economy validation failed: invalid inventory count for '%s' (type=%s)." % [String(item_id), type_string(typeof(count_value))])
 			return false
 
@@ -142,10 +139,19 @@ func is_save_data_valid(data: Variant) -> bool:
 			return false
 
 	var sequence_value: Variant = payload.get("purchase_sequence", null)
-	if typeof(sequence_value) != TYPE_INT or int(sequence_value) < 0:
-		push_warning("Economy validation failed: purchase_sequence is invalid (type=%s)." % type_string(typeof(sequence_value)))
+	if not _is_integral_number(sequence_value, MAX_BALANCE):
+		push_warning("Economy validation failed: purchase_sequence is not a bounded whole number.")
 		return false
 	return true
+
+
+func _is_integral_number(value: Variant, maximum: int) -> bool:
+	if typeof(value) != TYPE_INT and typeof(value) != TYPE_FLOAT:
+		return false
+	var numeric_value: float = float(value)
+	if numeric_value < 0.0 or numeric_value > float(maximum):
+		return false
+	return is_equal_approx(numeric_value, roundf(numeric_value))
 
 
 func load_save_data(data: Dictionary) -> bool:
@@ -153,8 +159,10 @@ func load_save_data(data: Dictionary) -> bool:
 		return false
 
 	_balance = int(data["balance"])
+	_inventory.clear()
 	var inventory_data: Dictionary = data["inventory"]
-	_inventory = inventory_data.duplicate(true)
+	for item_id: Variant in inventory_data.keys():
+		_inventory[String(item_id)] = int(inventory_data[item_id])
 	_processed_transactions.clear()
 	for transaction_id: Variant in data["processed_transactions"]:
 		_processed_transactions[String(transaction_id)] = true
