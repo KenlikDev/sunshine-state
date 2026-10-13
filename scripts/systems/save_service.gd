@@ -19,6 +19,8 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if get_tree().get_first_node_in_group("gameplay_scene") == null:
+		return
 	if event.is_action_pressed("save_game"):
 		save_game(true)
 		get_viewport().set_input_as_handled()
@@ -101,6 +103,12 @@ func delete_save_files() -> void:
 
 func get_save_data_path() -> String:
 	return SAVE_PATH
+
+
+func has_valid_save() -> bool:
+	if not _read_valid_payload(SAVE_PATH).is_empty():
+		return true
+	return not _read_valid_payload(BACKUP_PATH).is_empty()
 
 
 func get_schema_version() -> int:
