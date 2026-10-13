@@ -1,8 +1,10 @@
 extends VehicleBody3D
 
 signal driver_changed(has_driver: bool)
+signal vehicle_health_changed(current_health: int, max_health: int)
 
 @export var engine_power: float = 2400.0
+@export_range(1, 500, 1) var max_vehicle_health: int = 100
 @export var brake_power: float = 65.0
 @export var max_steering_angle: float = 0.42
 @export var steering_speed: float = 2.2
@@ -17,6 +19,7 @@ signal driver_changed(has_driver: bool)
 const RECOVERY_ACTION: StringName = &"vehicle_recover"
 @export var mouse_sensitivity: float = 0.0025
 
+var current_vehicle_health: int = 100
 var _driver: Node3D
 var _speed_before_last_step: float = 0.0
 var _last_impact_feedback_msec: int = -1200
@@ -25,6 +28,8 @@ var _last_impact_feedback_msec: int = -1200
 
 
 func _ready() -> void:
+	max_vehicle_health = maxi(1, max_vehicle_health)
+	current_vehicle_health = max_vehicle_health
 	add_to_group("vehicles")
 	_vehicle_camera.current = false
 	_create_wheel_visuals()
@@ -96,7 +101,7 @@ func _physics_process(delta: float) -> void:
 		engine_force = 0.0
 	else:
 		# Positive input drives along local -Z; reverse input drives along local +Z.
-		engine_force = -throttle * engine_power
+		engine_force = -throttle * engine_power * (float(current_vehicle_health) / float(max_vehicle_health))
 
 	brake = Input.get_action_strength("jump") * brake_power
 	if absf(throttle) < 0.01:
@@ -126,7 +131,39 @@ func _emit_collision_feedback_if_needed() -> void:
 	if now_msec - _last_impact_feedback_msec < impact_feedback_cooldown_ms:
 		return
 	_last_impact_feedback_msec = now_msec
+	var damage_amount: int = clampi(roundi(speed_drop * 6.0), 5, 35)
+	apply_vehicle_damage(damage_amount)
 	_driver.call("notify_interaction_feedback", "MESSAGE_VEHICLE_IMPACT")
+
+
+func get_vehicle_health() -> int:
+	return current_vehicle_health
+
+
+func apply_vehicle_damage(amount: int) -> bool:
+	if amount <= 0 or current_vehicle_health <= 0:
+		return false
+	var previous_health: int = current_vehicle_health
+	current_vehicle_health = maxi(0, current_vehicle_health - amount)
+	if current_vehicle_health == previous_health:
+		return false
+	vehicle_health_changed.emit(current_vehicle_health, max_vehicle_health)
+	if current_vehicle_health == 0:
+		engine_force = 0.0
+		_driver.call("notify_interaction_feedback", "MESSAGE_VEHICLE_DISABLED") if is_instance_valid(_driver) else null
+	return true
+
+
+func repair_vehicle() -> bool:
+	if current_vehicle_health >= max_vehicle_health:
+		return false
+	current_vehicle_health = max_vehicle_health
+	linear_velocity = Vector3.ZERO
+	angular_velocity = Vector3.ZERO
+	sleeping = false
+	_speed_before_last_step = 0.0
+	vehicle_health_changed.emit(current_vehicle_health, max_vehicle_health)
+	return true
 
 
 func _attempt_recovery() -> bool:
