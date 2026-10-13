@@ -33,4 +33,5 @@ func interact(actor: Node) -> String:
 		true,
 		source_id
 	)
+	MissionService.record_event(&"CRIME_REPORTED", source_id)
 	return "MESSAGE_CRIME_REPORTED"
