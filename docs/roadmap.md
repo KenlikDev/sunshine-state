@@ -10,7 +10,7 @@ Estimates are planning ranges, not delivery promises. Re-estimate after the firs
 | M3 — Living district | Authored pedestrian routes, player-alert state, road traffic routes, junction yield and bounded population | 15-minute stability test passes | In progress |
 | M4 — Wanted and combat | Authoritative wanted state, police pursuit/search, single-weapon combat, damage and player respawn | Scripted wanted/combat scenarios pass; manual combat review complete | Wanted/police and combat prototypes implemented; regression review in progress |
 | M5 — Missions and persistence | Three connected missions, economy, versioned save/load and backup recovery | Full critical path passes after reload; failure/restart and corrupt-save tests pass | Mission/economy/save foundations in regression testing |
-| M6 — Presentation | Original Blender assets, lighting, UI, audio | Art/UX review and performance capture pass | Not started |
+| M6 — Presentation | Main menu, pause/settings flow, original Blender assets, lighting, UI, and audio | UI-flow checks pass; manual UX/art/audio review and performance capture remain | Menu/settings prototype in regression review; original art/audio not started |
 | M7 — Release candidate | Regression, export, clean-machine test, documentation | No P0/P1 defects; acceptance checklist signed off | Not started |
 
 ## Dependency rule
