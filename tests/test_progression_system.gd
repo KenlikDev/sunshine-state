@@ -105,10 +105,52 @@ func _run_tests() -> void:
 	MissionService.record_event(&"PURCHASE_ITEM", &"first_aid_kit")
 	_check(EconomyService.get_balance() == 800, "Replaying a completed objective cannot grant another mission reward.")
 
+	var player_health: Node = player.get_node_or_null("Damageable")
+	_check(player_health != null, "Player health is available to the first-aid interaction.")
+	if player_health != null:
+		player_health.call("apply_damage", 60, player)
+		_check(int(player_health.get("current_health")) == 40, "The first-aid scenario starts with damaged health.")
+		_check(
+			String(player.call("use_first_aid_kit")) == "MESSAGE_FIRST_AID_USED",
+			"An owned first-aid kit can be consumed successfully."
+		)
+		_check(int(player_health.get("current_health")) == 90, "A first-aid kit restores the configured amount of health.")
+		_check(EconomyService.get_item_count("first_aid_kit") == 0, "Using a first-aid kit consumes one inventory item.")
+		_check(
+			String(player.call("use_first_aid_kit")) == "MESSAGE_NO_FIRST_AID",
+			"A player cannot use another kit after inventory reaches zero."
+		)
+		_check(int(player_health.get("current_health")) == 90, "Using an unavailable kit does not change health.")
+
+	var repair_shop: Node = world.get_node_or_null("VehicleServiceDesk")
+	var repair_vehicle: Node3D = world.get_node_or_null("PrototypeSedan") as Node3D
+	_check(repair_shop != null, "The vehicle repair desk exists in the district.")
+	_check(repair_vehicle != null, "The test sedan exists in the district.")
+	if repair_shop != null and repair_vehicle != null:
+		repair_vehicle.global_position = (repair_shop as Node3D).global_position + Vector3(0.0, -0.3, -4.0)
+		_check(
+			bool(repair_vehicle.call("apply_vehicle_damage", 45)),
+			"The vehicle accepts collision damage."
+		)
+		_check(int(repair_vehicle.call("get_vehicle_health")) == 55, "Collision damage reduces vehicle health.")
+		var balance_before_repair: int = EconomyService.get_balance()
+		_check(
+			String(repair_shop.call("interact", player)) == "MESSAGE_VEHICLE_REPAIRED",
+			"A paid repair service repairs a damaged nearby vehicle."
+		)
+		_check(int(repair_vehicle.call("get_vehicle_health")) == 100, "Repair restores vehicle health to maximum.")
+		_check(EconomyService.get_balance() == balance_before_repair - 150, "Repair service charges its catalog price exactly once.")
+		_check(
+			String(repair_shop.call("interact", player)) == "MESSAGE_NO_DAMAGED_VEHICLE",
+			"A fully repaired vehicle is not charged for a redundant repair."
+		)
+		_check(EconomyService.get_balance() == balance_before_repair - 150, "Rejected redundant repairs do not charge the player.")
+		_check(EconomyService.get_item_count("vehicle_repair") == 0, "A repair service is not stored as an inventory token.")
+
 	_check(SaveService.save_game(false), "The completed progression state can be saved.")
 	var expected_balance: int = EconomyService.get_balance()
 	var expected_inventory: int = EconomyService.get_item_count("first_aid_kit")
-	_check(EconomyService.purchase_item("vehicle_repair", "test_repair_before_backup"), "A repair-service purchase updates the save candidate.")
+	_check(EconomyService.grant_reward(75, "test_reward_before_backup"), "A committed currency transaction updates the save candidate.")
 	await get_tree().create_timer(0.15).timeout
 	_check(
 		FileAccess.file_exists(SaveService.get_backup_data_path()),
