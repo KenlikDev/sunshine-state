@@ -24,7 +24,7 @@ The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). Th
 - Mouse: orbit the active camera
 - E: interact, enter a vehicle, or exit the current vehicle
 - R: recover the current vehicle if blocked or overturned
-- Left mouse button: fire; right mouse button: aim; T: reload
+- Left mouse button: fire; right mouse button: aim; T: reload; H: use a first-aid kit
 - Escape: release the cursor; click the game view to capture it again
 - F5: save progress; F9: load progress; F8: restart an active/failed mission
 - F6: toggle English/Russian UI language
