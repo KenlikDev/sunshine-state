@@ -63,7 +63,7 @@ func _apply_time_of_day() -> void:
 	environment.ambient_light_energy = lerpf(0.22, 0.8, daylight)
 
 	_sunlight.rotation_degrees = Vector3(-sun_height * 70.0, 32.0, 0.0)
-	_sunlight.color = TWILIGHT_SUN_COLOR.lerp(DAY_SUN_COLOR, daylight)
+	_sunlight.light_color = TWILIGHT_SUN_COLOR.lerp(DAY_SUN_COLOR, daylight)
 	_sunlight.light_energy = 1.15 * daylight
 	_sunlight.visible = daylight > 0.005
 	time_of_day_changed.emit(_time_of_day_hours)
