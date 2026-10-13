@@ -122,7 +122,7 @@ jobs:
         run: godot --headless --path . res://tests/test_wanted_system.tscn
 
       - name: Run combat-system regression checks
-        run: godot --headless --path . res://tests/test_combat_system.tscn
+        run: timeout 45s godot --headless --path . res://tests/test_combat_system.tscn
 
   living-district-soak:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_living_district_soak }}
