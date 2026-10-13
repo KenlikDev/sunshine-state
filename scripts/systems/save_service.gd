@@ -132,8 +132,12 @@ func _read_valid_payload(path: String) -> Dictionary:
 	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
 	if file == null:
 		return {}
-	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	var parser := JSON.new()
+	var parse_error: Error = parser.parse(file.get_as_text())
 	file.close()
+	if parse_error != OK:
+		return {}
+	var parsed: Variant = parser.data
 	if not parsed is Dictionary:
 		return {}
 	var payload: Dictionary = parsed
