@@ -19,6 +19,8 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if get_tree().get_first_node_in_group("gameplay_scene") == null:
+		return
 	if event.is_action_pressed("restart_mission"):
 		restart_current_mission()
 		get_viewport().set_input_as_handled()
