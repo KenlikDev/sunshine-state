@@ -20,7 +20,7 @@ func _run_tests() -> void:
 	_check(EconomyService.get_catalog_ids().size() >= 2, "Economy loads a data-driven catalog with multiple items.")
 	_check(MissionService.get_mission_count() == 3, "Mission service loads all three connected mission definitions.")
 	_check(MissionService.get_current_mission_id() == "district_orientation", "A new game activates the first mission.")
-	_check(EconomyService.get_balance() == 300, "A new game starts with the configured currency balance.")
+	_check(EconomyService.get_balance() == 400, "A new game starts with the configured test currency balance.")
 
 	_check(EconomyService.purchase_item("first_aid_kit", "test_purchase_1"), "A valid purchase succeeds.")
 	_check(EconomyService.purchase_item("first_aid_kit", "test_purchase_2"), "The same item can be purchased in a distinct transaction.")
