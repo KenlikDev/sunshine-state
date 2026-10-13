@@ -88,6 +88,14 @@ func _run_tests() -> void:
 	var expected_inventory: int = EconomyService.get_item_count("first_aid_kit")
 	_check(EconomyService.purchase_item("vehicle_repair", "test_repair_before_backup"), "A repair-service purchase updates the save candidate.")
 	await get_tree().create_timer(0.15).timeout
+	_check(
+		FileAccess.file_exists(SaveService.get_backup_data_path()),
+		"A prior valid save is rotated to a backup before replacing the primary."
+	)
+	_check(
+		SaveService.validate_save_file(SaveService.get_backup_data_path()),
+		"The backup save validates against all service schemas before corruption recovery."
+	)
 	var corrupt_file: FileAccess = FileAccess.open(SaveService.get_save_data_path(), FileAccess.WRITE)
 	_check(corrupt_file != null, "Primary save file can be opened for corruption-recovery validation.")
 	if corrupt_file != null:
