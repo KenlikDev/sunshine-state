@@ -2,7 +2,7 @@
 
 ## Scope
 
-M3 introduces a small, fixed population of background pedestrians and road traffic to exercise the city blockout. These are systems prototypes rather than final character models, traffic rules, or production navigation.
+M3 introduces a small, fixed population of background pedestrians and road traffic to exercise the city blockout. These are systems prototypes rather than final character models, traffic rules, or production navigation. The district also runs a shared day/night environment cycle; see [Day–Night Environment Cycle](day-night-cycle.md) for its time controls and lighting contract.
 
 ## Pedestrians
 
