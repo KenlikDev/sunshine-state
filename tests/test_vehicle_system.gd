@@ -116,6 +116,7 @@ func _run_tests() -> void:
 			instance.add_child(barrier)
 			await get_tree().physics_frame
 
+			var health_before_impact: int = int(vehicle.call("get_vehicle_health"))
 			Input.action_press("move_forward")
 			for _frame: int in range(90):
 				await get_tree().physics_frame
@@ -128,6 +129,10 @@ func _run_tests() -> void:
 			_check(
 				_feedback_messages.has("MESSAGE_VEHICLE_IMPACT"),
 				"Horizontal vehicle impacts send throttled feedback."
+			)
+			_check(
+				int(vehicle.call("get_vehicle_health")) < health_before_impact,
+				"Vehicle impacts reduce persistent in-session vehicle health."
 			)
 
 			vehicle.global_position = barrier.global_position - forward_direction * 1.8
