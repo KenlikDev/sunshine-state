@@ -177,7 +177,6 @@ func _check(condition: bool, description: String) -> void:
 func _finish(exit_code: int, instance: Node = null) -> void:
 	if is_instance_valid(instance):
 		instance.queue_free()
-		await get_tree().process_frame
 	if exit_code == 0 and _failures.is_empty():
 		print("Combat-system checks passed.")
 	else:
