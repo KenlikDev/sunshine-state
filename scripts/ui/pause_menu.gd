@@ -200,6 +200,7 @@ func open_pause_menu() -> void:
 	get_tree().paused = true
 	if DisplayServer.get_name() != "headless":
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	_resume_button.grab_focus()
 
 
 func resume_game() -> void:
@@ -233,6 +234,10 @@ func _toggle_settings() -> void:
 	var show_settings: bool = not _settings_center.visible
 	_settings_center.visible = show_settings
 	_pause_center.visible = not show_settings
+	if show_settings:
+		_language_button.grab_focus()
+	else:
+		_settings_button.grab_focus()
 
 
 func _toggle_locale() -> void:
