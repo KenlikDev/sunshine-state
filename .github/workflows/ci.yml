@@ -43,6 +43,8 @@ jobs:
             docs/vertical-slice.md \
             docs/vehicle-system.md \
             docs/living-district.md \
+            docs/day-night-cycle.md \
+            scripts/world/day_night_cycle.gd \
             docs/wanted-system.md \
             docs/combat-system.md \
             docs/progression-system.md \
