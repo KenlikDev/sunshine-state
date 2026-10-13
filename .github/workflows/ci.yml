@@ -46,6 +46,14 @@ jobs:
             docs/wanted-system.md \
             docs/combat-system.md \
             docs/progression-system.md \
+            docs/ui-flow.md \
+            scripts/ui/settings_service.gd \
+            scripts/ui/main_menu.gd \
+            scripts/ui/pause_menu.gd \
+            scenes/ui/main_menu.tscn \
+            scenes/ui/pause_menu.tscn \
+            tests/test_ui_flow.gd \
+            tests/test_ui_flow.tscn \
             scripts/systems/economy_service.gd \
             scripts/systems/mission_service.gd \
             scripts/systems/save_service.gd \
@@ -136,6 +144,9 @@ jobs:
 
       - name: Run progression-system regression checks
         run: timeout 45s godot --headless --path . res://tests/test_progression_system.tscn
+
+      - name: Run UI-flow regression checks
+        run: timeout 30s godot --headless --path . res://tests/test_ui_flow.tscn
 
   living-district-soak:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_living_district_soak }}
