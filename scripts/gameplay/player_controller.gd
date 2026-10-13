@@ -193,6 +193,7 @@ func on_damaged_actor_died(_instigator: Node) -> void:
 	_current_interactable = null
 	_current_prompt_key = ""
 	WantedSystem.clear_wanted(&"PLAYER_DEATH")
+	MissionService.record_event(&"PLAYER_DEATH", &"PLAYER")
 	var respawn_timer: SceneTreeTimer = get_tree().create_timer(respawn_delay_seconds)
 	respawn_timer.timeout.connect(_finish_respawn, CONNECT_ONE_SHOT)
 
