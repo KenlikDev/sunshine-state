@@ -77,6 +77,34 @@ func purchase_item(item_id: String, idempotency_key: String = "") -> bool:
 	return true
 
 
+func purchase_service(service_id: String, idempotency_key: String = "") -> bool:
+	var service: Dictionary = get_item_definition(service_id)
+	if service.is_empty():
+		transaction_rejected.emit("MESSAGE_ITEM_UNAVAILABLE", service_id)
+		return false
+
+	var price: int = int(service.get("price", -1))
+	if price < 0:
+		transaction_rejected.emit("MESSAGE_ITEM_UNAVAILABLE", service_id)
+		return false
+
+	var transaction_id: String = idempotency_key
+	if transaction_id.is_empty():
+		_purchase_sequence += 1
+		transaction_id = "service:%s:%d" % [service_id, _purchase_sequence]
+	if _processed_transactions.has(transaction_id):
+		return false
+	if _balance < price:
+		transaction_rejected.emit("MESSAGE_INSUFFICIENT_FUNDS", service_id)
+		return false
+
+	_balance -= price
+	_processed_transactions[transaction_id] = true
+	balance_changed.emit(_balance)
+	transaction_committed.emit(transaction_id, "SERVICE", _balance, -price)
+	return true
+
+
 func consume_item(item_id: String, idempotency_key: String = "") -> bool:
 	var item: Dictionary = get_item_definition(item_id)
 	if item.is_empty() or get_item_count(item_id) <= 0:
