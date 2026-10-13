@@ -13,6 +13,11 @@ var _settings_center: CenterContainer
 var _settings_title: Label
 var _language_label: Label
 var _language_button: Button
+var _resolution_label: Label
+var _resolution_option: OptionButton
+var _fullscreen_checkbox: CheckBox
+var _master_volume_label: Label
+var _master_volume_slider: HSlider
 var _sensitivity_label: Label
 var _sensitivity_slider: HSlider
 var _settings_back_button: Button
@@ -134,6 +139,34 @@ func _build_ui() -> void:
 	_language_button = _make_button("LanguageButton", Callable(self, "_toggle_locale"))
 	settings_stack.add_child(_language_button)
 
+	_resolution_label = Label.new()
+	_resolution_label.name = "ResolutionLabel"
+	settings_stack.add_child(_resolution_label)
+	_resolution_option = OptionButton.new()
+	_resolution_option.name = "ResolutionOption"
+	for resolution: Vector2i in SettingsService.get_resolution_presets():
+		_resolution_option.add_item("%d × %d" % [resolution.x, resolution.y])
+	_resolution_option.select(SettingsService.get_resolution_index())
+	_resolution_option.item_selected.connect(_on_resolution_selected)
+	settings_stack.add_child(_resolution_option)
+
+	_fullscreen_checkbox = CheckBox.new()
+	_fullscreen_checkbox.name = "FullscreenCheckBox"
+	_fullscreen_checkbox.toggled.connect(_on_fullscreen_toggled)
+	settings_stack.add_child(_fullscreen_checkbox)
+
+	_master_volume_label = Label.new()
+	_master_volume_label.name = "MasterVolumeLabel"
+	settings_stack.add_child(_master_volume_label)
+	_master_volume_slider = HSlider.new()
+	_master_volume_slider.name = "MasterVolumeSlider"
+	_master_volume_slider.min_value = 0.0
+	_master_volume_slider.max_value = 100.0
+	_master_volume_slider.step = 5.0
+	_master_volume_slider.value = SettingsService.get_master_volume() * 100.0
+	_master_volume_slider.value_changed.connect(_on_master_volume_changed)
+	settings_stack.add_child(_master_volume_slider)
+
 	_sensitivity_label = Label.new()
 	_sensitivity_label.name = "SensitivityLabel"
 	settings_stack.add_child(_sensitivity_label)
@@ -198,6 +231,12 @@ func _refresh_texts() -> void:
 	_settings_title.text = Localization.translate_key("SETTINGS_TITLE")
 	_language_label.text = Localization.translate_key("SETTINGS_LANGUAGE")
 	_language_button.text = Localization.translate_key("SETTINGS_LANGUAGE_BUTTON") + ": " + SettingsService.get_locale().to_upper()
+	_resolution_label.text = Localization.translate_key("SETTINGS_RESOLUTION")
+	_resolution_option.select(SettingsService.get_resolution_index())
+	_fullscreen_checkbox.text = Localization.translate_key("SETTINGS_FULLSCREEN")
+	_fullscreen_checkbox.set_pressed_no_signal(SettingsService.get_is_fullscreen())
+	_update_master_volume_label(SettingsService.get_master_volume() * 100.0)
+	_master_volume_slider.set_value_no_signal(SettingsService.get_master_volume() * 100.0)
 	_settings_back_button.text = Localization.translate_key("SETTINGS_BACK")
 	_update_sensitivity_label(SettingsService.get_mouse_sensitivity())
 	_status_label.text = Localization.translate_key(_status_key) if not _status_key.is_empty() else ""
@@ -271,3 +310,21 @@ func _on_locale_changed(_locale: String) -> void:
 
 func _quit_game() -> void:
 	get_tree().quit()
+
+
+
+func _on_resolution_selected(index: int) -> void:
+	SettingsService.set_resolution_index(index)
+
+
+func _on_fullscreen_toggled(enabled: bool) -> void:
+	SettingsService.set_is_fullscreen(enabled)
+
+
+func _on_master_volume_changed(value: float) -> void:
+	SettingsService.set_master_volume(value / 100.0)
+	_update_master_volume_label(value)
+
+
+func _update_master_volume_label(value: float) -> void:
+	_master_volume_label.text = Localization.format_key("SETTINGS_MASTER_VOLUME_VALUE", [int(roundf(value))])
