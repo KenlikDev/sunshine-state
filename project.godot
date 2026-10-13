@@ -48,6 +48,18 @@ vehicle_recover={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"physical_keycode":82)]
 }
+fire_weapon={
+"deadzone": 0.5,
+"events": [Object(InputEventMouseButton,"button_index":1)]
+}
+aim_weapon={
+"deadzone": 0.5,
+"events": [Object(InputEventMouseButton,"button_index":2)]
+}
+reload_weapon={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":84)]
+}
 toggle_language={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"physical_keycode":4194337)]
