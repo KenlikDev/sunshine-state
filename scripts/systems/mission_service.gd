@@ -18,6 +18,12 @@ func _ready() -> void:
 	reset_for_new_game()
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("restart_mission"):
+		restart_current_mission()
+		get_viewport().set_input_as_handled()
+
+
 func get_current_mission_id() -> String:
 	return _current_mission_id
 
