@@ -60,6 +60,10 @@ reload_weapon={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"physical_keycode":84)]
 }
+use_first_aid_kit={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":72)]
+}
 save_game={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"physical_keycode":4194336)]
