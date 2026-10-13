@@ -29,6 +29,12 @@ func _run_tests() -> void:
 	_check(not EconomyService.purchase_item("first_aid_kit", "test_purchase_insufficient"), "Insufficient funds reject purchases.")
 	_check(EconomyService.get_balance() == 50, "Rejected purchases cannot make the balance negative.")
 	_check(EconomyService.get_item_count("first_aid_kit") == 2, "Repeated valid purchases increment inventory.")
+	_check(
+		not EconomyService.purchase_item("first_aid_kit", "test_purchase_1"),
+		"Reusing a purchase idempotency key cannot charge the player twice."
+	)
+	_check(EconomyService.get_balance() == 50, "A duplicate purchase transaction cannot alter the balance.")
+	_check(EconomyService.get_item_count("first_aid_kit") == 2, "A duplicate purchase transaction cannot increment inventory.")
 	var fractional_sequence_data: Dictionary = EconomyService.get_save_data()
 	fractional_sequence_data["purchase_sequence"] = 1.5
 	_check(
@@ -96,6 +102,8 @@ func _run_tests() -> void:
 	_check(MissionService.get_current_mission_id().is_empty(), "The mission chain reaches a stable completion state.")
 	_check(EconomyService.get_balance() == 800, "Mission three reward and purchase debit are both applied.")
 	_check(EconomyService.get_item_count("first_aid_kit") == 1, "Purchased supplies persist in inventory state.")
+	MissionService.record_event(&"PURCHASE_ITEM", &"first_aid_kit")
+	_check(EconomyService.get_balance() == 800, "Replaying a completed objective cannot grant another mission reward.")
 
 	_check(SaveService.save_game(false), "The completed progression state can be saved.")
 	var expected_balance: int = EconomyService.get_balance()
