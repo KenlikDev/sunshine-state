@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "items": [
+    {"id": "first_aid_kit", "price": 100, "name_key": "ITEM_FIRST_AID_KIT_NAME", "description_key": "ITEM_FIRST_AID_KIT_DESC"},
+    {"id": "vehicle_repair", "price": 150, "name_key": "ITEM_VEHICLE_REPAIR_NAME", "description_key": "ITEM_VEHICLE_REPAIR_DESC"}
+  ]
+}
