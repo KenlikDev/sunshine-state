@@ -29,6 +29,20 @@ func _run_tests() -> void:
 	_check(not EconomyService.purchase_item("first_aid_kit", "test_purchase_insufficient"), "Insufficient funds reject purchases.")
 	_check(EconomyService.get_balance() == 50, "Rejected purchases cannot make the balance negative.")
 	_check(EconomyService.get_item_count("first_aid_kit") == 2, "Repeated valid purchases increment inventory.")
+	var fractional_sequence_data: Dictionary = EconomyService.get_save_data()
+	fractional_sequence_data["purchase_sequence"] = 1.5
+	_check(
+		not EconomyService.is_save_data_valid(fractional_sequence_data),
+		"Fractional transaction counters are rejected by save validation."
+	)
+	var fractional_inventory_data: Dictionary = EconomyService.get_save_data()
+	var fractional_inventory: Dictionary = fractional_inventory_data["inventory"]
+	fractional_inventory["first_aid_kit"] = 2.5
+	fractional_inventory_data["inventory"] = fractional_inventory
+	_check(
+		not EconomyService.is_save_data_valid(fractional_inventory_data),
+		"Fractional inventory counts are rejected by save validation."
+	)
 	EconomyService.set("starting_balance", 300)
 	EconomyService.reset_for_new_game()
 	MissionService.reset_for_new_game()
