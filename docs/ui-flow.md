@@ -10,6 +10,8 @@ Press Escape during gameplay to pause the scene tree and open a pause overlay. T
 
 ## Settings
 
+Starting a new game shows a localized confirmation if a valid save exists; canceling the dialog does not reset the live mission, money, inventory, or wanted state. Existing save files are retained, so Continue remains available after choosing to restart.
+
 The first settings increment contains English/Russian locale selection and mouse-camera sensitivity. Values are saved to `user://sunshine_state_settings.cfg`. Sensitivity changes apply immediately to the player and current vehicle cameras. The settings service clamps sensitivity to the documented supported range and ignores unsupported locale codes.
 
 The language remains a presentation setting and does not alter mission, economy, or save-data identifiers.
