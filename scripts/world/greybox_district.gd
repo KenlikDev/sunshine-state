@@ -29,6 +29,7 @@ func _ready() -> void:
 
 func _create_environment() -> void:
 	var world_environment := WorldEnvironment.new()
+	world_environment.name = "WorldEnvironment"
 	var environment := Environment.new()
 	environment.background_mode = Environment.BG_COLOR
 	environment.background_color = Color(0.49, 0.72, 0.86, 1.0)
