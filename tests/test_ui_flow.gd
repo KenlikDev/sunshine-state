@@ -29,6 +29,8 @@ func _run_tests() -> void:
 	var continue_button: Button = menu.find_child("ContinueButton", true, false) as Button
 	var settings_button: Button = menu.find_child("SettingsButton", true, false) as Button
 	var sensitivity_slider: HSlider = menu.find_child("SensitivitySlider", true, false) as HSlider
+	var language_button: Button = menu.find_child("LanguageButton", true, false) as Button
+	var settings_back_button: Button = menu.find_child("SettingsBackButton", true, false) as Button
 	_check(title != null, "Main menu displays a title.")
 	_check(continue_button != null, "Main menu exposes a continue action.")
 	_check(settings_button != null, "Main menu exposes settings.")
@@ -41,7 +43,8 @@ func _run_tests() -> void:
 			"Continue is enabled only when a valid primary or backup save exists."
 		)
 
-	menu.call("_toggle_settings")
+	if settings_button != null:
+		settings_button.pressed.emit()
 	var settings_center: Control = menu.find_child("SettingsCenter", true, false) as Control
 	_check(settings_center != null and settings_center.visible, "Settings can be opened from the main menu.")
 	if sensitivity_slider != null:
@@ -51,13 +54,25 @@ func _run_tests() -> void:
 			is_equal_approx(SettingsService.get_mouse_sensitivity(), 0.004),
 			"Changing the sensitivity slider updates the stored setting."
 		)
-	menu.call("_toggle_locale")
+		var saved_settings := ConfigFile.new()
+		_check(saved_settings.load(SettingsService.SETTINGS_PATH) == OK, "User settings are written to disk.")
+		_check(
+			is_equal_approx(float(saved_settings.get_value("controls", "mouse_sensitivity", 0.0)), 0.004),
+			"Camera sensitivity persists outside the running menu."
+		)
+	if language_button != null:
+		language_button.pressed.emit()
 	_check(SettingsService.get_locale() == "ru", "The settings locale control switches to Russian.")
+	var locale_config := ConfigFile.new()
+	_check(locale_config.load(SettingsService.SETTINGS_PATH) == OK, "The locale setting is written to disk.")
+	_check(String(locale_config.get_value("display", "locale", "")) == "ru", "Locale choice persists in the settings file.")
 	if title != null:
 		_check(title.text == Localization.translate_key("MENU_TITLE"), "Menu labels refresh when language changes.")
-	menu.call("_toggle_locale")
+	if language_button != null:
+		language_button.pressed.emit()
 	_check(SettingsService.get_locale() == "en", "The settings locale control switches back to English.")
-	menu.call("_toggle_settings")
+	if settings_back_button != null:
+		settings_back_button.pressed.emit()
 	_check(not settings_center.visible, "The settings panel can be closed.")
 
 	var pause_scene: PackedScene = load("res://scenes/ui/pause_menu.tscn")
@@ -66,8 +81,11 @@ func _run_tests() -> void:
 		var pause_menu: CanvasLayer = pause_scene.instantiate() as CanvasLayer
 		add_child(pause_menu)
 		await get_tree().process_frame
-		pause_menu.call("open_pause_menu")
-		_check(get_tree().paused, "Opening the pause menu pauses the scene tree.")
+		var pause_event := InputEventAction.new()
+		pause_event.action = &"ui_cancel"
+		pause_event.pressed = true
+		pause_menu.call("_input", pause_event)
+		_check(get_tree().paused, "Escape opens the pause menu and pauses the scene tree.")
 		var pause_settings: Control = pause_menu.find_child("SettingsCenter", true, false) as Control
 		pause_menu.call("_toggle_settings")
 		_check(
@@ -75,8 +93,8 @@ func _run_tests() -> void:
 			"Settings can be opened without unpausing gameplay."
 		)
 		pause_menu.call("_toggle_settings")
-		pause_menu.call("resume_game")
-		_check(not get_tree().paused, "Resuming from the pause menu restores gameplay processing.")
+		pause_menu.call("_input", pause_event)
+		_check(not get_tree().paused, "Escape resumes gameplay and restores scene processing.")
 		pause_menu.queue_free()
 
 	SettingsService.set_locale(original_locale)
