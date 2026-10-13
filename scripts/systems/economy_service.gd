@@ -77,6 +77,26 @@ func purchase_item(item_id: String, idempotency_key: String = "") -> bool:
 	return true
 
 
+func consume_item(item_id: String, idempotency_key: String = "") -> bool:
+	var item: Dictionary = get_item_definition(item_id)
+	if item.is_empty() or get_item_count(item_id) <= 0:
+		transaction_rejected.emit("MESSAGE_ITEM_UNAVAILABLE", item_id)
+		return false
+
+	var transaction_id: String = idempotency_key
+	if transaction_id.is_empty():
+		_purchase_sequence += 1
+		transaction_id = "consume:%s:%d" % [item_id, _purchase_sequence]
+	if _processed_transactions.has(transaction_id):
+		return false
+
+	_inventory[item_id] = get_item_count(item_id) - 1
+	_processed_transactions[transaction_id] = true
+	inventory_changed.emit(item_id, get_item_count(item_id))
+	transaction_committed.emit(transaction_id, "CONSUME", _balance, 0)
+	return true
+
+
 func grant_reward(amount: int, idempotency_key: String) -> bool:
 	if amount <= 0 or idempotency_key.strip_edges().is_empty():
 		return false
