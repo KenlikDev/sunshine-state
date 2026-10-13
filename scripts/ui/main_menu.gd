@@ -8,6 +8,7 @@ var _new_game_button: Button
 var _continue_button: Button
 var _settings_button: Button
 var _quit_button: Button
+var _new_game_confirmation: ConfirmationDialog
 var _settings_center: CenterContainer
 var _settings_title: Label
 var _language_label: Label
@@ -92,7 +93,7 @@ func _build_ui() -> void:
 	menu_actions.name = "MenuActions"
 	menu_actions.add_theme_constant_override("separation", 9)
 	menu_stack.add_child(menu_actions)
-	_new_game_button = _make_button("NewGameButton", Callable(self, "_start_new_game"))
+	_new_game_button = _make_button("NewGameButton", Callable(self, "_request_new_game"))
 	_continue_button = _make_button("ContinueButton", Callable(self, "_continue_game"))
 	_settings_button = _make_button("SettingsButton", Callable(self, "_toggle_settings"))
 	_quit_button = _make_button("QuitButton", Callable(self, "_quit_game"))
@@ -160,6 +161,12 @@ func _build_ui() -> void:
 	_status_label.add_theme_color_override("font_color", Color(0.92, 0.82, 0.49))
 	add_child(_status_label)
 
+	_new_game_confirmation = ConfirmationDialog.new()
+	_new_game_confirmation.name = "NewGameConfirmation"
+	_new_game_confirmation.confirmed.connect(_start_new_game)
+	_new_game_confirmation.canceled.connect(_cancel_new_game)
+	add_child(_new_game_confirmation)
+
 
 func _make_button(node_name: String, callback: Callable) -> Button:
 	var button := Button.new()
@@ -194,9 +201,26 @@ func _refresh_texts() -> void:
 	_settings_back_button.text = Localization.translate_key("SETTINGS_BACK")
 	_update_sensitivity_label(SettingsService.get_mouse_sensitivity())
 	_status_label.text = Localization.translate_key(_status_key) if not _status_key.is_empty() else ""
+	_new_game_confirmation.title = Localization.translate_key("MENU_NEW_GAME_CONFIRM_TITLE")
+	_new_game_confirmation.dialog_text = Localization.translate_key("MENU_NEW_GAME_CONFIRM_MESSAGE")
+	_new_game_confirmation.ok_button_text = Localization.translate_key("MENU_NEW_GAME_CONFIRM")
+	_new_game_confirmation.get_cancel_button().text = Localization.translate_key("MENU_CANCEL")
+
+
+func _request_new_game() -> void:
+	if SaveService.has_valid_save():
+		_new_game_confirmation.popup_centered()
+		return
+	_start_new_game()
+
+
+func _cancel_new_game() -> void:
+	_new_game_confirmation.hide()
+	_new_game_button.grab_focus()
 
 
 func _start_new_game() -> void:
+	_new_game_confirmation.hide()
 	EconomyService.reset_for_new_game()
 	MissionService.reset_for_new_game()
 	WantedSystem.reset_for_new_game()
