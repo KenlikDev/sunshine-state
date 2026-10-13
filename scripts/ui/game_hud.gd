@@ -94,6 +94,7 @@ func _ready() -> void:
 	MissionService.mission_failed.connect(_on_mission_failed)
 	MissionService.mission_restarted.connect(_on_mission_restarted)
 	SaveService.save_status_changed.connect(_on_save_status_changed)
+	SettingsService.locale_changed.connect(_on_settings_locale_changed)
 
 	var crosshair := Label.new()
 	crosshair.name = "Crosshair"
@@ -168,7 +169,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _toggle_locale() -> void:
 	var current_locale: String = Localization.get_locale()
 	var next_locale: String = "ru" if current_locale.begins_with("en") else "en"
-	Localization.set_locale(next_locale)
+	SettingsService.set_locale(next_locale)
 	_refresh_localized_texts()
 	if is_instance_valid(_player):
 		_player.call("refresh_interaction_prompt")
@@ -324,3 +325,7 @@ func _on_economy_balance_changed(_balance: int) -> void:
 
 func _on_economy_inventory_changed(_item_id: String, _count: int) -> void:
 	_refresh_combat_status()
+
+
+func _on_settings_locale_changed(_locale: String) -> void:
+	_refresh_localized_texts()
