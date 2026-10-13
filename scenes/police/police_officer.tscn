@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" path="res://scripts/gameplay/police_controller.gd" id="1_police"]
 [ext_resource type="Script" path="res://scripts/gameplay/damageable.gd" id="2_damage"]
-[ext_resource type="Script" path="res://scripts/gameplay/damageable.gd" id="2_damage"]
 
 [sub_resource type="CapsuleShape3D" id="PoliceCollision"]
 radius = 0.38
@@ -43,10 +42,6 @@ material_override = SubResource("PoliceBodyMaterial")
 position = Vector3(0, 1.9, 0)
 mesh = SubResource("PoliceHatMesh")
 material_override = SubResource("PoliceHatMaterial")
-
-[node name="Damageable" type="Node" parent="."]
-script = ExtResource("2_damage")
-max_health = 100
 
 [node name="Damageable" type="Node" parent="."]
 script = ExtResource("2_damage")
