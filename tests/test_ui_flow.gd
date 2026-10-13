@@ -14,8 +14,14 @@ func _run_tests() -> void:
 	SaveService.delete_save_files()
 	var original_locale: String = SettingsService.get_locale()
 	var original_sensitivity: float = SettingsService.get_mouse_sensitivity()
+	var original_master_volume: float = SettingsService.get_master_volume()
+	var original_fullscreen: bool = SettingsService.get_is_fullscreen()
+	var original_resolution_index: int = SettingsService.get_resolution_index()
 	SettingsService.set_locale("en")
 	SettingsService.set_mouse_sensitivity(0.0025)
+	SettingsService.set_master_volume(0.8)
+	SettingsService.set_is_fullscreen(false)
+	SettingsService.set_resolution_index(0)
 
 	var menu_scene: PackedScene = load("res://scenes/ui/main_menu.tscn")
 	_check(menu_scene != null, "Main menu scene loads.")
@@ -32,10 +38,16 @@ func _run_tests() -> void:
 	var sensitivity_slider: HSlider = menu.find_child("SensitivitySlider", true, false) as HSlider
 	var language_button: Button = menu.find_child("LanguageButton", true, false) as Button
 	var settings_back_button: Button = menu.find_child("SettingsBackButton", true, false) as Button
+	var resolution_option: OptionButton = menu.find_child("ResolutionOption", true, false) as OptionButton
+	var fullscreen_checkbox: CheckBox = menu.find_child("FullscreenCheckBox", true, false) as CheckBox
+	var master_volume_slider: HSlider = menu.find_child("MasterVolumeSlider", true, false) as HSlider
 	_check(title != null, "Main menu displays a title.")
 	_check(continue_button != null, "Main menu exposes a continue action.")
 	_check(settings_button != null, "Main menu exposes settings.")
 	_check(sensitivity_slider != null, "Settings expose a mouse-sensitivity slider.")
+	_check(resolution_option != null, "Settings expose supported window resolutions.")
+	_check(fullscreen_checkbox != null, "Settings expose a fullscreen toggle.")
+	_check(master_volume_slider != null, "Settings expose a master-volume slider.")
 	if title != null:
 		_check(title.text == Localization.translate_key("MENU_TITLE"), "Main menu text follows the active locale.")
 	if continue_button != null:
@@ -62,6 +74,27 @@ func _run_tests() -> void:
 			is_equal_approx(float(saved_settings.get_value("controls", "mouse_sensitivity", 0.0)), 0.004),
 			"Camera sensitivity persists outside the running menu."
 		)
+	if master_volume_slider != null:
+		master_volume_slider.value = 65.0
+		_check(
+			is_equal_approx(SettingsService.get_master_volume(), 0.65),
+			"Changing master volume updates AudioServer settings."
+		)
+	if resolution_option != null:
+		resolution_option.select(1)
+		resolution_option.item_selected.emit(1)
+		_check(SettingsService.get_resolution_index() == 1, "Selecting a resolution updates saved display settings.")
+	if fullscreen_checkbox != null:
+		fullscreen_checkbox.set_pressed_no_signal(true)
+		fullscreen_checkbox.toggled.emit(true)
+		_check(SettingsService.get_is_fullscreen(), "The fullscreen toggle updates display settings.")
+
+	var display_config := ConfigFile.new()
+	_check(display_config.load(SettingsService.SETTINGS_PATH) == OK, "Display and audio settings are saved.")
+	_check(is_equal_approx(float(display_config.get_value("audio", "master_volume", 0.0)), 0.65), "Master volume persists.")
+	_check(int(display_config.get_value("display", "resolution_index", -1)) == 1, "Resolution choice persists.")
+	_check(bool(display_config.get_value("display", "fullscreen", false)), "Fullscreen state persists.")
+
 	if language_button != null:
 		language_button.pressed.emit()
 	_check(SettingsService.get_locale() == "ru", "The settings locale control switches to Russian.")
@@ -134,6 +167,9 @@ func _run_tests() -> void:
 
 	SettingsService.set_locale(original_locale)
 	SettingsService.set_mouse_sensitivity(original_sensitivity)
+	SettingsService.set_master_volume(original_master_volume)
+	SettingsService.set_is_fullscreen(original_fullscreen)
+	SettingsService.set_resolution_index(original_resolution_index)
 	SaveService.delete_save_files()
 	save_menu.queue_free()
 	menu.queue_free()
