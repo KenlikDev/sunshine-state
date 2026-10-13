@@ -11,6 +11,7 @@ func _ready() -> void:
 
 func _run_tests() -> void:
 	SaveService.delete_save_files()
+	EconomyService.set("starting_balance", 400)
 	EconomyService.reset_for_new_game()
 	MissionService.reset_for_new_game()
 	WantedSystem.reset_for_new_game()
@@ -24,10 +25,11 @@ func _run_tests() -> void:
 	_check(EconomyService.purchase_item("first_aid_kit", "test_purchase_1"), "A valid purchase succeeds.")
 	_check(EconomyService.purchase_item("first_aid_kit", "test_purchase_2"), "The same item can be purchased in a distinct transaction.")
 	_check(EconomyService.purchase_item("vehicle_repair", "test_purchase_3"), "A second catalog item can be purchased.")
-	_check(EconomyService.get_balance() == 0, "Purchases debit the exact price.")
+	_check(EconomyService.get_balance() == 50, "Purchases debit the exact price.")
 	_check(not EconomyService.purchase_item("first_aid_kit", "test_purchase_insufficient"), "Insufficient funds reject purchases.")
-	_check(EconomyService.get_balance() == 0, "Rejected purchases cannot make the balance negative.")
+	_check(EconomyService.get_balance() == 50, "Rejected purchases cannot make the balance negative.")
 	_check(EconomyService.get_item_count("first_aid_kit") == 2, "Repeated valid purchases increment inventory.")
+	EconomyService.set("starting_balance", 300)
 	EconomyService.reset_for_new_game()
 	MissionService.reset_for_new_game()
 
