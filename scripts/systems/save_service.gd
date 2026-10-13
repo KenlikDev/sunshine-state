@@ -107,6 +107,14 @@ func get_schema_version() -> int:
 	return SCHEMA_VERSION
 
 
+func get_backup_data_path() -> String:
+	return BACKUP_PATH
+
+
+func validate_save_file(path: String) -> bool:
+	return not _read_valid_payload(path).is_empty()
+
+
 func _build_payload() -> Dictionary:
 	return {
 		"schema_version": SCHEMA_VERSION,
@@ -140,12 +148,16 @@ func _is_valid_payload(payload: Dictionary) -> bool:
 	if typeof(payload.get("timestamp_utc", null)) != TYPE_STRING:
 		return false
 	if not EconomyService.is_save_data_valid(payload.get("economy", null)):
+		push_warning("Save validation failed: economy payload is invalid.")
 		return false
 	if not MissionService.is_save_data_valid(payload.get("missions", null)):
+		push_warning("Save validation failed: mission payload is invalid.")
 		return false
 	if not WantedSystem.is_save_data_valid(payload.get("wanted", null)):
+		push_warning("Save validation failed: wanted payload is invalid.")
 		return false
 	if not payload.get("world", null) is Dictionary:
+		push_warning("Save validation failed: world payload is invalid.")
 		return false
 	return true
 
