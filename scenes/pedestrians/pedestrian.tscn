@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/pedestrian_controller.gd" id="1_pedestrian"]
+[ext_resource type="Script" path="res://scripts/gameplay/damageable.gd" id="2_damage"]
 
 [sub_resource type="CapsuleShape3D" id="PedestrianCollision"]
 radius = 0.3
@@ -29,3 +30,7 @@ shape = SubResource("PedestrianCollision")
 position = Vector3(0, 0.78, 0)
 mesh = SubResource("PedestrianMesh")
 material_override = SubResource("PedestrianMaterial")
+
+[node name="Damageable" type="Node" parent="."]
+script = ExtResource("2_damage")
+max_health = 60
