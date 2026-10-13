@@ -105,7 +105,7 @@ func _run_tests() -> void:
 	distant_target.add_child(distant_health)
 	instance.add_child(distant_target)
 	weapon.set("weapon_range", 10.0)
-	await get_tree.create_timer(0.2).timeout
+	await get_tree().create_timer(0.2).timeout
 	_check(bool(weapon.call("fire_weapon")), "Firing is allowed even when no target is in range.")
 	_check(int(distant_health.get("current_health")) == 50, "Targets beyond weapon range take no damage.")
 	weapon.set("weapon_range", 80.0)
