@@ -6,6 +6,8 @@ var _shot_targets: Array[String] = []
 
 
 func _ready() -> void:
+	var watchdog: SceneTreeTimer = get_tree().create_timer(30.0)
+	watchdog.timeout.connect(_on_watchdog_timeout)
 	call_deferred("_run_tests")
 
 
@@ -183,3 +185,9 @@ func _finish(exit_code: int, instance: Node = null) -> void:
 		for failure: String in _failures:
 			push_error(failure)
 	get_tree().quit(exit_code)
+
+
+
+func _on_watchdog_timeout() -> void:
+	push_error("Combat regression timed out before completing all checks.")
+	get_tree().quit(1)
