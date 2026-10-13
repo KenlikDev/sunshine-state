@@ -12,7 +12,7 @@ The mission director owns the current mission and explicit `LOCKED`, `ACTIVE`, `
 
 ## Economy
 
-Items and prices live in `data/items/items.json`. All purchases go through `EconomyService`, which checks catalog membership, affordability, balance bounds, inventory, and transaction IDs. The current catalogue contains a first-aid kit (100) and a vehicle repair service (150). The greybox does not yet consume a first-aid kit to restore health or bind the repair service to vehicle damage; these are shop/economy prototypes, not finished service gameplay.
+Items and prices live in `data/items/items.json`. All transactions go through `EconomyService`, which checks catalog membership, affordability, balance bounds, inventory, and transaction IDs. The current catalogue contains a first-aid kit (100) and a vehicle repair service (150). Press H to consume one first-aid kit and restore up to 50 health. Vehicle collisions reduce vehicle health and proportionally reduce engine power; use the vehicle-service desk while a damaged car is within its service radius to pay 150 and restore the car to full health. Repair services debit currency without creating a duplicate inventory token.
 
 ## Save schema
 
@@ -24,8 +24,8 @@ F5 saves on demand; F9 loads. Important mission, transaction, and wanted-level c
 
 ## Automated coverage
 
-The progression test covers item catalogue loading, successful and repeated purchases, insufficient funds, negative-balance prevention, mission prerequisite sequencing, fail/restart, unique mission rewards, a complete three-mission path, save serialization, autosaved purchase state, and recovery from a corrupt primary save using the last known-good backup.
+The progression test covers item catalogue loading, successful and repeated purchases, duplicate transaction rejection, insufficient funds, negative-balance prevention, mission prerequisite sequencing, fail/restart, unique mission rewards, a complete three-mission path, first-aid consumption/healing, vehicle damage/repair/payment, save serialization, autosaved transaction state, and recovery from a corrupt primary save using the last known-good backup. A separate vehicle regression verifies that a physics collision reduces vehicle health.
 
 ## Remaining acceptance work
 
-This is an early progression foundation. Manual menu flows, real first-aid/vehicle-repair effects, mission failure variety, mission replay UI, a save-slot UI, schema migration beyond version 1, and full persistence policy for individual vehicle/NPC transforms remain outstanding. The project still requires manual play testing and the M3 15-minute simulation soak.
+This is an early progression foundation. Manual menu flows, mission failure variety, mission replay UI, a save-slot UI, schema migration beyond version 1, and full persistence policy for individual vehicle/NPC transforms remain outstanding. Vehicle damage currently persists only for the current session and is reset when the world is reconstructed. The project still requires manual play testing and the M3 15-minute simulation soak.
