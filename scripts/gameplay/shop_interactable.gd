@@ -29,7 +29,12 @@ func interact(actor: Node) -> String:
 	var price: int = int(item.get("price", 0))
 	if EconomyService.get_balance() < price:
 		return "MESSAGE_INSUFFICIENT_FUNDS"
-	if not EconomyService.purchase_item(item_id):
+	var purchase_succeeded: bool = (
+		EconomyService.purchase_service(item_id)
+		if item_id == "vehicle_repair"
+		else EconomyService.purchase_item(item_id)
+	)
+	if not purchase_succeeded:
 		return "MESSAGE_PURCHASE_FAILED"
 
 	if item_id == "vehicle_repair":
