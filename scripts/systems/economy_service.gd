@@ -107,34 +107,43 @@ func get_save_data() -> Dictionary:
 
 func is_save_data_valid(data: Variant) -> bool:
 	if not data is Dictionary:
+		push_warning("Economy validation failed: root value is not a dictionary.")
 		return false
 	var payload: Dictionary = data
 	var balance_value: Variant = payload.get("balance", null)
 	if typeof(balance_value) != TYPE_INT and typeof(balance_value) != TYPE_FLOAT:
+		push_warning("Economy validation failed: balance has type %s." % type_string(typeof(balance_value)))
 		return false
 	var balance: int = int(balance_value)
 	if balance < 0 or balance > MAX_BALANCE:
+		push_warning("Economy validation failed: balance is outside allowed bounds.")
 		return false
 
 	var inventory: Variant = payload.get("inventory", null)
 	if not inventory is Dictionary:
+		push_warning("Economy validation failed: inventory has type %s." % type_string(typeof(inventory)))
 		return false
 	for item_id: Variant in inventory.keys():
 		if not _catalog.has(String(item_id)):
+			push_warning("Economy validation failed: unknown inventory item '%s'." % String(item_id))
 			return false
 		var count_value: Variant = inventory[item_id]
 		if typeof(count_value) != TYPE_INT or int(count_value) < 0 or int(count_value) > 100000:
+			push_warning("Economy validation failed: invalid inventory count for '%s' (type=%s)." % [String(item_id), type_string(typeof(count_value))])
 			return false
 
 	var transactions: Variant = payload.get("processed_transactions", null)
 	if not transactions is Array:
+		push_warning("Economy validation failed: processed_transactions has type %s." % type_string(typeof(transactions)))
 		return false
 	for transaction_id: Variant in transactions:
-		if not transaction_id is String or String(transaction_id).is_empty():
+		if typeof(transaction_id) != TYPE_STRING or String(transaction_id).is_empty():
+			push_warning("Economy validation failed: transaction identifier is not a non-empty string.")
 			return false
 
 	var sequence_value: Variant = payload.get("purchase_sequence", null)
 	if typeof(sequence_value) != TYPE_INT or int(sequence_value) < 0:
+		push_warning("Economy validation failed: purchase_sequence is invalid (type=%s)." % type_string(typeof(sequence_value)))
 		return false
 	return true
 
