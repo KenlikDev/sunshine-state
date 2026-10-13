@@ -6,7 +6,7 @@ config_version=5
 [application]
 config/name="Sunshine State"
 config/description="Original single-player open-world action game. M1 playable greybox vertical slice."
-run/main_scene="res://scenes/bootstrap/main.tscn"
+run/main_scene="res://scenes/ui/main_menu.tscn"
 
 [display]
 window/size/viewport_width=1600
@@ -87,6 +87,7 @@ ui_cancel={
 
 [autoload]
 Localization="*res://scripts/ui/localization_service.gd"
+SettingsService="*res://scripts/ui/settings_service.gd"
 WantedSystem="*res://scripts/gameplay/wanted_system.gd"
 EconomyService="*res://scripts/systems/economy_service.gd"
 MissionService="*res://scripts/systems/mission_service.gd"
