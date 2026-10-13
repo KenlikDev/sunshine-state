@@ -149,7 +149,7 @@ jobs:
         run: timeout 30s godot --headless --path . res://tests/test_ui_flow.tscn
 
   living-district-soak:
-    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.run_living_district_soak) || (github.event_name == 'push' && github.ref == 'refs/heads/codex/m6-menu-settings') }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_living_district_soak }}
     runs-on: ubuntu-latest
     timeout-minutes: 17
     steps:
