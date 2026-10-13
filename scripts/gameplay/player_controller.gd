@@ -193,11 +193,11 @@ func on_damaged_actor_died(_instigator: Node) -> void:
 	_current_interactable = null
 	_current_prompt_key = ""
 	WantedSystem.clear_wanted(&"PLAYER_DEATH")
-	_respawn_after_delay()
+	var respawn_timer: SceneTreeTimer = get_tree().create_timer(respawn_delay_seconds)
+	respawn_timer.timeout.connect(_finish_respawn, CONNECT_ONE_SHOT)
 
 
-func _respawn_after_delay() -> void:
-	await get_tree().create_timer(respawn_delay_seconds).timeout
+func _finish_respawn() -> void:
 	if not is_inside_tree():
 		return
 
