@@ -87,3 +87,6 @@ MENU_NEW_GAME_CONFIRM_TITLE,"Start a new game?","Начать новую игр�
 MENU_NEW_GAME_CONFIRM_MESSAGE,"Starting a new game resets the current mission, money, inventory, and wanted state. Existing save files remain available if you choose Continue later.","Новая игра сбросит текущее задание, деньги, инвентарь и розыск. Файлы сохранений останутся доступными через «Продолжить»."
 MENU_NEW_GAME_CONFIRM,"Start New Game","Начать новую игру"
 MENU_CANCEL,"Cancel","Отмена"
+SETTINGS_RESOLUTION,"Window resolution","Разрешение окна"
+SETTINGS_FULLSCREEN,"Fullscreen","Полноэкранный режим"
+SETTINGS_MASTER_VOLUME_VALUE,"Master volume: %d%%","Общая громкость: %d%%"
