@@ -27,6 +27,7 @@ var _is_incapacitated: bool = false
 
 
 func _ready() -> void:
+	mouse_sensitivity = SettingsService.get_mouse_sensitivity()
 	_spawn_transform = global_transform
 	_interaction_ray.add_exception(self)
 	_interaction_ray.target_position = Vector3(0.0, 0.0, -interaction_distance)
