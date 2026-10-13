@@ -148,6 +148,8 @@ func bind_player(player: Node3D) -> void:
 		weapon_component.connect("ammo_changed", Callable(self, "_on_ammo_changed"))
 	_prompt_key = String(_player.call("get_current_interaction_prompt_key"))
 	_refresh_interaction_prompt()
+	_refresh_combat_status()
+	_refresh_wanted_status()
 
 
 func _unhandled_input(event: InputEvent) -> void:
