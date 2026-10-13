@@ -14,7 +14,7 @@ The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). Th
 
 1. Install [Godot 4.7.2-stable](https://godotengine.org/download/archive/4.7.2-stable/).
 2. Clone the repository and open `project.godot` in Godot.
-3. Run the project from the editor (F5); the main menu opens first.
+3. Run the project from the editor (F5); the main menu opens first. Starting a new game asks for confirmation when a valid save exists; Continue retains access to the existing save.
 
 ## Controls
 
