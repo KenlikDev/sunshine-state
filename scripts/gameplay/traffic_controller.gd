@@ -12,12 +12,14 @@ enum RouteAxis { NORTH_SOUTH, EAST_WEST }
 @export var offscreen_distance: float = 55.0
 @export var obstacle_recovery_delay: float = 3.0
 @export var reverse_recovery_duration: float = 1.1
+@export_range(1.0, 15.0, 0.5) var intersection_yield_timeout_seconds: float = 4.5
 @export var body_color: Color = Color(0.23, 0.48, 0.72, 1.0)
 
 var _route_index: int = 1
 var _route_direction: int = 1
 var _stalled_seconds: float = 0.0
 var _reverse_remaining: float = 0.0
+var _yielding_seconds: float = 0.0
 var _ai_state: String = "DRIVING"
 var _gravity: float = float(ProjectSettings.get_setting("physics/3d/default_gravity"))
 
@@ -49,7 +51,12 @@ func _physics_process(delta: float) -> void:
 	var frame_start_position: Vector3 = global_position
 	var was_recovering: bool = _reverse_remaining > 0.0
 	var direction: Vector3 = _get_route_direction()
-	var yielding: bool = _should_yield_for_intersection()
+	var conflict_requires_yield: bool = _should_yield_for_intersection()
+	if conflict_requires_yield:
+		_yielding_seconds = minf(_yielding_seconds + delta, intersection_yield_timeout_seconds)
+	else:
+		_yielding_seconds = 0.0
+	var yielding: bool = conflict_requires_yield and _yielding_seconds < intersection_yield_timeout_seconds
 	var near_camera: bool = _is_near_camera()
 	var blocked: bool = false
 
@@ -121,6 +128,10 @@ func get_route_index() -> int:
 
 func get_stalled_seconds() -> float:
 	return _stalled_seconds
+
+
+func get_yielding_seconds() -> float:
+	return _yielding_seconds
 
 
 func _get_route_direction() -> Vector3:
