@@ -99,6 +99,7 @@ func _run_tests() -> void:
 		var crossing_pedestrian: Node3D = instance.get_node_or_null("World/PedestrianEast02") as Node3D
 		var crossing_traffic: Node3D = instance.get_node_or_null("World/TrafficEastbound") as Node3D
 		if is_instance_valid(crossing_pedestrian) and is_instance_valid(crossing_traffic):
+			player.global_position = Vector3(0.0, 0.0, 12.0)
 			crossing_pedestrian.global_position = Vector3(9.1, 0.0, 4.4)
 			crossing_pedestrian.set("_route_index", 3)
 			crossing_traffic.global_position = Vector3(9.1, 0.65, 2.0)
@@ -118,6 +119,10 @@ func _run_tests() -> void:
 
 		var recovery_traffic: Node3D = instance.get_node_or_null("World/TrafficEastbound") as Node3D
 		if is_instance_valid(player) and is_instance_valid(recovery_traffic):
+			recovery_traffic.set("_route_index", 1)
+			recovery_traffic.set("_route_direction", 1)
+			recovery_traffic.set("_stalled_seconds", 0.0)
+			recovery_traffic.set("_reverse_remaining", 0.0)
 			recovery_traffic.global_position = Vector3(-50.0, 0.65, -2.0)
 			recovery_traffic.global_rotation = Vector3(0.0, -PI / 2.0, 0.0)
 			player.global_position = Vector3(-55.0, 0.0, -2.0)
