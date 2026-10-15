@@ -46,6 +46,7 @@ The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). Th
 - [Art and asset pipeline](docs/art-pipeline.md)
 - [Testing strategy](docs/testing-strategy.md)
 - [Performance budgets](docs/performance-budgets.md)
+- [Desktop export and release smoke tests](docs/release-builds.md)
 - [Source register](docs/source-register.md)
 - [Roadmap](docs/roadmap.md)
 - [Branching and contribution workflow](docs/development-workflow.md)

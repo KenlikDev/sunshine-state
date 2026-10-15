@@ -74,7 +74,7 @@ The items below are required scope, not a claim that they are implemented. If a 
 ### Release
 - Exported desktop build, clean-machine smoke test, installation/run instructions, known-issues list, and asset-license inventory.
 
-**Acceptance:** a tester can launch the packaged build without the Godot editor and complete the documented critical path.
+**Acceptance:** a tester can launch the packaged build without the Godot editor and complete the documented critical path. CI export and headless smoke checks are preliminary verification; they do not replace a clean-machine Windows playthrough.
 
 ## Explicit exclusions
 - Online services, multiplayer, cloud saves, large-scale procedural city generation, full destructibility, complete state-sized world, and extensive cinematic campaign.

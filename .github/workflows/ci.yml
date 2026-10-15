@@ -36,6 +36,8 @@ jobs:
             docs/gameplay-systems.md \
             docs/art-pipeline.md \
             docs/testing-strategy.md \
+            docs/release-builds.md \
+            export_presets.cfg \
             docs/performance-budgets.md \
             docs/source-register.md \
             docs/roadmap.md \
@@ -151,6 +153,50 @@ jobs:
 
       - name: Run UI-flow regression checks
         run: timeout 30s godot --headless --path . res://tests/test_ui_flow.tscn
+
+  desktop-export-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Godot and desktop export templates
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.7.2
+          use-dotnet: false
+          include-templates: true
+
+      - name: Import and validate project resources
+        run: godot --headless --editor --path . --quit
+
+      - name: Export Windows Desktop package
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          godot --headless --path . --export-release "Windows Desktop" build/SunshineState.exe
+          test -s build/SunshineState.exe
+
+      - name: Export Linux/X11 package
+        shell: bash
+        run: |
+          set -euo pipefail
+          godot --headless --path . --export-release "Linux/X11" build/SunshineState.x86_64
+          test -s build/SunshineState.x86_64
+          test -x build/SunshineState.x86_64
+
+      - name: Smoke-test exported Linux build without the editor
+        shell: bash
+        run: timeout 30s build/SunshineState.x86_64 --headless --quit-after 2
+
+      - name: Upload desktop build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sunshine-state-desktop-builds
+          path: build/
+          if-no-files-found: error
+          retention-days: 7
 
   living-district-soak:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_living_district_soak }}
