@@ -14,7 +14,9 @@ func _run_tests() -> void:
 	SaveService.delete_save_files()
 	var original_locale: String = SettingsService.get_locale()
 	var original_sensitivity: float = SettingsService.get_mouse_sensitivity()
-	var original_master_volume: float = SettingsService.get_master_volume()
+	var original_controller_sensitivity: float = SettingsService.get_controller_look_sensitivity()
+	var original_controller_y_inverted: bool = SettingsService.get_invert_controller_look_y()
+	var original_master_volume: = SettingsService.get_master_volume()
 	var original_music_volume: float = SettingsService.get_music_volume()
 	var original_effects_volume: float = SettingsService.get_effects_volume()
 	var original_fullscreen: bool = SettingsService.get_is_fullscreen()
@@ -24,6 +26,8 @@ func _run_tests() -> void:
 		original_bindings[action] = SettingsService.get_binding_keycode(action)
 	SettingsService.set_locale("en")
 	SettingsService.set_mouse_sensitivity(0.0025)
+	SettingsService.set_controller_look_sensitivity(2.5)
+	SettingsService.set_invert_controller_look_y(false)
 	SettingsService.set_master_volume(0.8)
 	SettingsService.set_music_volume(0.28)
 	SettingsService.set_effects_volume(0.75)
@@ -58,6 +62,8 @@ func _run_tests() -> void:
 	var continue_button: Button = menu.find_child("ContinueButton", true, false) as Button
 	var settings_button: Button = menu.find_child("SettingsButton", true, false) as Button
 	var sensitivity_slider: HSlider = menu.find_child("SensitivitySlider", true, false) as HSlider
+	var controller_sensitivity_slider: HSlider = menu.find_child("ControllerSensitivitySlider", true, false) as HSlider
+	var invert_controller_y_checkbox: CheckBox = menu.find_child("InvertControllerYCheckBox", true, false) as CheckBox
 	var language_button: Button = menu.find_child("LanguageButton", true, false) as Button
 	var settings_back_button: Button = menu.find_child("SettingsBackButton", true, false) as Button
 	var resolution_option: OptionButton = menu.find_child("ResolutionOption", true, false) as OptionButton
@@ -71,6 +77,8 @@ func _run_tests() -> void:
 	_check(continue_button != null, "Main menu exposes a continue action.")
 	_check(settings_button != null, "Main menu exposes settings.")
 	_check(sensitivity_slider != null, "Settings expose a mouse-sensitivity slider.")
+	_check(controller_sensitivity_slider != null, "Settings expose a dedicated gamepad look-sensitivity slider.")
+	_check(invert_controller_y_checkbox != null, "Settings expose vertical-axis inversion for the gamepad camera.")
 	_check(resolution_option != null, "Settings expose supported window resolutions.")
 	_check(fullscreen_checkbox != null, "Settings expose a fullscreen toggle.")
 	_check(master_volume_slider != null, "Settings expose a master-volume slider.")
@@ -125,8 +133,30 @@ func _run_tests() -> void:
 		fullscreen_checkbox.toggled.emit(true)
 		_check(SettingsService.get_is_fullscreen(), "The fullscreen toggle updates display settings.")
 
+	if controller_sensitivity_slider != null:
+		controller_sensitivity_slider.value = 4.5
+		_check(
+			is_equal_approx(SettingsService.get_controller_look_sensitivity(), 4.5),
+			"Gamepad look sensitivity can be configured independently of mouse sensitivity."
+		)
+	if invert_controller_y_checkbox != null:
+		invert_controller_y_checkbox.set_pressed_no_signal(true)
+		invert_controller_y_checkbox.toggled.emit(true)
+		_check(
+			SettingsService.get_invert_controller_look_y(),
+			"The invert-Y option updates controller camera settings."
+		)
+
 	var display_config := ConfigFile.new()
-	_check(display_config.load(SettingsService.SETTINGS_PATH) == OK, "Display and audio settings are saved.")
+	_check(display_config.load(SettingsService.SETTINGS_PATH) == OK, "Display, audio, and input settings are saved.")
+	_check(
+		is_equal_approx(float(display_config.get_value("controls", "controller_look_sensitivity", 0.0)), 4.5),
+		"Gamepad camera sensitivity persists in the controls section."
+	)
+	_check(
+		bool(display_config.get_value("controls", "invert_controller_look_y", false)),
+		"Vertical-axis inversion persists in the controls section."
+	)
 	_check(is_equal_approx(float(display_config.get_value("audio", "master_volume", 0.0)), 0.65), "Master volume persists.")
 	_check(is_equal_approx(float(display_config.get_value("audio", "music_volume", 0.0)), 0.35), "Music volume persists independently.")
 	_check(is_equal_approx(float(display_config.get_value("audio", "effects_volume", 0.0)), 0.60), "Effects volume persists independently.")
@@ -266,6 +296,8 @@ func _run_tests() -> void:
 
 	SettingsService.set_locale(original_locale)
 	SettingsService.set_mouse_sensitivity(original_sensitivity)
+	SettingsService.set_controller_look_sensitivity(original_controller_sensitivity)
+	SettingsService.set_invert_controller_look_y(original_controller_y_inverted)
 	SettingsService.set_master_volume(original_master_volume)
 	SettingsService.set_music_volume(original_music_volume)
 	SettingsService.set_effects_volume(original_effects_volume)
