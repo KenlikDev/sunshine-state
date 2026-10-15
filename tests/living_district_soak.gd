@@ -116,6 +116,17 @@ func _sample_group(
 		var state_name: String = String(agent.call("get_ai_state"))
 		var allowed_stall: float = yielding_stall_limit_seconds if is_traffic and state_name == "YIELDING" else stall_limit
 		if stationary > allowed_stall:
+			var velocity_value: Variant = agent.get("velocity")
+			var route_index_value: Variant = agent.call("get_route_index") if agent.has_method("get_route_index") else -1
+			var camera: Camera3D = get_viewport().get_camera_3d()
+			var camera_distance: float = (
+				camera.global_position.distance_to(position)
+				if is_instance_valid(camera) else -1.0
+			)
+			push_error(
+				"Soak diagnostic: agent=%s group=%s position=%s previous=%s velocity=%s route_index=%s camera_distance=%.2f state=%s stalled=%.1f"
+				% [agent.name, group_name, position, previous, velocity_value, route_index_value, camera_distance, state_name, stationary]
+			)
 			_failures.append(
 				"Agent '%s' remained stationary for %.1f seconds (state=%s)."
 				% [agent.name, stationary, state_name]
