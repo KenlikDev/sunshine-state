@@ -1,7 +1,7 @@
 # Asset and License Inventory
 
-**Status:** Initial inventory for the greybox prototype; not final release approval.  
-**Last repository scan:** 2026-10-15  
+**Status:** Initial inventory for the greybox prototype; not final release approval.
+**Last repository scan:** 2026-10-15
 **Scanned revision:** `d9d22a7054805dbab936fb246b2b3226b08cd518`
 
 ## Current project-authored content
@@ -40,3 +40,4 @@ Add one row per asset or coherent asset pack before it is merged:
 - Do not merge external assets when the provenance, license, or required attribution is unknown.
 - Before shipping, verify engine and bundled third-party notices against the exact pinned Godot distribution, and include all required notices in the packaged documentation/credits.
 - Original or appropriately licensed sound effects and music, production art, accessibility review, and the final third-party asset inventory remain release gates. The current absence of imported art/audio is not evidence that those MVP deliverables have been completed.
+
