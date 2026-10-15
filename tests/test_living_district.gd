@@ -103,6 +103,16 @@ func _run_tests() -> void:
 				await get_tree().physics_frame
 				observed_yield = observed_yield or String(east_west.call("get_ai_state")) == "YIELDING"
 			_check(observed_yield, "The conflict timeout test begins in a yielding state.")
+			print(
+				"Yield timeout diagnostic: start_x=", yield_test_start_x,
+				" current=", east_west.global_position,
+				" state=", east_west.call("get_ai_state"),
+				" route_index=", east_west.call("get_route_index"),
+				" yield_seconds=", east_west.call("get_yielding_seconds"),
+				" reverse_remaining=", east_west.get("_reverse_remaining"),
+				" stalled_seconds=", east_west.call("get_stalled_seconds"),
+				" ray_colliding=", east_west.get_node("ObstacleRay").get("is_colliding")
+			)
 			_check(
 				String(east_west.call("get_ai_state")) == "DRIVING"
 				and east_west.global_position.x > yield_test_start_x + 1.0,
