@@ -80,7 +80,7 @@ Run a scripted critical path:
 - camera clipping and inaccessible geometry
 - vehicle steering, braking, suspension, collisions, and safe exit clearance
 - NPC/traffic stuck recovery
-- audio and UI feedback
+- audio stream generation and independent master/music/effects settings in CI; listen to ambient music, UI feedback, weapon fire, hits, and vehicle impacts on a real audio device
 - resolution changes and graphics settings
 - performance in dense and quiet areas
 
