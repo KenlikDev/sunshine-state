@@ -352,7 +352,7 @@ func _refresh_mission_status() -> void:
 		return
 	var mission: Dictionary = MissionService.get_active_mission()
 	if mission.is_empty():
-			_objective_label.text = Localization.translate_key("HUD_ALL_MISSIONS_COMPLETE")
+		_objective_label.text = Localization.translate_key("HUD_ALL_MISSIONS_COMPLETE")
 		_refresh_waypoint_status()
 		return
 
