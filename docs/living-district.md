@@ -16,7 +16,7 @@ M3 introduces a small, fixed population of background pedestrians and road traff
 - Four traffic agents follow bounded north-south and east-west waypoint routes on the main crossroad.
 - Vehicles use kinematic collision bodies for predictable background movement; the player-drivable vehicles remain physics-based `VehicleBody3D` scenes.
 - Background traffic uses its own collision layer. The player and drivable vehicles include that layer in their masks, while pedestrians exclude it so a cross-traffic car cannot permanently pin an authored patrol at the junction. Traffic still detects shared world/player bodies and the traffic AI retains bounded stall recovery.
-- East-west traffic yields near the central junction while north-south traffic is approaching or crossing.
+- East-west traffic yields near the central junction while north-south traffic is approaching or crossing. Yielding is bounded to 4.5 seconds per continuous conflict; if a cross-traffic agent remains stalled, the east-west vehicle proceeds so a single stale agent cannot starve the route indefinitely.
 - A forward obstacle ray causes an agent to wait; a sustained obstacle can trigger a short reverse-and-retry recovery.
 - At route endpoints, agents reverse their waypoint direction rather than spawning replacements.
 
@@ -33,6 +33,7 @@ The M3 regression scene checks:
 - pedestrian route movement and alert-state response to a nearby player
 - road-route movement and district bounds
 - north-south right-of-way at the main junction
+- bounded yielding when a north-south agent remains stationary in the conflict zone
 - a pedestrian crossing alongside a stationary traffic body, ensuring the pedestrian keeps progressing
 - off-screen traffic recovery from physical blockage with the obstacle ray intentionally disabled
 
