@@ -36,6 +36,12 @@ jobs:
             docs/gameplay-systems.md \
             docs/art-pipeline.md \
             docs/testing-strategy.md \
+            docs/release-builds.md \
+            docs/release-start-guide.txt \
+            docs/release-acceptance-checklist.md \
+            docs/asset-license-inventory.md \
+            LICENSES/GODOT_ENGINE_LICENSE.txt \
+            export_presets.cfg \
             docs/performance-budgets.md \
             docs/source-register.md \
             docs/roadmap.md \
@@ -43,12 +49,27 @@ jobs:
             docs/vertical-slice.md \
             docs/vehicle-system.md \
             docs/living-district.md \
+            docs/day-night-cycle.md \
+            scripts/world/day_night_cycle.gd \
             docs/wanted-system.md \
             docs/combat-system.md \
             docs/progression-system.md \
+            docs/ui-flow.md \
+            scripts/ui/settings_service.gd \
+            scripts/ui/main_menu.gd \
+            scripts/ui/pause_menu.gd \
+            scripts/ui/input_bindings_panel.gd \
+            scenes/ui/input_bindings_panel.tscn \
+            scenes/ui/main_menu.tscn \
+            scenes/ui/pause_menu.tscn \
+            tests/test_ui_flow.gd \
+            tests/test_ui_flow.tscn \
             scripts/systems/economy_service.gd \
             scripts/systems/mission_service.gd \
             scripts/systems/save_service.gd \
+            scripts/systems/audio_service.gd \
+            tests/test_audio_system.gd \
+            tests/test_audio_system.tscn \
             scripts/gameplay/shop_interactable.gd \
             data/items/items.json \
             data/missions/missions.json \
@@ -76,7 +97,7 @@ jobs:
             tests/living_district_soak.tscn \
             scenes/vehicles/compact.tscn \
             scenes/vehicles/pickup.tscn \
-            localization/ui.csv \
+            localization/ui_table.txt \
             scripts/ui/localization_service.gd \
             tests/test_vertical_slice.gd \
             tests/test_vertical_slice.tscn \
@@ -114,7 +135,15 @@ jobs:
         run: godot --version
 
       - name: Import and validate project resources
-        run: godot --headless --editor --path . --quit
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          godot --headless --editor --path . --quit 2>&1 | tee build/editor-import.log
+          if grep -E "SCRIPT ERROR:|ERROR:" build/editor-import.log; then
+            echo "Godot reported script or resource errors during import."
+            exit 1
+          fi
 
       - name: Launch main scene headlessly
         run: godot --headless --path . --quit-after 2
@@ -136,6 +165,140 @@ jobs:
 
       - name: Run progression-system regression checks
         run: timeout 45s godot --headless --path . res://tests/test_progression_system.tscn
+
+      - name: Run UI-flow regression checks
+        run: timeout 30s godot --headless --path . res://tests/test_ui_flow.tscn
+
+      - name: Run procedural audio regression checks
+        run: timeout 30s godot --headless --path . res://tests/test_audio_system.tscn
+
+  desktop-export-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Godot and desktop export templates
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.7.2
+          use-dotnet: false
+          include-templates: true
+
+      - name: Import and validate project resources
+        run: godot --headless --editor --path . --quit
+
+      - name: Export Windows Desktop package
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          godot --headless --path . --export-release "Windows Desktop" build/SunshineState.exe
+          test -s build/SunshineState.exe
+
+      - name: Export Linux/X11 package
+        shell: bash
+        run: |
+          set -euo pipefail
+          godot --headless --path . --export-release "Linux/X11" build/SunshineState.x86_64
+          test -s build/SunshineState.x86_64
+          test -x build/SunshineState.x86_64
+
+      - name: Smoke-test exported Linux build without the editor
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 30s env SUNSHINE_STATE_SMOKE_TEST=1 build/SunshineState.x86_64 --headless --quit-after 120 2>&1 | tee build/exported-linux-smoke.log
+          if grep -E "SCRIPT ERROR:|ERROR:" build/exported-linux-smoke.log; then
+            echo "The exported Linux application reported runtime errors."
+            exit 1
+          fi
+
+      - name: Package tester guide and notices
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/ReleaseDocs
+          cp docs/release-start-guide.txt build/README.txt
+          cp docs/release-acceptance-checklist.md build/ReleaseDocs/RELEASE-ACCEPTANCE-CHECKLIST.md
+          cp docs/asset-license-inventory.md build/ReleaseDocs/ASSET-LICENSE-INVENTORY.md
+          cp LICENSES/GODOT_ENGINE_LICENSE.txt build/ReleaseDocs/GODOT_ENGINE_LICENSE.txt
+
+      - name: Upload desktop build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sunshine-state-desktop-builds
+          path: build/
+          if-no-files-found: error
+          retention-days: 7
+
+  windows-runtime-smoke:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Godot and Windows export templates
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.7.2
+          use-dotnet: false
+          include-templates: true
+
+      - name: Import and validate project resources
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force build | Out-Null
+          $godotExe = Join-Path $env:USERPROFILE "godot\Godot_v4.7.2-stable_win64.exe"
+          & $godotExe --headless --editor --path . --quit 2>&1 | Tee-Object -FilePath build/editor-import.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (Select-String -Path build/editor-import.log -Pattern 'SCRIPT ERROR:|ERROR:') {
+            Write-Error "Godot reported script or resource errors during import."
+            exit 1
+          }
+
+      - name: Export Windows Desktop package
+        shell: pwsh
+        run: |
+          $godotExe = Join-Path $env:USERPROFILE "godot\Godot_v4.7.2-stable_win64.exe"
+          & $godotExe --headless --path . --export-release "Windows Desktop" build/SunshineState.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (-not (Test-Path build/SunshineState.exe) -or (Get-Item build/SunshineState.exe).Length -le 0) {
+            Write-Error "Windows executable was not generated."
+            exit 1
+          }
+
+      - name: Smoke-test exported Windows gameplay without the editor
+        shell: pwsh
+        run: |
+          $env:SUNSHINE_STATE_SMOKE_TEST = "1"
+          & build/SunshineState.exe --headless --quit-after 120 2>&1 | Tee-Object -FilePath build/windows-smoke.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (Select-String -Path build/windows-smoke.log -Pattern 'SCRIPT ERROR:|ERROR:') {
+            Write-Error "The exported Windows application reported runtime errors."
+            exit 1
+          }
+
+      - name: Package tester guide and notices
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force build/ReleaseDocs | Out-Null
+          Copy-Item docs/release-start-guide.txt build/README.txt
+          Copy-Item docs/release-acceptance-checklist.md build/ReleaseDocs/RELEASE-ACCEPTANCE-CHECKLIST.md
+          Copy-Item docs/asset-license-inventory.md build/ReleaseDocs/ASSET-LICENSE-INVENTORY.md
+          Copy-Item LICENSES/GODOT_ENGINE_LICENSE.txt build/ReleaseDocs/GODOT_ENGINE_LICENSE.txt
+
+      - name: Upload Windows build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sunshine-state-windows-build
+          path: |
+            build/SunshineState.exe
+            build/README.txt
+            build/ReleaseDocs/
+          if-no-files-found: error
+          retention-days: 7
 
   living-district-soak:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_living_district_soak }}

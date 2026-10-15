@@ -1,6 +1,6 @@
 extends Node
 
-const TRANSLATION_CSV: String = "res://localization/ui.csv"
+const TRANSLATION_TABLE_PATH: String = "res://localization/ui_table.txt"
 const SUPPORTED_LOCALES: Array[String] = ["en", "ru"]
 
 var _locale: String = "en"
@@ -40,15 +40,15 @@ func format_key(key: String, arguments: Array = []) -> String:
 
 
 func _load_translation_table() -> void:
-	var file: FileAccess = FileAccess.open(TRANSLATION_CSV, FileAccess.READ)
+	var file: FileAccess = FileAccess.open(TRANSLATION_TABLE_PATH, FileAccess.READ)
 	if file == null:
-		push_error("Cannot open localization table: %s" % TRANSLATION_CSV)
+		push_error("Cannot open localization table: %s" % TRANSLATION_TABLE_PATH)
 		return
 
 	var headers: PackedStringArray = file.get_csv_line()
 	var key_column: int = headers.find("keys")
 	if key_column < 0:
-		push_error("Localization CSV must contain a 'keys' column.")
+		push_error("Localization table must contain a 'keys' column.")
 		return
 
 	var locale_columns: Dictionary = {}
@@ -58,7 +58,7 @@ func _load_translation_table() -> void:
 			locale_columns[locale] = column
 
 	if locale_columns.size() != SUPPORTED_LOCALES.size():
-		push_error("Localization CSV must contain columns for en and ru.")
+		push_error("Localization table must contain columns for en and ru.")
 		return
 
 	while not file.eof_reached():

@@ -10,13 +10,13 @@ The items below are required scope, not a claim that they are implemented. If a 
 - One connected, walkable and drivable fictional coastal-city district.
 - Clearly readable roads, sidewalks, building blocks, landmarks, and a coastal or beach area.
 - Collision coverage for traversable geometry and reliable world boundaries.
-- Basic day/night variation. Basic weather is included only after lighting and exposure remain stable.
+- Basic day/night variation via a shared world clock and environment lighting controller. Basic weather is included only after lighting and exposure remain stable.
 
 **Acceptance:** the player can navigate the complete MVP area without falling through geometry, reaching unintended voids, or encountering a progression-blocking dead end.
 
 ### Player
 - Third-person movement, walking, running, jumping, camera orbit, collision, interaction prompt, health, death, and respawn.
-- Input remapping and sensitivity settings where supported by the selected input architecture.
+- Keyboard input remapping, persistent camera sensitivity, and display/audio settings.
 
 **Acceptance:** movement and camera behave consistently at the target frame rate and after respawn; input does not remain stuck after UI transitions.
 
@@ -66,15 +66,16 @@ The items below are required scope, not a claim that they are implemented. If a 
 
 ### UI and audio
 - Main menu, pause menu, settings, HUD, mission notifications, and completion/failure feedback.
-- Original or appropriately licensed sound effects and music.
+- Original or appropriately licensed sound effects and music. An original procedural ambient/SFX baseline is implemented; composition quality, mixing, and contextual coverage still require review.
+- Basic accessibility controls for UI scale and HUD contrast, plus gamepad look sensitivity and optional inverted Y.
 - Localization-ready UI; user-facing language support is a separate content layer, not hard-coded into game logic.
 
-**Acceptance:** UI remains navigable with keyboard/controller as scoped, does not trap input, and all critical game states have clear feedback.
+**Acceptance:** UI remains navigable with keyboard/controller as scoped; remappable keys, UI scale, and HUD contrast persist and apply correctly; the UI does not trap input; critical game states have clear feedback; and audio cues are audible and mixed appropriately in an exported desktop build.
 
 ### Release
 - Exported desktop build, clean-machine smoke test, installation/run instructions, known-issues list, and asset-license inventory.
 
-**Acceptance:** a tester can launch the packaged build without the Godot editor and complete the documented critical path.
+**Acceptance:** a tester can launch the packaged build without the Godot editor and complete the documented critical path. CI export and headless smoke checks are preliminary verification; they do not replace a clean-machine Windows playthrough.
 
 ## Explicit exclusions
 - Online services, multiplayer, cloud saves, large-scale procedural city generation, full destructibility, complete state-sized world, and extensive cinematic campaign.

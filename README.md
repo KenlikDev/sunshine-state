@@ -4,17 +4,17 @@ Sunshine State is an original, single-player, third-person open-world crime-acti
 
 ## Project status
 
-**Current milestone:** M5 — three-mission progression, economy, and versioned save/load in regression review.
+**Current milestone:** M6 — menu/pause, persistent control/display/audio settings, accessible UI scaling and high-contrast HUD, procedural ambient music and gameplay/UI sound effects, with presentation review still in progress.
 
-The current branch contains a controllable third-person character, a bounded greybox coastal district, an information board, an English/Russian HUD, three drivable vehicle prototypes (sedan, compact coupe, and utility pickup), four route-following pedestrians, four background traffic agents, and an initial wanted/police loop, one raycast-based sidearm, health/damage, automatic player respawn, and an initial three-mission/economy/save-load loop. This is an intermediate prototype, not the complete MVP.
+The current branch contains a controllable third-person character, a bounded greybox coastal district with a real-time day-night lighting cycle, an information board, an English/Russian HUD, three drivable vehicle prototypes (sedan, compact coupe, and utility pickup), four route-following pedestrians, four background traffic agents, and an initial wanted/police loop, one raycast-based sidearm, health/damage, automatic player respawn, and an initial three-mission/economy/save-load loop. This is an intermediate prototype, not the complete MVP.
 
-The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). The three vehicle types are greybox prototypes and still need manual handling and visual review. Pedestrian and traffic agents are an early bounded simulation prototype; the required 15-minute stability test is not yet complete. The wanted/police loop covers crime reports, wanted levels, line-of-sight pursuit, searching and decay. The combat prototype covers one weapon, aiming, ammo/reload, damage, police attacks and player respawn; manual weapon feel, audio/animation and broader combat balance remain unfinished. Mission, economy and save/load foundations are now present but require regression and manual review. Final art, audio, world polish, and packaged release validation remain required.
+The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). The three vehicle types are greybox prototypes and still need manual handling and visual review. Pedestrian and traffic agents are an early bounded simulation prototype; the isolated 15-minute stability test has passed on the dedicated validation branch, while manual world traversal and visual review remain pending. The wanted/police loop covers crime reports, wanted levels, line-of-sight pursuit, searching and decay. The combat prototype covers one weapon, aiming, ammo/reload, damage, police attacks and player respawn; procedural weapon/impact sounds and ambient audio exist, but their mix/quality and broader combat balance still need desktop review. Mission, economy and save/load foundations are now present but require regression and manual review. Original Blender art, manual audio quality/mixing review, world polish, and clean-machine release validation remain required.
 
 ## Run locally
 
 1. Install [Godot 4.7.2-stable](https://godotengine.org/download/archive/4.7.2-stable/).
 2. Clone the repository and open `project.godot` in Godot.
-3. Run the project from the editor (F5).
+3. Run the project from the editor (F5); the main menu opens first. Starting a new game asks for confirmation when a valid save exists; Continue retains access to the existing save.
 
 ## Controls
 
@@ -25,9 +25,10 @@ The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). Th
 - E: interact, enter a vehicle, or exit the current vehicle
 - R: recover the current vehicle if blocked or overturned
 - Left mouse button: fire; right mouse button: aim; T: reload; H: use a first-aid kit
-- Escape: release the cursor; click the game view to capture it again
-- F5: save progress; F9: load progress; F8: restart an active/failed mission
-- F6: toggle English/Russian UI language
+- Escape: open/resume the pause menu; the mouse is recaptured when gameplay resumes
+- F5: save progress; F9: load progress; F8: restart an active/failed mission (also available in the pause menu)
+- F6: toggle English/Russian UI language (saved in settings); Settings includes keyboard remapping with conflict checks and reset defaults
+- Controller: left stick move/drive; right stick camera; camera sensitivity and Y inversion configurable in Settings; L3 sprint; A jump/brake; X interact; LB aim; RB fire; Y recover vehicle; D-pad right reload; R3 first-aid kit; B pause/back
 
 ## Documentation
 
@@ -38,12 +39,17 @@ The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). Th
 - [Vertical slice and controls](docs/vertical-slice.md)
 - [Vehicle system and controls](docs/vehicle-system.md)
 - [Living district simulation](docs/living-district.md)
+- [Day-night environment cycle](docs/day-night-cycle.md)
 - [Wanted and police system](docs/wanted-system.md)
 - [Combat and damage system](docs/combat-system.md)
 - [Missions, economy, and persistence](docs/progression-system.md)
+- [Main menu, pause flow, and settings](docs/ui-flow.md)
 - [Art and asset pipeline](docs/art-pipeline.md)
+- [Asset and license inventory](docs/asset-license-inventory.md)
 - [Testing strategy](docs/testing-strategy.md)
 - [Performance budgets](docs/performance-budgets.md)
+- [Desktop export and release smoke tests](docs/release-builds.md)
+- [Release acceptance checklist](docs/release-acceptance-checklist.md)
 - [Source register](docs/source-register.md)
 - [Roadmap](docs/roadmap.md)
 - [Branching and contribution workflow](docs/development-workflow.md)
@@ -59,4 +65,4 @@ The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). Th
 
 ## Validation
 
-GitHub Actions runs Godot headless resource import, a main-scene smoke test, vertical-slice, vehicle-system, living-district, wanted-system, combat-system, and progression-system regression tests. An opt-in manual workflow runs the 15-minute living-district soak test; it has not yet been accepted as passed. Manual vehicle handling tests and export checks are still required; the game is not yet a packaged release build.
+GitHub Actions runs the M1–M6 regression suites, a 15-minute living-district soak on a dedicated validation branch, and Windows/Linux desktop export tests that launch the gameplay scene without the editor. The isolated 15-minute soak test passed on the dedicated validation branch. User-machine playthrough, visual/audio review, final asset-license audit, and installer/signing work remain release gates; these CI artifacts are development builds, not a final release.

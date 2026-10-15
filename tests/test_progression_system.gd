@@ -65,8 +65,10 @@ func _run_tests() -> void:
 
 	var player: Node3D = instance.get_node_or_null("Player") as Node3D
 	var world: Node = instance.get_node_or_null("World")
+	var day_night: Node = world.get_node_or_null("DayNightCycle") if world != null else null
 	_check(player != null, "Bootstrap creates the player for interaction missions.")
 	_check(world != null, "Bootstrap creates the world and objective interactables.")
+	_check(day_night != null, "The active world exposes its day-night clock.")
 	if player == null or world == null:
 		_finish(1, instance)
 		return
@@ -147,6 +149,24 @@ func _run_tests() -> void:
 		_check(EconomyService.get_balance() == balance_before_repair - 150, "Rejected redundant repairs do not charge the player.")
 		_check(EconomyService.get_item_count("vehicle_repair") == 0, "A repair service is not stored as an inventory token.")
 
+	var expected_time_of_day: float = -1.0
+	if day_night != null:
+		day_night.call("set_time_of_day", 21.5)
+		expected_time_of_day = float(day_night.call("get_time_of_day"))
+	var candidate_payload: Dictionary = SaveService.call("_build_payload")
+	var candidate_world: Dictionary = candidate_payload["world"]
+	_check(
+		absf(float(candidate_world.get("time_of_day_hours", -1.0)) - expected_time_of_day) < 0.001,
+		"Save payload captures the current world clock."
+	)
+	var invalid_time_payload: Dictionary = candidate_payload.duplicate(true)
+	var invalid_time_world: Dictionary = invalid_time_payload["world"]
+	invalid_time_world["time_of_day_hours"] = 24.0
+	invalid_time_payload["world"] = invalid_time_world
+	_check(
+		not bool(SaveService.call("_is_valid_payload", invalid_time_payload)),
+		"Save validation rejects day times outside the 0-to-24 hour range."
+	)
 	_check(SaveService.save_game(false), "The completed progression state can be saved.")
 	var expected_balance: int = EconomyService.get_balance()
 	var expected_inventory: int = EconomyService.get_item_count("first_aid_kit")
@@ -160,6 +180,8 @@ func _run_tests() -> void:
 		SaveService.validate_save_file(SaveService.get_backup_data_path()),
 		"The backup save validates against all service schemas before corruption recovery."
 	)
+	if day_night != null:
+		day_night.call("set_time_of_day", 7.25)
 	var corrupt_file: FileAccess = FileAccess.open(SaveService.get_save_data_path(), FileAccess.WRITE)
 	_check(corrupt_file != null, "Primary save file can be opened for corruption-recovery validation.")
 	if corrupt_file != null:
@@ -172,6 +194,11 @@ func _run_tests() -> void:
 	_check(MissionService.is_mission_completed("district_orientation"), "Backup recovery preserves completed mission one.")
 	_check(MissionService.is_mission_completed("property_report"), "Backup recovery preserves completed mission two.")
 	_check(MissionService.is_mission_completed("supply_run"), "Backup recovery preserves completed mission three.")
+	if day_night != null:
+		_check(
+			absf(float(day_night.call("get_time_of_day")) - expected_time_of_day) < 0.01,
+			"Backup recovery restores the previously saved world time."
+		)
 	_check(int(WantedSystem.call("get_wanted_level")) >= 0, "Wanted save state remains valid through save/load.")
 	_check(SaveService.get_schema_version() == 1, "The save service records a versioned schema.")
 

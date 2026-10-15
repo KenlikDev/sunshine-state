@@ -16,7 +16,7 @@ Items and prices live in `data/items/items.json`. All transactions go through `E
 
 ## Save schema
 
-`SaveService` stores schema version 1 in `user://sunshine_state_save.json`. The payload contains currency/inventory/processed transactions, mission states/current mission, wanted level/last known position, a timestamp, and selected world progression flags.
+`SaveService` stores schema version 1 in `user://sunshine_state_save.json`. The payload contains currency/inventory/processed transactions, mission states/current mission, wanted level/last known position, a timestamp, selected world progression flags, and the day-night clock when the environment is active. The `time_of_day_hours` world field is optional for backward compatibility with existing schema-version-1 saves; when present it must be numeric and in the range 0–24 (exclusive at 24).
 
 Writes go to a temporary file first. Before replacing a valid primary save, the previous valid version is rotated into `user://sunshine_state_save.bak`. Load validates the complete payload before applying data. If the primary is invalid, a validated backup is tried; if neither is valid, the service reports failure and leaves the in-memory state untouched. Unsupported schema versions are rejected rather than silently rewritten.
 
@@ -24,7 +24,7 @@ F5 saves on demand; F9 loads. Important mission, transaction, and wanted-level c
 
 ## Automated coverage
 
-The progression test covers item catalogue loading, successful and repeated purchases, duplicate transaction rejection, insufficient funds, negative-balance prevention, mission prerequisite sequencing, fail/restart, unique mission rewards, a complete three-mission path, first-aid consumption/healing, vehicle damage/repair/payment, save serialization, autosaved transaction state, and recovery from a corrupt primary save using the last known-good backup. A separate vehicle regression verifies that a physics collision reduces vehicle health.
+The progression test covers item catalogue loading, successful and repeated purchases, duplicate transaction rejection, insufficient funds, negative-balance prevention, mission prerequisite sequencing, fail/restart, unique mission rewards, a complete three-mission path, first-aid consumption/healing, vehicle damage/repair/payment, day-night time validation and round-trip/backup restoration, save serialization, autosaved transaction state, and recovery from a corrupt primary save using the last known-good backup. A separate vehicle regression verifies that a physics collision reduces vehicle health.
 
 ## Remaining acceptance work
 

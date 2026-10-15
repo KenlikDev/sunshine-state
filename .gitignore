@@ -3,6 +3,7 @@
 .import/
 export.cfg
 export_presets.cfg
+!export_presets.cfg
 
 # Blender backup and temporary files
 *.blend1

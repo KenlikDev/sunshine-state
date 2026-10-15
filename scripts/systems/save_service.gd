@@ -9,6 +9,7 @@ const SCHEMA_VERSION: int = 1
 
 var _autosave_queued: bool = false
 var _is_loading: bool = false
+var _pending_world_time_hours: float = -1.0
 
 
 func _ready() -> void:
@@ -19,6 +20,8 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if get_tree().get_first_node_in_group("gameplay_scene") == null:
+		return
 	if event.is_action_pressed("save_game"):
 		save_game(true)
 		get_viewport().set_input_as_handled()
@@ -103,6 +106,12 @@ func get_save_data_path() -> String:
 	return SAVE_PATH
 
 
+func has_valid_save() -> bool:
+	if not _read_valid_payload(SAVE_PATH).is_empty():
+		return true
+	return not _read_valid_payload(BACKUP_PATH).is_empty()
+
+
 func get_schema_version() -> int:
 	return SCHEMA_VERSION
 
@@ -116,13 +125,17 @@ func validate_save_file(path: String) -> bool:
 
 
 func _build_payload() -> Dictionary:
+	var world_state: Dictionary = MissionService.get_world_state()
+	var day_night_cycle: Node = _get_day_night_cycle()
+	if is_instance_valid(day_night_cycle) and day_night_cycle.has_method("get_time_of_day"):
+		world_state["time_of_day_hours"] = float(day_night_cycle.call("get_time_of_day"))
 	return {
 		"schema_version": SCHEMA_VERSION,
 		"timestamp_utc": Time.get_datetime_string_from_system(true),
 		"economy": EconomyService.get_save_data(),
 		"missions": MissionService.get_save_data(),
 		"wanted": WantedSystem.get_save_data(),
-		"world": MissionService.get_world_state()
+		"world": world_state
 	}
 
 
@@ -163,6 +176,16 @@ func _is_valid_payload(payload: Dictionary) -> bool:
 	if not payload.get("world", null) is Dictionary:
 		push_warning("Save validation failed: world payload is invalid.")
 		return false
+	var world_state: Dictionary = payload["world"]
+	if world_state.has("time_of_day_hours"):
+		var time_value: Variant = world_state["time_of_day_hours"]
+		if typeof(time_value) != TYPE_INT and typeof(time_value) != TYPE_FLOAT:
+			push_warning("Save validation failed: world time is not numeric.")
+			return false
+		var time_hours: float = float(time_value)
+		if time_hours < 0.0 or time_hours >= 24.0 or time_hours != time_hours:
+			push_warning("Save validation failed: world time is outside the valid day range.")
+			return false
 	return true
 
 
@@ -172,7 +195,30 @@ func _apply_payload(payload: Dictionary) -> bool:
 	var missions_ok: bool = MissionService.load_save_data(payload["missions"])
 	var wanted_ok: bool = WantedSystem.load_save_data(payload["wanted"])
 	_is_loading = false
-	return economy_ok and missions_ok and wanted_ok
+	if not economy_ok or not missions_ok or not wanted_ok:
+		return false
+	_pending_world_time_hours = -1.0
+	var world_state: Dictionary = payload["world"]
+	if world_state.has("time_of_day_hours"):
+		_pending_world_time_hours = float(world_state["time_of_day_hours"])
+	var day_night_cycle: Node = _get_day_night_cycle()
+	if is_instance_valid(day_night_cycle):
+		restore_pending_world_time(day_night_cycle)
+	return true
+
+
+func restore_pending_world_time(day_night_cycle: Node) -> bool:
+	if _pending_world_time_hours < 0.0 or not is_instance_valid(day_night_cycle):
+		return false
+	if not day_night_cycle.has_method("set_time_of_day"):
+		return false
+	day_night_cycle.call("set_time_of_day", _pending_world_time_hours)
+	_pending_world_time_hours = -1.0
+	return true
+
+
+func _get_day_night_cycle() -> Node:
+	return get_tree().get_first_node_in_group("day_night_cycle")
 
 
 func _queue_autosave() -> void:

@@ -9,6 +9,7 @@ const TRAFFIC_SCENE: PackedScene = preload("res://scenes/traffic/traffic_vehicle
 const POLICE_SCENE: PackedScene = preload("res://scenes/police/police_officer.tscn")
 const CRIME_SCENE: PackedScene = preload("res://scenes/crime/graffiti_spot.tscn")
 const SHOP_SCENE: PackedScene = preload("res://scenes/economy/shop_interactable.tscn")
+const DAY_NIGHT_SCRIPT: Script = preload("res://scripts/world/day_night_cycle.gd")
 
 
 func _ready() -> void:
@@ -28,6 +29,7 @@ func _ready() -> void:
 
 func _create_environment() -> void:
 	var world_environment := WorldEnvironment.new()
+	world_environment.name = "WorldEnvironment"
 	var environment := Environment.new()
 	environment.background_mode = Environment.BG_COLOR
 	environment.background_color = Color(0.49, 0.72, 0.86, 1.0)
@@ -44,6 +46,11 @@ func _create_environment() -> void:
 	sunlight.shadow_enabled = true
 	sunlight.directional_shadow_max_distance = 100.0
 	add_child(sunlight)
+
+	var day_night_cycle := Node.new()
+	day_night_cycle.name = "DayNightCycle"
+	day_night_cycle.set_script(DAY_NIGHT_SCRIPT)
+	add_child(day_night_cycle)
 
 
 func _create_ground_and_roads() -> void:

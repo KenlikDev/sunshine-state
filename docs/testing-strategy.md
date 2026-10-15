@@ -6,10 +6,16 @@ The initial project baseline uses **Godot 4.7.2-stable**. CI uses the same exact
 
 The GitHub Actions workflow performs these checks:
 1. Imports editor resources in headless editor mode.
-2. Launches the configured main scene headlessly and exits after a short run.
-3. Runs the M1 vertical-slice regression scene for bootstrap composition, movement, interaction, and Russian localization.
-4. Runs the M2 vehicle regression scene for all three vehicle configurations, distinct power tuning, vehicle entry/driver ownership, throttle movement, braking deceleration, steering response, static-barrier collision, impact feedback, safe recovery, exit restoration, and HUD feedback.
-5. Checks required documents and changed-line whitespace.
+2. Launches the configured main menu scene and verifies the gameplay scene can still be loaded headlessly.
+3. Runs M1 vertical-slice checks for movement, interaction, HUD feedback, and localization.
+4. Runs M2 vehicle checks for all three configurations, driver/input ownership, throttle, braking, steering, collision feedback, recovery, safe exit, and HUD state.
+5. Runs M3 district checks for day/night lighting, pedestrian/traffic routes, population bounds, right-of-way, obstruction recovery, and world boundaries.
+6. Runs M4 wanted/police checks for crime severity, detection, pursuit/search, occlusion, decay, and state clearing.
+7. Runs M4 combat checks for weapon input, rate/ammo/reload, damage, police attacks, player death, wanted reset, and respawn.
+8. Runs M5 progression checks for purchases, duplicate transactions/rewards, three-mission sequencing, first-aid consumption, vehicle repair, save round-trip including world time, numeric/range validation, and backup recovery.
+9. Runs M6 UI-flow checks for save availability, overwrite confirmation, language/settings persistence, keyboard remapping/conflicts/reset, standard gamepad mappings and UI navigation, independent controller camera sensitivity/invert-Y persistence, UI-scale and high-contrast HUD accessibility persistence, live contrast updates, pause/resume, pause-menu mission restart, and display/audio preferences.
+10. Checks required documents and changed-line whitespace.
+11. Builds Windows Desktop and Linux/X11 packages using pinned Godot 4.7.2 export templates, validates that both artifacts are non-empty, and launches both exported builds headlessly into the gameplay scene on Linux and Windows runners.
 
 These checks verify project loading and selected contracts. They do not prove visual quality, feel, export success, or target-machine performance.
 
@@ -40,14 +46,14 @@ Cover pure logic and state transitions:
 - single-driver ownership and input ownership
 - throttle, reverse, steering, braking, and recovery checks
 - vehicle collision feedback, recovery clearance, upright reset, and safe exit positioning
-- pedestrian route progression, alert-state response, bounded agent population, traffic route progression, junction yielding, and district-boundary checks
+- deterministic day/night lighting and sky-state changes, pedestrian route progression and alert response, crossing progress beside a stationary traffic body, bounded agent population, traffic route progression, junction yielding and bounded timeout under a stalled cross-traffic agent, on/off-screen physical stall recovery, and district-boundary checks
 - crime event severity and wanted-level transitions
 - police detection, pursuit, occlusion/search, reacquisition, decay, and explicit wanted clearing
 - weapon raycasts, damage application, rate-of-fire, ammunition/reload, and aim state
 - NPC death, police attack conditions, player incapacitation, wanted reset, and respawn
 - mission completion grants one reward exactly once
 - police detection creates and clears a pursuit correctly
-- save/load restores progression after restart; corrupt primary save recovery uses the last known-good backup
+- save/load restores progression and world time after relaunch; invalid day-time values are rejected and corrupt primary recovery uses the last known-good backup
 
 ### Acceptance tests
 
@@ -67,11 +73,16 @@ Run a scripted critical path:
 
 - 15-minute living-district soak test with fixed agent counts, route progress, junction yielding, and no systemic traffic deadlock. Run locally with `godot --headless --path . res://tests/living_district_soak.tscn` or dispatch GitHub Actions with `run_living_district_soak` enabled.
 
+- main-menu Continue availability, new-game confirmation/cancel, settings persistence, pause/resume, and no gameplay processing while paused
+- keyboard binding changes across relaunch, duplicate-key rejection, reset-to-default, and Escape cancellation
+- gamepad movement axes, combat/interaction buttons, pause/back, and UI focus navigation mappings
+- controller camera sensitivity bounds, persistent invert-Y preference, and independent mouse/controller sensitivity
+- run exported Windows build on a clean Windows machine; a CI export alone does not satisfy this manual acceptance check
 - keyboard/mouse and supported controller
 - camera clipping and inaccessible geometry
 - vehicle steering, braking, suspension, collisions, and safe exit clearance
 - NPC/traffic stuck recovery
-- audio and UI feedback
+- audio stream generation and independent master/music/effects settings in CI; listen to ambient music, UI feedback, weapon fire, hits, and vehicle impacts on a real audio device
 - resolution changes and graphics settings
 - performance in dense and quiet areas
 

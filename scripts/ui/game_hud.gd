@@ -11,9 +11,11 @@ var _wanted_label: Label
 var _combat_label: Label
 var _prompt_key: String = ""
 var _status_key: String = "HUD_READY"
+var _high_contrast_hud_active: bool = false
 
 
 func _ready() -> void:
+	add_to_group("game_hud")
 	var screen := Control.new()
 	screen.name = "Screen"
 	screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -94,6 +96,10 @@ func _ready() -> void:
 	MissionService.mission_failed.connect(_on_mission_failed)
 	MissionService.mission_restarted.connect(_on_mission_restarted)
 	SaveService.save_status_changed.connect(_on_save_status_changed)
+	SettingsService.locale_changed.connect(_on_settings_locale_changed)
+	SettingsService.accessibility_changed.connect(_on_accessibility_changed)
+	if not Input.joy_connection_changed.is_connected(_on_joy_connection_changed):
+		Input.joy_connection_changed.connect(_on_joy_connection_changed)
 
 	var crosshair := Label.new()
 	crosshair.name = "Crosshair"
@@ -136,6 +142,7 @@ func _ready() -> void:
 	_status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	screen.add_child(_status_label)
 
+	_apply_accessibility_settings()
 	_refresh_localized_texts()
 
 
@@ -168,7 +175,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _toggle_locale() -> void:
 	var current_locale: String = Localization.get_locale()
 	var next_locale: String = "ru" if current_locale.begins_with("en") else "en"
-	Localization.set_locale(next_locale)
+	SettingsService.set_locale(next_locale)
 	_refresh_localized_texts()
 	if is_instance_valid(_player):
 		_player.call("refresh_interaction_prompt")
@@ -180,6 +187,8 @@ func _refresh_localized_texts() -> void:
 	_title_label.text = Localization.translate_key("HUD_TITLE")
 	_objective_label.text = Localization.translate_key("HUD_OBJECTIVE")
 	_controls_label.text = Localization.translate_key("HUD_CONTROLS")
+	if not Input.get_connected_joypads().is_empty():
+		_controls_label.text += "\n" + Localization.translate_key("HUD_CONTROLLER_CONTROLS")
 	_language_button.text = "%s: %s" % [
 		Localization.translate_key("HUD_LANGUAGE_LABEL"),
 		"RU" if Localization.get_locale().begins_with("ru") else "EN"
@@ -324,3 +333,57 @@ func _on_economy_balance_changed(_balance: int) -> void:
 
 func _on_economy_inventory_changed(_item_id: String, _count: int) -> void:
 	_refresh_combat_status()
+
+
+func _on_settings_locale_changed(_locale: String) -> void:
+	_refresh_localized_texts()
+
+
+func _on_joy_connection_changed(_device: int, _connected: bool) -> void:
+	_refresh_localized_texts()
+
+
+
+func _on_accessibility_changed(_ui_scale: float, _high_contrast_hud: bool) -> void:
+	_apply_accessibility_settings()
+
+
+func is_high_contrast_hud_active() -> bool:
+	return _high_contrast_hud_active
+
+
+func _apply_accessibility_settings() -> void:
+	_high_contrast_hud_active = SettingsService.get_high_contrast_hud()
+	var objective_panel: PanelContainer = get_node_or_null("Screen/ObjectivePanel") as PanelContainer
+	if is_instance_valid(objective_panel):
+		var panel_style := StyleBoxFlat.new()
+		panel_style.bg_color = (
+			Color(0.0, 0.0, 0.0, 0.98)
+			if _high_contrast_hud_active else Color(0.035, 0.055, 0.07, 0.88)
+		)
+		panel_style.border_color = (
+			Color(1.0, 1.0, 1.0, 1.0)
+			if _high_contrast_hud_active else Color(0.035, 0.055, 0.07, 0.0)
+		)
+		panel_style.set_border_width_all(2 if _high_contrast_hud_active else 0)
+		panel_style.set_corner_radius_all(8)
+		objective_panel.add_theme_stylebox_override("panel", panel_style)
+
+	var primary_color: Color = Color.WHITE if _high_contrast_hud_active else Color(0.95, 0.97, 0.98)
+	var secondary_color: Color = Color.WHITE if _high_contrast_hud_active else Color(0.70, 0.76, 0.79)
+	var emphasis_color: Color = Color(1.0, 1.0, 0.0) if _high_contrast_hud_active else Color(0.96, 0.83, 0.34)
+	for label: Label in [_title_label, _objective_label, _prompt_label, _status_label]:
+		if is_instance_valid(label):
+			label.add_theme_color_override("font_color", primary_color)
+	if is_instance_valid(_controls_label):
+		_controls_label.add_theme_color_override("font_color", secondary_color)
+	if is_instance_valid(_combat_label):
+		_combat_label.add_theme_color_override("font_color", emphasis_color)
+	if is_instance_valid(_wanted_label):
+		_wanted_label.add_theme_color_override("font_color", emphasis_color)
+	var crosshair: Label = get_node_or_null("Screen/Crosshair") as Label
+	if is_instance_valid(crosshair):
+		crosshair.add_theme_color_override(
+			"font_color",
+			Color(1.0, 1.0, 0.0, 1.0) if _high_contrast_hud_active else Color(1.0, 1.0, 1.0, 0.85)
+		)

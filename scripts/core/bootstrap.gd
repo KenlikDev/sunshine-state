@@ -3,11 +3,11 @@ extends Node3D
 const WORLD_SCENE: PackedScene = preload("res://scenes/world/greybox_district.tscn")
 const PLAYER_SCENE: PackedScene = preload("res://scenes/player/player.tscn")
 const HUD_SCENE: PackedScene = preload("res://scenes/ui/game_hud.tscn")
+const PAUSE_MENU_SCENE: PackedScene = preload("res://scenes/ui/pause_menu.tscn")
 
 
 func _ready() -> void:
-	SaveService.load_game(false)
-	Localization.set_locale("en")
+	add_to_group("gameplay_scene")
 
 	var world: Node3D = WORLD_SCENE.instantiate()
 	world.name = "World"
@@ -23,6 +23,10 @@ func _ready() -> void:
 	hud.name = "HUD"
 	add_child(hud)
 	hud.call("bind_player", player)
+
+	var pause_menu: CanvasLayer = PAUSE_MENU_SCENE.instantiate() as CanvasLayer
+	pause_menu.name = "PauseMenu"
+	add_child(pause_menu)
 
 	if DisplayServer.get_name() != "headless":
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED

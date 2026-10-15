@@ -61,6 +61,7 @@ func fire_weapon() -> bool:
 	current_ammo -= 1
 	_cooldown_remaining = fire_interval_seconds
 	ammo_changed.emit(current_ammo, reserve_ammo)
+	AudioService.play_weapon_fire()
 
 	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
 	var screen_center: Vector2 = viewport_size * 0.5

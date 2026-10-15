@@ -12,12 +12,14 @@ enum RouteAxis { NORTH_SOUTH, EAST_WEST }
 @export var offscreen_distance: float = 55.0
 @export var obstacle_recovery_delay: float = 3.0
 @export var reverse_recovery_duration: float = 1.1
+@export_range(1.0, 15.0, 0.5) var intersection_yield_timeout_seconds: float = 4.5
 @export var body_color: Color = Color(0.23, 0.48, 0.72, 1.0)
 
 var _route_index: int = 1
 var _route_direction: int = 1
 var _stalled_seconds: float = 0.0
 var _reverse_remaining: float = 0.0
+var _yielding_seconds: float = 0.0
 var _ai_state: String = "DRIVING"
 var _gravity: float = float(ProjectSettings.get_setting("physics/3d/default_gravity"))
 
@@ -26,6 +28,9 @@ var _gravity: float = float(ProjectSettings.get_setting("physics/3d/default_grav
 
 
 func _ready() -> void:
+	# Traffic is its own layer: players and drivable cars collide with it, but it cannot block patrol pedestrians.
+	collision_layer = 2
+	collision_mask = 1
 	add_to_group("traffic_vehicles")
 	_obstacle_ray.add_exception(self)
 	if start_at_end and route_points.size() >= 2:
@@ -43,17 +48,31 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector3.ZERO
 		return
 
+	var frame_start_position: Vector3 = global_position
+	var was_recovering: bool = _reverse_remaining > 0.0
 	var direction: Vector3 = _get_route_direction()
-	var yielding: bool = _should_yield_for_intersection()
+	var conflict_requires_yield: bool = _should_yield_for_intersection()
+	if conflict_requires_yield:
+		_yielding_seconds = minf(_yielding_seconds + delta, intersection_yield_timeout_seconds)
+	else:
+		_yielding_seconds = 0.0
+	var yielding: bool = conflict_requires_yield and _yielding_seconds < intersection_yield_timeout_seconds
 	var near_camera: bool = _is_near_camera()
 	var blocked: bool = false
 
+	var yield_timeout_elapsed: bool = (
+		conflict_requires_yield
+		and _yielding_seconds >= intersection_yield_timeout_seconds
+	)
 	if near_camera:
 		_obstacle_ray.force_raycast_update()
 		if _obstacle_ray.is_colliding():
 			var collider: Object = _obstacle_ray.get_collider()
 			if collider is Node and collider != self:
-				blocked = true
+				blocked = not (
+					yield_timeout_elapsed
+					and _is_timed_out_cross_traffic(collider as Node)
+				)
 
 	if _reverse_remaining > 0.0:
 		_reverse_remaining = maxf(0.0, _reverse_remaining - delta)
@@ -77,7 +96,6 @@ func _physics_process(delta: float) -> void:
 			_stalled_seconds = 0.0
 			_reverse_remaining = reverse_recovery_duration
 	else:
-		_stalled_seconds = 0.0
 		_set_ai_state("DRIVING")
 		var speed_scale: float = 1.0 if near_camera else 0.8
 		velocity.x = direction.x * cruise_speed * speed_scale
@@ -90,6 +108,22 @@ func _physics_process(delta: float) -> void:
 		velocity.y -= _gravity * delta
 	move_and_slide()
 
+	# Off-screen traffic skips ray-based avoidance, so physical collision stalls
+	# need their own bounded recovery path instead of remaining in DRIVING forever.
+	if not was_recovering and not yielding and not blocked:
+		var horizontal_step: float = Vector2(
+			global_position.x - frame_start_position.x,
+			global_position.z - frame_start_position.z
+		).length()
+		if direction.length_squared() > 0.1 and horizontal_step < maxf(0.025, cruise_speed * delta * 0.15):
+			_stalled_seconds += delta
+			if _stalled_seconds >= obstacle_recovery_delay:
+				_stalled_seconds = 0.0
+				_reverse_remaining = reverse_recovery_duration
+				_set_ai_state("WAITING")
+		else:
+			_stalled_seconds = 0.0
+
 
 func get_ai_state() -> String:
 	return _ai_state
@@ -101,6 +135,10 @@ func get_route_index() -> int:
 
 func get_stalled_seconds() -> float:
 	return _stalled_seconds
+
+
+func get_yielding_seconds() -> float:
+	return _yielding_seconds
 
 
 func _get_route_direction() -> Vector3:
@@ -141,6 +179,17 @@ func _should_yield_for_intersection() -> bool:
 		if absf((other as Node3D).global_position.x) < 8.0 and absf((other as Node3D).global_position.z) < 20.0:
 			return true
 	return false
+
+
+func _is_timed_out_cross_traffic(candidate: Node) -> bool:
+	if not candidate.is_in_group("traffic_vehicles"):
+		return false
+	if int(candidate.get("route_axis")) != RouteAxis.NORTH_SOUTH:
+		return false
+	if not candidate is Node3D:
+		return false
+	var candidate_position: Vector3 = (candidate as Node3D).global_position
+	return absf(candidate_position.x) < 8.0 and absf(candidate_position.z) < 20.0
 
 
 func _is_near_camera() -> bool:

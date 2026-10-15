@@ -27,11 +27,42 @@ var _is_incapacitated: bool = false
 
 
 func _ready() -> void:
+	collision_mask |= 2
+	mouse_sensitivity = SettingsService.get_mouse_sensitivity()
 	_spawn_transform = global_transform
 	_interaction_ray.add_exception(self)
 	_interaction_ray.target_position = Vector3(0.0, 0.0, -interaction_distance)
 	_interaction_ray.collide_with_areas = true
 	_interaction_ray.enabled = true
+
+
+func _process(delta: float) -> void:
+	if _is_incapacitated or is_instance_valid(_current_vehicle):
+		return
+	var connected_joypads: Array[int] = Input.get_connected_joypads()
+	if connected_joypads.is_empty():
+		return
+
+	var device_id: int = connected_joypads[0]
+	var look_x: float = _apply_look_deadzone(Input.get_joy_axis(device_id, JOY_AXIS_RIGHT_X))
+	var look_y: float = _apply_look_deadzone(Input.get_joy_axis(device_id, JOY_AXIS_RIGHT_Y))
+	if SettingsService.get_invert_controller_look_y():
+		look_y = -look_y
+	if absf(look_x) > 0.0:
+		rotate_y(-look_x * 2.5 * delta)
+	if absf(look_y) > 0.0:
+		_camera_pivot.rotation.x = clampf(
+			_camera_pivot.rotation.x - look_y * SettingsService.get_controller_look_sensitivity() * delta,
+			deg_to_rad(-55.0),
+			deg_to_rad(35.0)
+		)
+
+
+func _apply_look_deadzone(value: float) -> float:
+	const DEADZONE: float = 0.16
+	if absf(value) <= DEADZONE:
+		return 0.0
+	return signf(value) * (absf(value) - DEADZONE) / (1.0 - DEADZONE)
 
 
 func _unhandled_input(event: InputEvent) -> void:

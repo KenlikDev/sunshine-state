@@ -28,6 +28,8 @@ var _last_impact_feedback_msec: int = -1200
 
 
 func _ready() -> void:
+	collision_mask |= 2
+	mouse_sensitivity = SettingsService.get_mouse_sensitivity()
 	max_vehicle_health = maxi(1, max_vehicle_health)
 	current_vehicle_health = max_vehicle_health
 	add_to_group("vehicles")
@@ -133,6 +135,7 @@ func _emit_collision_feedback_if_needed() -> void:
 	_last_impact_feedback_msec = now_msec
 	var damage_amount: int = clampi(roundi(speed_drop * 6.0), 5, 35)
 	apply_vehicle_damage(damage_amount)
+	AudioService.play_vehicle_impact()
 	_driver.call("notify_interaction_feedback", "MESSAGE_VEHICLE_IMPACT")
 
 
@@ -229,6 +232,35 @@ func _attempt_recovery() -> bool:
 		return true
 
 	return false
+
+
+func _process(delta: float) -> void:
+	if not is_instance_valid(_driver):
+		return
+	var connected_joypads: Array[int] = Input.get_connected_joypads()
+	if connected_joypads.is_empty():
+		return
+
+	var device_id: int = connected_joypads[0]
+	var look_x: float = _apply_look_deadzone(Input.get_joy_axis(device_id, JOY_AXIS_RIGHT_X))
+	var look_y: float = _apply_look_deadzone(Input.get_joy_axis(device_id, JOY_AXIS_RIGHT_Y))
+	if SettingsService.get_invert_controller_look_y():
+		look_y = -look_y
+	if absf(look_x) > 0.0:
+		_camera_pivot.rotate_y(-look_x * 2.5 * delta)
+	if absf(look_y) > 0.0:
+		_camera_pivot.rotation.x = clampf(
+			_camera_pivot.rotation.x - look_y * SettingsService.get_controller_look_sensitivity() * delta,
+			deg_to_rad(-12.0),
+			deg_to_rad(28.0)
+		)
+
+
+func _apply_look_deadzone(value: float) -> float:
+	const DEADZONE: float = 0.16
+	if absf(value) <= DEADZONE:
+		return 0.0
+	return signf(value) * (absf(value) - DEADZONE) / (1.0 - DEADZONE)
 
 
 func _unhandled_input(event: InputEvent) -> void:
