@@ -198,7 +198,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          timeout 30s build/SunshineState.x86_64 --headless --quit-after 30 2>&1 | tee build/exported-linux-smoke.log
+          timeout 30s env SUNSHINE_STATE_SMOKE_TEST=1 build/SunshineState.x86_64 --headless --quit-after 120 2>&1 | tee build/exported-linux-smoke.log
           if grep -E "SCRIPT ERROR:|ERROR:" build/exported-linux-smoke.log; then
             echo "The exported Linux application reported runtime errors."
             exit 1
