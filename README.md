@@ -27,7 +27,7 @@ The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). Th
 - Left mouse button: fire; right mouse button: aim; T: reload; H: use a first-aid kit
 - Escape: open/resume the pause menu; the mouse is recaptured when gameplay resumes
 - F5: save progress; F9: load progress; F8: restart an active/failed mission
-- F6: toggle English/Russian UI language (saved in settings)
+- F6: toggle English/Russian UI language (saved in settings); Settings includes keyboard remapping with conflict checks and reset defaults
 
 ## Documentation
 
