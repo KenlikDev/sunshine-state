@@ -79,7 +79,6 @@ func _physics_process(delta: float) -> void:
 			_stalled_seconds = 0.0
 			_reverse_remaining = reverse_recovery_duration
 	else:
-		_stalled_seconds = 0.0
 		_set_ai_state("DRIVING")
 		var speed_scale: float = 1.0 if near_camera else 0.8
 		velocity.x = direction.x * cruise_speed * speed_scale
