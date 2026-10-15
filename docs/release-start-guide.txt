@@ -46,12 +46,13 @@ Controller layout, keyboard assignments, camera sensitivity, UI scale, HUD contr
 FIRST PLAYTHROUGH
 -----------------
 1. Start a new game and inspect the district information board.
-2. Visit the marked property-damage site and report the incident.
-3. Purchase a first-aid kit from the vendor, take damage if needed, and test the kit with H.
-4. Enter each of the three prototype vehicles, drive, brake, steer, reverse, exit, and use vehicle recovery.
-5. Observe the wanted/police response to a crime report.
-6. Save, quit the application, relaunch it, and use Continue. Confirm that mission progress, economy, and the day-night time are restored.
-7. Open Settings and test language, input rebinding, high-contrast HUD, UI scale, resolution/fullscreen, and the separate music/effects levels.
+2. Follow the mission waypoint to each objective and verify that guidance changes after objectives complete.
+3. Visit the marked property-damage site and report the incident.
+4. Purchase a first-aid kit from the vendor, take damage if needed, and test the kit with H.
+5. Enter each of the three prototype vehicles, drive, brake, steer, reverse, exit, collide with a barrier, and use vehicle recovery.
+6. Observe the wanted/police response to a crime report.
+7. Save, quit the application, relaunch it, and use Continue. Confirm that mission progress, economy, day-night time, and vehicle health are restored. Vehicle position, rotation, velocity, and individual NPC transforms are not saved.
+8. Open Settings and test language, input rebinding, high-contrast HUD, UI scale, resolution/fullscreen, and the separate music/effects levels.
 
 USER DATA
 ---------
@@ -64,7 +65,7 @@ KNOWN LIMITATIONS
 -----------------
 - The district and vehicles are greybox prototypes; final art, animation and content are not included.
 - Mission, police, traffic, and combat systems are early single-player prototypes.
-- Vehicle damage is session-only and individual NPC/vehicle transforms are not yet included in saved world state.
+- Vehicle health and repair state are persisted across save/load and Continue. Vehicle positions, rotations, velocities, and individual NPC transforms are not yet included in the saved world state.
 - Audio is procedural and needs subjective listening and mix review on real audio hardware.
 - The day-night cycle changes lighting only; weather, moon/stars, and time-based NPC schedules are not included.
 - CI export/smoke tests do not replace a full interactive playthrough on a clean machine.
