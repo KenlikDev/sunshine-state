@@ -11,6 +11,7 @@ var _title_label: Label
 var _resume_button: Button
 var _save_button: Button
 var _load_button: Button
+var _restart_mission_button: Button
 var _settings_button: Button
 var _main_menu_button: Button
 var _quit_button: Button
@@ -104,10 +105,11 @@ func _build_ui() -> void:
 	_resume_button = _make_button("ResumeButton", Callable(self, "resume_game"))
 	_save_button = _make_button("SaveButton", Callable(self, "_save_game"))
 	_load_button = _make_button("LoadButton", Callable(self, "_load_game"))
+	_restart_mission_button = _make_button("RestartMissionButton", Callable(self, "_restart_mission"))
 	_settings_button = _make_button("SettingsButton", Callable(self, "_toggle_settings"))
 	_main_menu_button = _make_button("MainMenuButton", Callable(self, "_return_to_menu"))
 	_quit_button = _make_button("QuitButton", Callable(self, "_quit_game"))
-	for button: Button in [_resume_button, _save_button, _load_button, _settings_button, _main_menu_button, _quit_button]:
+	for button: Button in [_resume_button, _save_button, _load_button, _restart_mission_button, _settings_button, _main_menu_button, _quit_button]:
 		stack.add_child(button)
 
 	_settings_center = CenterContainer.new()
@@ -259,6 +261,10 @@ func _refresh_texts() -> void:
 	_resume_button.text = Localization.translate_key("PAUSE_RESUME")
 	_save_button.text = Localization.translate_key("PAUSE_SAVE")
 	_load_button.text = Localization.translate_key("PAUSE_LOAD")
+	_restart_mission_button.text = Localization.translate_key("PAUSE_RESTART_MISSION")
+	var active_mission: Dictionary = MissionService.get_active_mission()
+	var mission_state: String = String(active_mission.get("state", ""))
+	_restart_mission_button.disabled = active_mission.is_empty() or not ["ACTIVE", "FAILED"].has(mission_state)
 	_settings_button.text = Localization.translate_key("MENU_SETTINGS")
 	_main_menu_button.text = Localization.translate_key("PAUSE_MAIN_MENU")
 	_quit_button.text = Localization.translate_key("MENU_QUIT")
@@ -282,6 +288,7 @@ func _refresh_texts() -> void:
 
 
 func open_pause_menu() -> void:
+	_refresh_texts()
 	_pause_center.visible = true
 	_settings_center.visible = false
 	_screen.visible = true
@@ -292,6 +299,18 @@ func open_pause_menu() -> void:
 
 
 func resume_game() -> void:
+	get_tree().paused = false
+	_screen.visible = false
+	if DisplayServer.get_name() != "headless":
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+
+func _restart_mission() -> void:
+	if not MissionService.restart_current_mission():
+		_status_key = "MESSAGE_MISSION_RESTART_UNAVAILABLE"
+		_refresh_texts()
+		return
+	_status_key = "MESSAGE_MISSION_RESTARTED"
 	get_tree().paused = false
 	_screen.visible = false
 	if DisplayServer.get_name() != "headless":
