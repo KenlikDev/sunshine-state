@@ -135,6 +135,7 @@ func _emit_collision_feedback_if_needed() -> void:
 	_last_impact_feedback_msec = now_msec
 	var damage_amount: int = clampi(roundi(speed_drop * 6.0), 5, 35)
 	apply_vehicle_damage(damage_amount)
+	AudioService.play_vehicle_impact()
 	_driver.call("notify_interaction_feedback", "MESSAGE_VEHICLE_IMPACT")
 
 
