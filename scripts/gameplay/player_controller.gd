@@ -27,6 +27,7 @@ var _is_incapacitated: bool = false
 
 
 func _ready() -> void:
+	collision_mask |= 2
 	mouse_sensitivity = SettingsService.get_mouse_sensitivity()
 	_spawn_transform = global_transform
 	_interaction_ray.add_exception(self)
