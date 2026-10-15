@@ -21,6 +21,10 @@ var _resolution_option: OptionButton
 var _fullscreen_checkbox: CheckBox
 var _master_volume_label: Label
 var _master_volume_slider: HSlider
+var _music_volume_label: Label
+var _music_volume_slider: HSlider
+var _effects_volume_label: Label
+var _effects_volume_slider: HSlider
 var _sensitivity_label: Label
 var _sensitivity_slider: HSlider
 var _settings_back_button: Button
@@ -131,10 +135,17 @@ func _build_ui() -> void:
 		settings_margin.add_theme_constant_override(margin_name, 28)
 	settings_panel.add_child(settings_margin)
 
+	var settings_scroll := ScrollContainer.new()
+	settings_scroll.name = "SettingsScroll"
+	settings_scroll.custom_minimum_size = Vector2(440.0, 510.0)
+	settings_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	settings_margin.add_child(settings_scroll)
+
 	var settings_stack := VBoxContainer.new()
 	settings_stack.name = "SettingsStack"
 	settings_stack.add_theme_constant_override("separation", 14)
-	settings_margin.add_child(settings_stack)
+	settings_stack.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	settings_scroll.add_child(settings_stack)
 
 	_settings_title = Label.new()
 	_settings_title.name = "SettingsTitle"
@@ -177,6 +188,30 @@ func _build_ui() -> void:
 	_master_volume_slider.value_changed.connect(_on_master_volume_changed)
 	settings_stack.add_child(_master_volume_slider)
 
+	_music_volume_label = Label.new()
+	_music_volume_label.name = "MusicVolumeLabel"
+	settings_stack.add_child(_music_volume_label)
+	_music_volume_slider = HSlider.new()
+	_music_volume_slider.name = "MusicVolumeSlider"
+	_music_volume_slider.min_value = 0.0
+	_music_volume_slider.max_value = 100.0
+	_music_volume_slider.step = 5.0
+	_music_volume_slider.value = SettingsService.get_music_volume() * 100.0
+	_music_volume_slider.value_changed.connect(_on_music_volume_changed)
+	settings_stack.add_child(_music_volume_slider)
+
+	_effects_volume_label = Label.new()
+	_effects_volume_label.name = "EffectsVolumeLabel"
+	settings_stack.add_child(_effects_volume_label)
+	_effects_volume_slider = HSlider.new()
+	_effects_volume_slider.name = "EffectsVolumeSlider"
+	_effects_volume_slider.min_value = 0.0
+	_effects_volume_slider.max_value = 100.0
+	_effects_volume_slider.step = 5.0
+	_effects_volume_slider.value = SettingsService.get_effects_volume() * 100.0
+	_effects_volume_slider.value_changed.connect(_on_effects_volume_changed)
+	settings_stack.add_child(_effects_volume_slider)
+
 	_sensitivity_label = Label.new()
 	_sensitivity_label.name = "SensitivityLabel"
 	settings_stack.add_child(_sensitivity_label)
@@ -217,6 +252,7 @@ func _make_button(node_name: String, callback: Callable) -> Button:
 	button.custom_minimum_size = Vector2(0.0, 44.0)
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.add_theme_font_size_override("font_size", 17)
+	button.pressed.connect(Callable(AudioService, "play_ui_click"))
 	button.pressed.connect(callback)
 	return button
 
@@ -248,6 +284,10 @@ func _refresh_texts() -> void:
 	_fullscreen_checkbox.set_pressed_no_signal(SettingsService.get_is_fullscreen())
 	_update_master_volume_label(SettingsService.get_master_volume() * 100.0)
 	_master_volume_slider.set_value_no_signal(SettingsService.get_master_volume() * 100.0)
+	_update_music_volume_label(SettingsService.get_music_volume() * 100.0)
+	_music_volume_slider.set_value_no_signal(SettingsService.get_music_volume() * 100.0)
+	_update_effects_volume_label(SettingsService.get_effects_volume() * 100.0)
+	_effects_volume_slider.set_value_no_signal(SettingsService.get_effects_volume() * 100.0)
 	_settings_back_button.text = Localization.translate_key("SETTINGS_BACK")
 	_update_sensitivity_label(SettingsService.get_mouse_sensitivity())
 	_status_label.text = Localization.translate_key(_status_key) if not _status_key.is_empty() else ""
@@ -270,6 +310,7 @@ func _cancel_new_game() -> void:
 
 
 func _start_new_game() -> void:
+	AudioService.play_ui_confirm()
 	_new_game_confirmation.hide()
 	EconomyService.reset_for_new_game()
 	MissionService.reset_for_new_game()
@@ -346,3 +387,21 @@ func _toggle_input_bindings() -> void:
 	if not is_instance_valid(_input_bindings_panel):
 		return
 	_input_bindings_panel.visible = not _input_bindings_panel.visible
+
+
+func _on_music_volume_changed(value: float) -> void:
+	SettingsService.set_music_volume(value / 100.0)
+	_update_music_volume_label(value)
+
+
+func _update_music_volume_label(value: float) -> void:
+	_music_volume_label.text = Localization.format_key("SETTINGS_MUSIC_VOLUME_VALUE", [int(roundf(value))])
+
+
+func _on_effects_volume_changed(value: float) -> void:
+	SettingsService.set_effects_volume(value / 100.0)
+	_update_effects_volume_label(value)
+
+
+func _update_effects_volume_label(value: float) -> void:
+	_effects_volume_label.text = Localization.format_key("SETTINGS_EFFECTS_VOLUME_VALUE", [int(roundf(value))])
