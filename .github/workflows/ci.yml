@@ -38,6 +38,7 @@ jobs:
             docs/testing-strategy.md \
             docs/release-builds.md \
             docs/release-start-guide.txt \
+            docs/release-manifest.md \
             docs/release-acceptance-checklist.md \
             docs/asset-license-inventory.md \
             LICENSES/GODOT_ENGINE_LICENSE.txt \
@@ -214,6 +215,28 @@ jobs:
             exit 1
           fi
 
+      - name: Generate and validate build manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          generated_at_utc="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          cat > build/build-manifest.json <<EOF
+          {
+            "schema_version": 1,
+            "project_name": "Sunshine State",
+            "project_version": "0.1.0",
+            "commit_sha": "${GITHUB_SHA}",
+            "workflow_run_id": "${GITHUB_RUN_ID}",
+            "workflow_run_attempt": "${GITHUB_RUN_ATTEMPT}",
+            "workflow_url": "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}",
+            "engine_version": "4.7.2-stable",
+            "platform_targets": ["Windows Desktop", "Linux/X11"],
+            "checks_performed": ["Windows export", "Linux export", "Linux headless runtime smoke"],
+            "generated_at_utc": "${generated_at_utc}"
+          }
+          EOF
+          jq -e --arg sha "$GITHUB_SHA" '.schema_version == 1 and .commit_sha == $sha and .engine_version == "4.7.2-stable" and (.platform_targets | length == 2)' build/build-manifest.json > /dev/null
+
       - name: Package tester guide and notices
         shell: bash
         run: |
@@ -223,6 +246,7 @@ jobs:
           cp docs/release-acceptance-checklist.md build/ReleaseDocs/RELEASE-ACCEPTANCE-CHECKLIST.md
           cp docs/asset-license-inventory.md build/ReleaseDocs/ASSET-LICENSE-INVENTORY.md
           cp LICENSES/GODOT_ENGINE_LICENSE.txt build/ReleaseDocs/GODOT_ENGINE_LICENSE.txt
+          cp docs/release-manifest.md build/ReleaseDocs/BUILD-MANIFEST-SCHEMA.md
 
       - name: Upload desktop build artifacts
         uses: actions/upload-artifact@v4
@@ -280,6 +304,27 @@ jobs:
             exit 1
           }
 
+      - name: Generate and validate build manifest
+        shell: pwsh
+        run: |
+          $manifest = [ordered]@{
+            schema_version = 1
+            project_name = "Sunshine State"
+            project_version = "0.1.0"
+            commit_sha = $env:GITHUB_SHA
+            workflow_run_id = $env:GITHUB_RUN_ID
+            workflow_run_attempt = $env:GITHUB_RUN_ATTEMPT
+            workflow_url = "https://github.com/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
+            engine_version = "4.7.2-stable"
+            platform_targets = @("Windows Desktop")
+            checks_performed = @("Windows export", "Windows headless runtime smoke")
+            generated_at_utc = [DateTime]::UtcNow.ToString("o")
+          }
+          $manifest | ConvertTo-Json -Depth 4 | Set-Content -Encoding utf8 build/build-manifest.json
+          $writtenManifest = Get-Content -Raw build/build-manifest.json | ConvertFrom-Json
+          if ($writtenManifest.commit_sha -ne $env:GITHUB_SHA) { throw "Build manifest commit SHA does not match the checked out revision." }
+          if ($writtenManifest.schema_version -ne 1) { throw "Unsupported build manifest schema." }
+
       - name: Package tester guide and notices
         shell: pwsh
         run: |
@@ -288,6 +333,7 @@ jobs:
           Copy-Item docs/release-acceptance-checklist.md build/ReleaseDocs/RELEASE-ACCEPTANCE-CHECKLIST.md
           Copy-Item docs/asset-license-inventory.md build/ReleaseDocs/ASSET-LICENSE-INVENTORY.md
           Copy-Item LICENSES/GODOT_ENGINE_LICENSE.txt build/ReleaseDocs/GODOT_ENGINE_LICENSE.txt
+          Copy-Item docs/release-manifest.md build/ReleaseDocs/BUILD-MANIFEST-SCHEMA.md
 
       - name: Upload Windows build artifact
         uses: actions/upload-artifact@v4
