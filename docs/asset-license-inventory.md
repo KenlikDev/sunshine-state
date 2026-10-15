@@ -2,7 +2,7 @@
 
 **Status:** Initial inventory for the greybox prototype; not final release approval.
 **Last repository scan:** 2026-10-15
-**Baseline scan revision:** `d9d22a7054805dbab936fb246b2b3226b08cd518` (before the procedural audio service was added)
+**Baseline scan revision:** `9a7ce08880da30cc90d41538eaa21610d2884c3b` (includes the procedural audio service and current UI/settings prototypes)
 
 ## Current project-authored content
 
