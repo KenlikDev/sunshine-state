@@ -52,6 +52,8 @@ jobs:
             scripts/ui/settings_service.gd \
             scripts/ui/main_menu.gd \
             scripts/ui/pause_menu.gd \
+            scripts/ui/input_bindings_panel.gd \
+            scenes/ui/input_bindings_panel.tscn \
             scenes/ui/main_menu.tscn \
             scenes/ui/pause_menu.tscn \
             tests/test_ui_flow.gd \
