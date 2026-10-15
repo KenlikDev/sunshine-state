@@ -253,7 +253,11 @@ func _is_valid_payload(payload: Dictionary) -> bool:
 				push_warning("Save validation failed: vehicle ID is invalid.")
 				return false
 			var health_value: Variant = vehicle_health[vehicle_id]
-			if typeof(health_value) != TYPE_INT or int(health_value) < 0 or int(health_value) > 500:
+			if typeof(health_value) != TYPE_INT and typeof(health_value) != TYPE_FLOAT:
+				push_warning("Save validation failed: vehicle health is not numeric.")
+				return false
+			var health_number: float = float(health_value)
+			if health_number != health_number or health_number < 0.0 or health_number > 500.0 or health_number != roundf(health_number):
 				push_warning("Save validation failed: vehicle health is outside the valid integer range.")
 				return false
 	return true
