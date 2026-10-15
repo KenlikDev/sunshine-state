@@ -46,7 +46,7 @@ Cover pure logic and state transitions:
 - single-driver ownership and input ownership
 - throttle, reverse, steering, braking, and recovery checks
 - vehicle collision feedback, recovery clearance, upright reset, and safe exit positioning
-- deterministic day/night lighting and sky-state changes, pedestrian route progression, alert-state response, bounded agent population, traffic route progression, junction yielding, obstacle recovery, and district-boundary checks
+- deterministic day/night lighting and sky-state changes, pedestrian route progression and alert response, crossing progress beside a stationary traffic body, bounded agent population, traffic route progression, junction yielding, on/off-screen physical stall recovery, and district-boundary checks
 - crime event severity and wanted-level transitions
 - police detection, pursuit, occlusion/search, reacquisition, decay, and explicit wanted clearing
 - weapon raycasts, damage application, rate-of-fire, ammunition/reload, and aim state
