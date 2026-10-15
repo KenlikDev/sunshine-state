@@ -299,10 +299,21 @@ func _on_ammo_changed(_current_ammo: int, _reserve_ammo: int) -> void:
 
 
 
+func _get_guidance_origin() -> Node3D:
+	if not is_instance_valid(_player):
+		return null
+	if _player.has_method("get_controlled_actor"):
+		var controlled_actor: Variant = _player.call("get_controlled_actor")
+		if controlled_actor is Node3D and is_instance_valid(controlled_actor):
+			return controlled_actor as Node3D
+	return _player
+
+
 func _refresh_waypoint_status() -> void:
 	if not is_instance_valid(_waypoint_label):
 		return
-	if not is_instance_valid(_player):
+	var guidance_origin: Node3D = _get_guidance_origin()
+	if not is_instance_valid(guidance_origin):
 		_waypoint_label.text = ""
 		return
 
@@ -311,7 +322,7 @@ func _refresh_waypoint_status() -> void:
 		_waypoint_label.text = ""
 		return
 
-	var direction: Vector3 = target.global_position - _player.global_position
+	var direction: Vector3 = target.global_position - guidance_origin.global_position
 	direction.y = 0.0
 	var distance_meters: int = roundi(direction.length())
 	if direction.length_squared() < 0.01:
@@ -319,7 +330,7 @@ func _refresh_waypoint_status() -> void:
 		return
 
 	var target_angle: float = atan2(-direction.x, -direction.z)
-	var relative_angle: float = wrapf(target_angle - _player.global_rotation.y, -PI, PI)
+	var relative_angle: float = wrapf(target_angle - guidance_origin.global_rotation.y, -PI, PI)
 	var relative_degrees: float = rad_to_deg(relative_angle)
 	var direction_arrow: String = "↑"
 	if relative_degrees >= -22.5 and relative_degrees <= 22.5:
