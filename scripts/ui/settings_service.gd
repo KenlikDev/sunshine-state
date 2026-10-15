@@ -161,6 +161,10 @@ func get_binding_keycode(action: StringName) -> int:
 func get_binding_label(action: StringName) -> String:
 	var physical_keycode: int = get_binding_keycode(action)
 	if physical_keycode <= 0:
+		if action == &"fire_weapon":
+			return Localization.translate_key("BINDING_MOUSE_LEFT")
+		if action == &"aim_weapon":
+			return Localization.translate_key("BINDING_MOUSE_RIGHT")
 		return Localization.translate_key("SETTINGS_BINDING_UNASSIGNED")
 	return OS.get_keycode_string(physical_keycode)
 
@@ -264,6 +268,8 @@ func _cache_default_key_bindings() -> void:
 			if event is InputEventKey and (event as InputEventKey).physical_keycode > 0:
 				_default_key_bindings[action] = int((event as InputEventKey).physical_keycode)
 				break
+		if not _default_key_bindings.has(action):
+			_default_key_bindings[action] = 0
 
 
 func _load_saved_key_bindings(config: ConfigFile) -> void:
@@ -293,9 +299,10 @@ func _replace_keyboard_binding(action: StringName, physical_keycode: int) -> voi
 	for event: InputEvent in InputMap.action_get_events(action).duplicate():
 		if event is InputEventKey:
 			InputMap.action_erase_event(action, event)
-	var new_event := InputEventKey.new()
-	new_event.physical_keycode = physical_keycode
-	InputMap.action_add_event(action, new_event)
+	if physical_keycode > 0:
+		var new_event := InputEventKey.new()
+		new_event.physical_keycode = physical_keycode
+		InputMap.action_add_event(action, new_event)
 
 
 func _apply_master_volume() -> void:
