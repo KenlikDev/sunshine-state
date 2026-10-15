@@ -26,3 +26,7 @@
 
 ## Asset licensing
 Maintain an inventory for every external asset. Do not commit ripped game assets, leaked proprietary assets, unlicensed music, or copied brand/trademark designs. Keep provenance evidence with the asset record.
+
+## Current inventory
+
+The current committed resource baseline is tracked in [the asset and license inventory](asset-license-inventory.md). Before adding any third-party model, texture, image, font, sound, music, plugin, or code dependency, record its source URL, creator, license and required attribution, modification status, and included file paths. An asset must not enter the build until the license terms have been reviewed for the intended use and redistribution.

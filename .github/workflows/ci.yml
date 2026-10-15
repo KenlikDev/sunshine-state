@@ -37,6 +37,8 @@ jobs:
             docs/art-pipeline.md \
             docs/testing-strategy.md \
             docs/release-builds.md \
+            docs/asset-license-inventory.md \
+            LICENSES/GODOT_ENGINE_LICENSE.txt \
             export_presets.cfg \
             docs/performance-budgets.md \
             docs/source-register.md \

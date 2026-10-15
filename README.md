@@ -44,6 +44,7 @@ The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). Th
 - [Missions, economy, and persistence](docs/progression-system.md)
 - [Main menu, pause flow, and settings](docs/ui-flow.md)
 - [Art and asset pipeline](docs/art-pipeline.md)
+- [Asset and license inventory](docs/asset-license-inventory.md)
 - [Testing strategy](docs/testing-strategy.md)
 - [Performance budgets](docs/performance-budgets.md)
 - [Desktop export and release smoke tests](docs/release-builds.md)
