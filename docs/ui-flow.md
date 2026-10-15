@@ -20,8 +20,8 @@ The bilingual English/Russian key table is maintained as CSV-formatted text in `
 
 ## Automated coverage
 
-The UI-flow regression validates menu loading, Continue disabled without a save and enabled with one, new-game confirmation/cancel without losing in-memory progression, settings panel open/close, locale and sensitivity persistence, resolution/fullscreen/master/music/effects-volume/keyboard-binding persistence, procedural sound generation, conflict rejection, default reset, pause state, opening settings while paused, and returning to live gameplay.
+The UI-flow regression validates menu loading, Continue disabled without a save and enabled with one, new-game confirmation/cancel without losing in-memory progression, settings panel open/close, locale and sensitivity persistence, resolution/fullscreen/master/music/effects-volume/keyboard-binding persistence, gamepad axis/button mappings for movement, action controls, and UI navigation, procedural sound generation, conflict rejection, default reset, pause state, opening settings while paused, and returning to live gameplay.
 
 ## Remaining work
 
-Controller navigation, accessibility settings, polished visual transitions, production-quality sound/music and mixing, and packaged-build UX review remain outstanding. The presentation increment is not a release-ready UI.
+Keyboard and gamepad focus-navigation/action mappings are configured, and the HUD exposes controller guidance while a pad is connected. Physical controller testing across Windows/Linux hardware, accessibility settings, polished visual transitions, production-quality sound/music and mixing, and packaged-build UX review remain outstanding. The presentation increment is not a release-ready UI.
