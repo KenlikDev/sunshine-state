@@ -4,7 +4,7 @@ Sunshine State is an original, single-player, third-person open-world crime-acti
 
 ## Project status
 
-**Current milestone:** M6 — menu/pause, persistent settings, procedural ambient music and gameplay/UI sound effects, with presentation review still in progress.
+**Current milestone:** M6 — menu/pause, persistent control/display/audio settings, accessible UI scaling and high-contrast HUD, procedural ambient music and gameplay/UI sound effects, with presentation review still in progress.
 
 The current branch contains a controllable third-person character, a bounded greybox coastal district with a real-time day-night lighting cycle, an information board, an English/Russian HUD, three drivable vehicle prototypes (sedan, compact coupe, and utility pickup), four route-following pedestrians, four background traffic agents, and an initial wanted/police loop, one raycast-based sidearm, health/damage, automatic player respawn, and an initial three-mission/economy/save-load loop. This is an intermediate prototype, not the complete MVP.
 
