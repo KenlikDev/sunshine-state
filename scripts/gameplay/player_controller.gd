@@ -36,6 +36,33 @@ func _ready() -> void:
 	_interaction_ray.enabled = true
 
 
+func _process(delta: float) -> void:
+	if _is_incapacitated or is_instance_valid(_current_vehicle):
+		return
+	var connected_joypads: Array[int] = Input.get_connected_joypads()
+	if connected_joypads.is_empty():
+		return
+
+	var device_id: int = connected_joypads[0]
+	var look_x: float = _apply_look_deadzone(Input.get_joy_axis(device_id, JOY_AXIS_RIGHT_X))
+	var look_y: float = _apply_look_deadzone(Input.get_joy_axis(device_id, JOY_AXIS_RIGHT_Y))
+	if absf(look_x) > 0.0:
+		rotate_y(-look_x * 2.5 * delta)
+	if absf(look_y) > 0.0:
+		_camera_pivot.rotation.x = clampf(
+			_camera_pivot.rotation.x - look_y * 2.0 * delta,
+			deg_to_rad(-55.0),
+			deg_to_rad(35.0)
+		)
+
+
+func _apply_look_deadzone(value: float) -> float:
+	const DEADZONE: float = 0.16
+	if absf(value) <= DEADZONE:
+		return 0.0
+	return signf(value) * (absf(value) - DEADZONE) / (1.0 - DEADZONE)
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if _is_incapacitated:
 		return
