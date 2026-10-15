@@ -124,6 +124,7 @@ func _build_ui() -> void:
 		var change_button := Button.new()
 		change_button.name = "ChangeButton"
 		change_button.custom_minimum_size = Vector2(120.0, 32.0)
+		change_button.pressed.connect(Callable(AudioService, "play_ui_click"))
 		change_button.pressed.connect(_start_rebind.bind(action))
 		row.add_child(change_button)
 
@@ -146,12 +147,14 @@ func _build_ui() -> void:
 	_reset_button = Button.new()
 	_reset_button.name = "ResetDefaultsButton"
 	_reset_button.custom_minimum_size = Vector2(145.0, 40.0)
+	_reset_button.pressed.connect(Callable(AudioService, "play_ui_click"))
 	_reset_button.pressed.connect(_reset_defaults)
 	footer.add_child(_reset_button)
 
 	_close_button = Button.new()
 	_close_button.name = "CloseBindingsButton"
 	_close_button.custom_minimum_size = Vector2(100.0, 40.0)
+	_close_button.pressed.connect(Callable(AudioService, "play_ui_click"))
 	_close_button.pressed.connect(_close_panel)
 	footer.add_child(_close_button)
 
