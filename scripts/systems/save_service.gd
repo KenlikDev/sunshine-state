@@ -10,6 +10,8 @@ const SCHEMA_VERSION: int = 1
 var _autosave_queued: bool = false
 var _is_loading: bool = false
 var _pending_world_time_hours: float = -1.0
+var _pending_vehicle_health: Dictionary = {}
+var _restoring_vehicle_health: bool = false
 
 
 func _ready() -> void:
@@ -124,11 +126,65 @@ func validate_save_file(path: String) -> bool:
 	return not _read_valid_payload(path).is_empty()
 
 
+func register_vehicle(vehicle: Node) -> void:
+	if not is_instance_valid(vehicle) or not vehicle.has_signal("vehicle_health_changed"):
+		return
+	var callback: Callable = Callable(self, "_on_vehicle_health_changed")
+	if not vehicle.is_connected("vehicle_health_changed", callback):
+		vehicle.connect("vehicle_health_changed", callback)
+
+
+func _capture_vehicle_health() -> Dictionary:
+	var saved_health: Dictionary = {}
+	for candidate: Node in get_tree().get_nodes_in_group("vehicles"):
+		if not is_instance_valid(candidate) or not candidate.has_method("get_vehicle_health"):
+			continue
+		var id_value: Variant = candidate.get("save_id")
+		if typeof(id_value) != TYPE_STRING:
+			continue
+		var vehicle_id: String = String(id_value)
+		if vehicle_id.is_empty():
+			continue
+		if saved_health.has(vehicle_id):
+			push_warning("Duplicate vehicle save ID ignored: %s" % vehicle_id)
+			continue
+		saved_health[vehicle_id] = int(candidate.call("get_vehicle_health"))
+	return saved_health
+
+
+func restore_pending_vehicle_health() -> bool:
+	if _pending_vehicle_health.is_empty():
+		return false
+	if not is_instance_valid(get_tree().get_first_node_in_group("gameplay_scene")):
+		return false
+
+	_restoring_vehicle_health = true
+	var restored_any: bool = false
+	for candidate: Node in get_tree().get_nodes_in_group("vehicles"):
+		if not is_instance_valid(candidate) or not candidate.has_method("restore_vehicle_health"):
+			continue
+		var id_value: Variant = candidate.get("save_id")
+		if typeof(id_value) != TYPE_STRING:
+			continue
+		var vehicle_id: String = String(id_value)
+		if vehicle_id.is_empty() or not _pending_vehicle_health.has(vehicle_id):
+			continue
+		var health_value: Variant = _pending_vehicle_health[vehicle_id]
+		if typeof(health_value) != TYPE_INT:
+			continue
+		if bool(candidate.call("restore_vehicle_health", int(health_value))):
+			restored_any = true
+	_restoring_vehicle_health = false
+	_pending_vehicle_health.clear()
+	return restored_any
+
+
 func _build_payload() -> Dictionary:
 	var world_state: Dictionary = MissionService.get_world_state()
 	var day_night_cycle: Node = _get_day_night_cycle()
 	if is_instance_valid(day_night_cycle) and day_night_cycle.has_method("get_time_of_day"):
 		world_state["time_of_day_hours"] = float(day_night_cycle.call("get_time_of_day"))
+	world_state["vehicle_health"] = _capture_vehicle_health()
 	return {
 		"schema_version": SCHEMA_VERSION,
 		"timestamp_utc": Time.get_datetime_string_from_system(true),
@@ -186,6 +242,20 @@ func _is_valid_payload(payload: Dictionary) -> bool:
 		if time_hours < 0.0 or time_hours >= 24.0 or time_hours != time_hours:
 			push_warning("Save validation failed: world time is outside the valid day range.")
 			return false
+	if world_state.has("vehicle_health"):
+		var vehicle_health_value: Variant = world_state["vehicle_health"]
+		if not vehicle_health_value is Dictionary:
+			push_warning("Save validation failed: vehicle health is not a dictionary.")
+			return false
+		var vehicle_health: Dictionary = vehicle_health_value
+		for vehicle_id: Variant in vehicle_health.keys():
+			if typeof(vehicle_id) != TYPE_STRING or String(vehicle_id).is_empty():
+				push_warning("Save validation failed: vehicle ID is invalid.")
+				return false
+			var health_value: Variant = vehicle_health[vehicle_id]
+			if typeof(health_value) != TYPE_INT or int(health_value) < 0 or int(health_value) > 500:
+				push_warning("Save validation failed: vehicle health is outside the valid integer range.")
+				return false
 	return true
 
 
@@ -201,9 +271,15 @@ func _apply_payload(payload: Dictionary) -> bool:
 	var world_state: Dictionary = payload["world"]
 	if world_state.has("time_of_day_hours"):
 		_pending_world_time_hours = float(world_state["time_of_day_hours"])
+	_pending_vehicle_health.clear()
+	var saved_vehicle_health: Variant = world_state.get("vehicle_health", {})
+	if saved_vehicle_health is Dictionary:
+		_pending_vehicle_health = saved_vehicle_health.duplicate(true)
 	var day_night_cycle: Node = _get_day_night_cycle()
 	if is_instance_valid(day_night_cycle):
 		restore_pending_world_time(day_night_cycle)
+	if is_instance_valid(get_tree().get_first_node_in_group("gameplay_scene")):
+		restore_pending_vehicle_health()
 	return true
 
 
@@ -256,6 +332,12 @@ func _on_crime_reported(
 
 
 func _on_wanted_level_changed(_level: int) -> void:
+	_queue_autosave()
+
+
+func _on_vehicle_health_changed(_current_health: int, _max_health: int) -> void:
+	if _restoring_vehicle_health:
+		return
 	_queue_autosave()
 
 
