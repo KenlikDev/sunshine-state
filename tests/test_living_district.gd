@@ -150,6 +150,10 @@ func _run_tests() -> void:
 			# avoidance is intentionally disabled and physical progress must detect stalls.
 			recovery_traffic.global_position = Vector3(-65.0, 0.65, -2.0)
 			recovery_traffic.global_rotation = Vector3(0.0, -PI / 2.0, 0.0)
+			recovery_traffic.set("_route_index", 1)
+			recovery_traffic.set("_route_direction", 1)
+			recovery_traffic.set("_stalled_seconds", 0.0)
+			recovery_traffic.set("_reverse_remaining", 0.0)
 			player.global_position = Vector3(0.0, 0.0, 12.0)
 			var offscreen_obstacle := StaticBody3D.new()
 			offscreen_obstacle.name = "OffscreenTrafficRecoveryObstacle"
