@@ -212,6 +212,60 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  windows-runtime-smoke:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Godot and Windows export templates
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.7.2
+          use-dotnet: false
+          include-templates: true
+
+      - name: Import and validate project resources
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force build | Out-Null
+          godot --headless --editor --path . --quit 2>&1 | Tee-Object -FilePath build/editor-import.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (Select-String -Path build/editor-import.log -Pattern 'SCRIPT ERROR:|ERROR:') {
+            Write-Error "Godot reported script or resource errors during import."
+            exit 1
+          }
+
+      - name: Export Windows Desktop package
+        shell: pwsh
+        run: |
+          godot --headless --path . --export-release "Windows Desktop" build/SunshineState.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (-not (Test-Path build/SunshineState.exe) -or (Get-Item build/SunshineState.exe).Length -le 0) {
+            Write-Error "Windows executable was not generated."
+            exit 1
+          }
+
+      - name: Smoke-test exported Windows gameplay without the editor
+        shell: pwsh
+        run: |
+          $env:SUNSHINE_STATE_SMOKE_TEST = "1"
+          & build/SunshineState.exe --headless --quit-after 120 2>&1 | Tee-Object -FilePath build/windows-smoke.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (Select-String -Path build/windows-smoke.log -Pattern 'SCRIPT ERROR:|ERROR:') {
+            Write-Error "The exported Windows application reported runtime errors."
+            exit 1
+          }
+
+      - name: Upload Windows build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sunshine-state-windows-build
+          path: build/SunshineState.exe
+          if-no-files-found: error
+          retention-days: 7
+
   living-district-soak:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_living_district_soak }}
     runs-on: ubuntu-latest
