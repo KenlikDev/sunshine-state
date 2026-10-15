@@ -42,6 +42,7 @@ Cover pure logic and state transitions:
 - player movement and camera input, interactable raycast discovery, and interaction feedback
 - world collision and boundary recovery
 - vehicle interaction raycast and entry/exit handoff across sedan, compact coupe, and pickup
+- mission waypoint origin switches from the on-foot player to the occupied vehicle and back after exit, so distance and direction remain correct while driving
 - distinct vehicle tuning, physical braking deceleration, and steering path change
 - single-driver ownership and input ownership
 - throttle, reverse, steering, braking, and recovery checks
