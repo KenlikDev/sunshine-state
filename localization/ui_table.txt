@@ -128,3 +128,4 @@ SETTINGS_CONTROLLER_LOOK_SENSITIVITY_VALUE,"Controller look sensitivity: %0.2f",
 SETTINGS_INVERT_CONTROLLER_Y,"Invert controller look Y axis","Инвертировать вертикальную ось камеры контроллера"
 SETTINGS_UI_SCALE_VALUE,"UI scale: %d%%","Масштаб интерфейса: %d%%"
 SETTINGS_HIGH_CONTRAST_HUD,"High-contrast HUD","Контрастный игровой интерфейс"
+HUD_WAYPOINT_DISTANCE,"Waypoint %s · %dm","Цель %s · %dм"

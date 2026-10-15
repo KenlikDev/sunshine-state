@@ -3,6 +3,8 @@ extends CanvasLayer
 var _player: Node3D
 var _title_label: Label
 var _objective_label: Label
+var _waypoint_label: Label
+var _waypoint_refresh_timer: float = 0.0
 var _controls_label: Label
 var _prompt_label: Label
 var _status_label: Label
@@ -51,6 +53,13 @@ func _ready() -> void:
 	_objective_label.add_theme_font_size_override("font_size", 17)
 	_objective_label.add_theme_color_override("font_color", Color(0.88, 0.91, 0.92))
 	stack.add_child(_objective_label)
+
+	_waypoint_label = Label.new()
+	_waypoint_label.name = "MissionWaypoint"
+	_waypoint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_waypoint_label.add_theme_font_size_override("font_size", 15)
+	_waypoint_label.add_theme_color_override("font_color", Color(0.58, 0.95, 0.77))
+	stack.add_child(_waypoint_label)
 
 	_controls_label = Label.new()
 	_controls_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -162,8 +171,17 @@ func bind_player(player: Node3D) -> void:
 	EconomyService.inventory_changed.connect(_on_economy_inventory_changed)
 	_prompt_key = String(_player.call("get_current_interaction_prompt_key"))
 	_refresh_interaction_prompt()
+	_refresh_waypoint_status()
 	_refresh_combat_status()
 	_refresh_wanted_status()
+
+
+func _process(delta: float) -> void:
+	_waypoint_refresh_timer += delta
+	if _waypoint_refresh_timer < 0.2:
+		return
+	_waypoint_refresh_timer = 0.0
+	_refresh_waypoint_status()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -198,6 +216,7 @@ func _refresh_localized_texts() -> void:
 	_refresh_interaction_prompt()
 	_refresh_wanted_status()
 	_refresh_mission_status()
+	_refresh_waypoint_status()
 
 
 func _refresh_interaction_prompt() -> void:
@@ -280,12 +299,72 @@ func _on_ammo_changed(_current_ammo: int, _reserve_ammo: int) -> void:
 
 
 
+func _get_guidance_origin() -> Node3D:
+	if not is_instance_valid(_player):
+		return null
+	if _player.has_method("get_controlled_actor"):
+		var controlled_actor: Variant = _player.call("get_controlled_actor")
+		if controlled_actor is Node3D and is_instance_valid(controlled_actor):
+			return controlled_actor as Node3D
+	return _player
+
+
+func _refresh_waypoint_status() -> void:
+	if not is_instance_valid(_waypoint_label):
+		return
+	var guidance_origin: Node3D = _get_guidance_origin()
+	if not is_instance_valid(guidance_origin):
+		_waypoint_label.text = ""
+		return
+
+	var target: Node3D = MissionService.get_active_target_node()
+	if not is_instance_valid(target):
+		_waypoint_label.text = ""
+		return
+
+	var direction: Vector3 = target.global_position - guidance_origin.global_position
+	direction.y = 0.0
+	var distance_meters: int = roundi(direction.length())
+	if direction.length_squared() < 0.01:
+		_waypoint_label.text = Localization.format_key("HUD_WAYPOINT_DISTANCE", ["●", 0])
+		return
+
+	var target_angle: float = atan2(-direction.x, -direction.z)
+	var relative_angle: float = wrapf(target_angle - guidance_origin.global_rotation.y, -PI, PI)
+	var relative_degrees: float = rad_to_deg(relative_angle)
+	var direction_arrow: String = "↑"
+	if relative_degrees >= -22.5 and relative_degrees <= 22.5:
+		direction_arrow = "↑"
+	elif relative_degrees < -22.5 and relative_degrees >= -67.5:
+		direction_arrow = "↗"
+	elif relative_degrees < -67.5 and relative_degrees >= -112.5:
+		direction_arrow = "→"
+	elif relative_degrees < -112.5 and relative_degrees >= -157.5:
+		direction_arrow = "↘"
+	elif relative_degrees < -157.5:
+		direction_arrow = "↓"
+	elif relative_degrees > 22.5 and relative_degrees <= 67.5:
+		direction_arrow = "↖"
+	elif relative_degrees > 67.5 and relative_degrees <= 112.5:
+		direction_arrow = "←"
+	elif relative_degrees > 112.5 and relative_degrees <= 157.5:
+		direction_arrow = "↙"
+	else:
+		direction_arrow = "↓"
+
+	_waypoint_label.text = Localization.format_key("HUD_WAYPOINT_DISTANCE", [
+		direction_arrow,
+		distance_meters
+	])
+
+
 func _refresh_mission_status() -> void:
 	if not is_instance_valid(_objective_label):
 		return
 	var mission: Dictionary = MissionService.get_active_mission()
 	if mission.is_empty():
 		_objective_label.text = Localization.translate_key("HUD_ALL_MISSIONS_COMPLETE")
+		_refresh_waypoint_status()
 		return
 
 	var title: String = Localization.translate_key(String(mission.get("title_key", "HUD_OBJECTIVE")))
@@ -294,6 +373,7 @@ func _refresh_mission_status() -> void:
 	_objective_label.text = "%s\n%s" % [title, objective]
 	if state == "FAILED":
 		_objective_label.text += "\n" + Localization.translate_key("HUD_MISSION_FAILED_HINT")
+	_refresh_waypoint_status()
 
 
 func _on_mission_state_changed(_mission_id: String, _state: String) -> void:

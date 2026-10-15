@@ -53,6 +53,23 @@ func get_active_mission() -> Dictionary:
 	return result
 
 
+func get_active_target_node() -> Node3D:
+	var mission: Dictionary = get_active_mission()
+	if mission.is_empty():
+		return null
+
+	var target_name: String = String(mission.get("target_node_name", ""))
+	if target_name.is_empty():
+		return null
+	var gameplay_scene: Node = get_tree().get_first_node_in_group("gameplay_scene")
+	if not is_instance_valid(gameplay_scene):
+		return null
+	var world: Node = gameplay_scene.get_node_or_null("World")
+	if not is_instance_valid(world):
+		return null
+	return world.get_node_or_null(target_name) as Node3D
+
+
 func record_event(event_type: StringName, source_id: StringName) -> void:
 	if _current_mission_id.is_empty() or get_mission_state(_current_mission_id) != "ACTIVE":
 		return
@@ -264,7 +281,8 @@ func _load_definitions() -> void:
 		var mission_id: String = String(definition.get("id", ""))
 		var event_type: String = String(definition.get("objective_event", ""))
 		var source_id: String = String(definition.get("objective_source", ""))
-		if mission_id.is_empty() or event_type.is_empty() or source_id.is_empty() or seen_ids.has(mission_id):
+		var target_node_name: String = String(definition.get("target_node_name", ""))
+		if mission_id.is_empty() or event_type.is_empty() or source_id.is_empty() or target_node_name.is_empty() or seen_ids.has(mission_id):
 			push_error("Invalid or duplicate mission definition: %s" % mission_id)
 			continue
 		if int(definition.get("reward", -1)) < 0:

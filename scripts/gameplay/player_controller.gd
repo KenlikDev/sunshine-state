@@ -204,6 +204,12 @@ func is_in_vehicle() -> bool:
 	return is_instance_valid(_current_vehicle)
 
 
+func get_controlled_actor() -> Node3D:
+	if is_instance_valid(_current_vehicle):
+		return _current_vehicle
+	return self
+
+
 func get_current_interaction_prompt_key() -> String:
 	return _current_prompt_key
 
