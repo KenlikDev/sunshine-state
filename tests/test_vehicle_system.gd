@@ -55,10 +55,23 @@ func _run_tests() -> void:
 				String(player.call("get_current_interaction_prompt_key")) == "INTERACT_ENTER_VEHICLE",
 				"Player raycast finds the vehicle interaction area."
 			)
+			var hud: Node = instance.get_node_or_null("HUD")
+			_check(hud != null, "Gameplay creates the HUD for mission navigation.")
+			if hud != null:
+				_check(
+					hud.call("_get_guidance_origin") == player,
+					"Mission waypoint guidance follows the player while on foot."
+				)
 
 			player.call("_try_interact")
 			_check(bool(player.call("is_in_vehicle")), "Interaction transfers control to the vehicle.")
 			_check(bool(vehicle.call("has_driver")), "Driver ownership is assigned after entry.")
+			if hud != null:
+				_check(
+					hud.call("_get_guidance_origin") == vehicle,
+					"Mission waypoint guidance follows the driven vehicle while seated."
+				)
+				hud.call("_refresh_waypoint_status")
 			_check(
 				not (player.get_node("MeshInstance3D") as MeshInstance3D).visible,
 				"Player presentation is hidden while driving."
@@ -169,6 +182,12 @@ func _run_tests() -> void:
 			await get_tree().physics_frame
 			_check(not bool(player.call("is_in_vehicle")), "E transfers control back to the player.")
 			_check(not bool(vehicle.call("has_driver")), "Vehicle releases driver ownership on exit.")
+			if hud != null:
+				_check(
+					hud.call("_get_guidance_origin") == player,
+					"Mission waypoint guidance returns to the player after exiting."
+				)
+				hud.call("_refresh_waypoint_status")
 			_check(
 				(player.get_node("MeshInstance3D") as MeshInstance3D).visible,
 				"Player presentation is restored after exit."
