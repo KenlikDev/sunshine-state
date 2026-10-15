@@ -106,6 +106,10 @@ func _run_tests() -> void:
 			east_west.set("_stalled_seconds", 0.0)
 			east_west.set("_reverse_remaining", 0.0)
 			east_west.set("velocity", Vector3.ZERO)
+			_check(
+				bool(east_west.call("_is_timed_out_cross_traffic", north_south)),
+				"The yield timeout identifies a stalled north-south vehicle as cross traffic."
+			)
 			var yield_test_start_x: float = east_west.global_position.x
 			var observed_yield: bool = false
 			for _frame: int in range(540):
