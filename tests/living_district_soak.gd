@@ -19,7 +19,7 @@ func _ready() -> void:
 func _run_soak_test() -> void:
 	var main_scene: PackedScene = load("res://scenes/bootstrap/main.tscn")
 	if main_scene == null:
-		quit(1)
+		get_tree().quit(1)
 		return
 
 	var instance: Node = main_scene.instantiate()
