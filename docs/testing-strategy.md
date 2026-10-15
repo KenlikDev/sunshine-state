@@ -15,7 +15,7 @@ The GitHub Actions workflow performs these checks:
 8. Runs M5 progression checks for purchases, duplicate transactions/rewards, three-mission sequencing, first-aid consumption, vehicle repair, save round-trip including world time, numeric/range validation, and backup recovery.
 9. Runs M6 UI-flow checks for save availability, overwrite confirmation, language/settings persistence, keyboard remapping/conflicts/reset, standard gamepad mappings and UI navigation, independent controller camera sensitivity/invert-Y persistence, UI-scale and high-contrast HUD accessibility persistence, live contrast updates, pause/resume, pause-menu mission restart, and display/audio preferences.
 10. Checks required documents and changed-line whitespace.
-11. Builds Windows Desktop and Linux/X11 packages using pinned Godot 4.7.2 export templates, validates that both artifacts are non-empty, and launches both exported builds headlessly into the gameplay scene on Linux and Windows runners.
+11. Builds Windows Desktop and Linux/X11 packages using pinned Godot 4.7.2 export templates, validates the commit-bound build manifest, launches both exported binaries headlessly on their respective runners, and uploads each artifact with a run guide, acceptance checklist, asset/license inventory, and Godot license notice. This does not replace a clean-machine interactive playthrough.
 
 These checks verify project loading and selected contracts. They do not prove visual quality, feel, export success, or target-machine performance.
 
