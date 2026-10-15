@@ -3,6 +3,8 @@ extends Node
 signal locale_changed(locale: String)
 signal mouse_sensitivity_changed(value: float)
 signal master_volume_changed(value: float)
+signal music_volume_changed(value: float)
+signal effects_volume_changed(value: float)
 signal display_settings_changed(fullscreen: bool, resolution_index: int)
 signal binding_change_started(action: StringName)
 signal binding_change_completed(action: StringName, physical_keycode: int)
@@ -15,6 +17,8 @@ const DEFAULT_MOUSE_SENSITIVITY: float = 0.0025
 const MIN_MOUSE_SENSITIVITY: float = 0.001
 const MAX_MOUSE_SENSITIVITY: float = 0.01
 const DEFAULT_MASTER_VOLUME: float = 0.8
+const DEFAULT_MUSIC_VOLUME: float = 0.28
+const DEFAULT_EFFECTS_VOLUME: float = 0.75
 const RESOLUTION_PRESETS: Array[Vector2i] = [Vector2i(1280, 720), Vector2i(1600, 900), Vector2i(1920, 1080)]
 const REMAPPABLE_ACTIONS: Array[StringName] = [
 	&"move_forward", &"move_backward", &"move_left", &"move_right",
@@ -25,6 +29,8 @@ const REMAPPABLE_ACTIONS: Array[StringName] = [
 
 var _mouse_sensitivity: float = DEFAULT_MOUSE_SENSITIVITY
 var _master_volume: float = DEFAULT_MASTER_VOLUME
+var _music_volume: float = DEFAULT_MUSIC_VOLUME
+var _effects_volume: float = DEFAULT_EFFECTS_VOLUME
 var _is_fullscreen: bool = false
 var _resolution_index: int = 0
 var _default_key_bindings: Dictionary = {}
@@ -45,6 +51,8 @@ func _ready() -> void:
 			MAX_MOUSE_SENSITIVITY
 		)
 		_master_volume = clampf(float(config.get_value("audio", "master_volume", DEFAULT_MASTER_VOLUME)), 0.0, 1.0)
+		_music_volume = clampf(float(config.get_value("audio", "music_volume", DEFAULT_MUSIC_VOLUME)), 0.0, 1.0)
+		_effects_volume = clampf(float(config.get_value("audio", "effects_volume", DEFAULT_EFFECTS_VOLUME)), 0.0, 1.0)
 		_is_fullscreen = bool(config.get_value("display", "fullscreen", false))
 		_resolution_index = clampi(int(config.get_value("display", "resolution_index", 0)), 0, RESOLUTION_PRESETS.size() - 1)
 		_load_saved_key_bindings(config)
@@ -98,6 +106,8 @@ func _save_settings() -> void:
 	config.set_value("display", "resolution_index", _resolution_index)
 	config.set_value("controls", "mouse_sensitivity", _mouse_sensitivity)
 	config.set_value("audio", "master_volume", _master_volume)
+	config.set_value("audio", "music_volume", _music_volume)
+	config.set_value("audio", "effects_volume", _effects_volume)
 	for action: StringName in _custom_key_bindings.keys():
 		config.set_value("input", String(action), int(_custom_key_bindings[action]))
 	var save_error: Error = config.save(SETTINGS_PATH)
@@ -118,6 +128,32 @@ func set_master_volume(value: float) -> void:
 	_apply_master_volume()
 	_save_settings()
 	master_volume_changed.emit(_master_volume)
+
+
+func get_music_volume() -> float:
+	return _music_volume
+
+
+func set_music_volume(value: float) -> void:
+	var next_value: float = clampf(value, 0.0, 1.0)
+	if is_equal_approx(_music_volume, next_value):
+		return
+	_music_volume = next_value
+	_save_settings()
+	music_volume_changed.emit(_music_volume)
+
+
+func get_effects_volume() -> float:
+	return _effects_volume
+
+
+func set_effects_volume(value: float) -> void:
+	var next_value: float = clampf(value, 0.0, 1.0)
+	if is_equal_approx(_effects_volume, next_value):
+		return
+	_effects_volume = next_value
+	_save_settings()
+	effects_volume_changed.emit(_effects_volume)
 
 
 func get_is_fullscreen() -> bool:
