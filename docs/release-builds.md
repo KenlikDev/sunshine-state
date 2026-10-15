@@ -2,7 +2,7 @@
 
 ## Supported development presets
 
-The committed `export_presets.cfg` defines two 64-bit desktop presets: **Windows Desktop** and **Linux/X11**. It contains no signing certificates, encryption keys, or per-machine credentials. Local export credentials, if ever added, belong in Godot's ignored credentials file and must not be committed.
+The committed `export_presets.cfg` defines two 64-bit desktop presets: **Windows Desktop** and **Linux/X11**. The non-resource export filter includes `*.txt` and `*.json`, which are loaded directly at runtime. The bilingual key table is stored as CSV-formatted plain text in `localization/ui_table.txt` so Godot's CSV translation importer does not convert it into a resource that `FileAccess` cannot open from the exported pack. The presets contain no signing certificates, encryption keys, or per-machine credentials. Local export credentials, if ever added, belong in Godot's ignored credentials file and must not be committed.
 
 The normal CI export job uses Godot 4.7.2 and installs the matching export templates. It creates both packages under `build/`, validates that the files are non-empty, and starts the exported Linux executable in headless mode without the editor. The job uploads both artifacts as `sunshine-state-desktop-builds` for seven days.
 
