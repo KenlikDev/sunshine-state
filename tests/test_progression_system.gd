@@ -257,6 +257,16 @@ func _run_tests() -> void:
 		not bool(SaveService.call("_is_valid_payload", invalid_vehicle_payload)),
 		"Save validation rejects out-of-range vehicle health."
 	)
+	var fractional_vehicle_payload: Dictionary = candidate_payload.duplicate(true)
+	var fractional_vehicle_world: Dictionary = fractional_vehicle_payload["world"]
+	var fractional_vehicle_health: Dictionary = fractional_vehicle_world["vehicle_health"]
+	fractional_vehicle_health["sedan"] = 65.5
+	fractional_vehicle_world["vehicle_health"] = fractional_vehicle_health
+	fractional_vehicle_payload["world"] = fractional_vehicle_world
+	_check(
+		not bool(SaveService.call("_is_valid_payload", fractional_vehicle_payload)),
+		"Save validation rejects fractional vehicle health while accepting whole-number JSON values."
+	)
 	var invalid_time_payload: Dictionary = candidate_payload.duplicate(true)
 	var invalid_time_world: Dictionary = invalid_time_payload["world"]
 	invalid_time_world["time_of_day_hours"] = 24.0
