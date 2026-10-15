@@ -170,9 +170,12 @@ func restore_pending_vehicle_health() -> bool:
 		if vehicle_id.is_empty() or not _pending_vehicle_health.has(vehicle_id):
 			continue
 		var health_value: Variant = _pending_vehicle_health[vehicle_id]
-		if typeof(health_value) != TYPE_INT:
+		if typeof(health_value) != TYPE_INT and typeof(health_value) != TYPE_FLOAT:
 			continue
-		if bool(candidate.call("restore_vehicle_health", int(health_value))):
+		var health_number: float = float(health_value)
+		if health_number != health_number or health_number < 0.0 or health_number > 500.0 or health_number != roundf(health_number):
+			continue
+		if bool(candidate.call("restore_vehicle_health", int(health_number))):
 			restored_any = true
 	_restoring_vehicle_health = false
 	_pending_vehicle_health.clear()
