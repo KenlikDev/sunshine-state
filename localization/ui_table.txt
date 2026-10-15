@@ -119,3 +119,5 @@ BINDING_RESTART_MISSION,"Restart mission","Перезапустить задан
 BINDING_TOGGLE_LANGUAGE,"Toggle interface language","Переключить язык интерфейса"
 BINDING_MOUSE_LEFT,"Mouse Button 1","Кнопка мыши 1"
 BINDING_MOUSE_RIGHT,"Mouse Button 2","Кнопка мыши 2"
+SETTINGS_MUSIC_VOLUME_VALUE,"Music volume: %d%%","Громкость музыки: %d%%"
+SETTINGS_EFFECTS_VOLUME_VALUE,"Effects volume: %d%%","Громкость эффектов: %d%%"
