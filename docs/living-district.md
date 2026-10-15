@@ -15,6 +15,7 @@ M3 introduces a small, fixed population of background pedestrians and road traff
 
 - Four traffic agents follow bounded north-south and east-west waypoint routes on the main crossroad.
 - Vehicles use kinematic collision bodies for predictable background movement; the player-drivable vehicles remain physics-based `VehicleBody3D` scenes.
+- Background traffic uses its own collision layer. The player and drivable vehicles include that layer in their masks, while pedestrians exclude it so a cross-traffic car cannot permanently pin an authored patrol at the junction. Traffic still detects shared world/player bodies and the traffic AI retains bounded stall recovery.
 - East-west traffic yields near the central junction while north-south traffic is approaching or crossing.
 - A forward obstacle ray causes an agent to wait; a sustained obstacle can trigger a short reverse-and-retry recovery.
 - At route endpoints, agents reverse their waypoint direction rather than spawning replacements.
@@ -23,7 +24,7 @@ M3 introduces a small, fixed population of background pedestrians and road traff
 
 - The current population is fixed at four pedestrians and four traffic vehicles. No timer-based or proximity-based spawning is enabled.
 - Distant agents use simpler movement updates and skip camera-proximity obstacle checks; agents near the camera or player use the full local behaviour.
-- Population counts are tested across repeated physics updates. This is an early stability check, not a claim that the 15-minute acceptance test has been completed.
+- Population counts are tested across repeated physics updates. Short regressions cover physical traffic stalls and pedestrian/traffic separation; these do not substitute for the full 15-minute acceptance soak.
 
 ## Automated checks
 
@@ -32,6 +33,8 @@ The M3 regression scene checks:
 - pedestrian route movement and alert-state response to a nearby player
 - road-route movement and district bounds
 - north-south right-of-way at the main junction
+- a pedestrian crossing alongside a stationary traffic body, ensuring the pedestrian keeps progressing
+- off-screen traffic recovery from physical blockage with the obstacle ray intentionally disabled
 
 ## Running the long-duration soak test
 
