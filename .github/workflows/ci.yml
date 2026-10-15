@@ -271,7 +271,7 @@ jobs:
           retention-days: 7
 
   living-district-soak:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_living_district_soak }}
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.run_living_district_soak) || (github.event_name == 'push' && github.ref == 'refs/heads/codex/m3-soak-pedestrian-diagnostics') }}
     runs-on: ubuntu-latest
     timeout-minutes: 17
     steps:
