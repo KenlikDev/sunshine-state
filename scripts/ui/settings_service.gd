@@ -10,6 +10,7 @@ signal binding_change_started(action: StringName)
 signal binding_change_completed(action: StringName, physical_keycode: int)
 signal binding_change_cancelled(action: StringName)
 signal binding_change_rejected(action: StringName, message_key: String)
+signal accessibility_changed(ui_scale: float, high_contrast_hud: bool)
 
 const SETTINGS_PATH: String = "user://sunshine_state_settings.cfg"
 const DEFAULT_LOCALE: String = "en"
@@ -22,6 +23,9 @@ const MAX_MOUSE_SENSITIVITY: float = 0.01
 const DEFAULT_MASTER_VOLUME: float = 0.8
 const DEFAULT_MUSIC_VOLUME: float = 0.28
 const DEFAULT_EFFECTS_VOLUME: float = 0.75
+const DEFAULT_UI_SCALE: float = 1.0
+const MIN_UI_SCALE: float = 0.8
+const MAX_UI_SCALE: float = 1.4
 const RESOLUTION_PRESETS: Array[Vector2i] = [Vector2i(1280, 720), Vector2i(1600, 900), Vector2i(1920, 1080)]
 const REMAPPABLE_ACTIONS: Array[StringName] = [
 	&"move_forward", &"move_backward", &"move_left", &"move_right",
@@ -36,6 +40,8 @@ var _invert_controller_look_y: bool = false
 var _master_volume: float = DEFAULT_MASTER_VOLUME
 var _music_volume: float = DEFAULT_MUSIC_VOLUME
 var _effects_volume: float = DEFAULT_EFFECTS_VOLUME
+var _ui_scale: float = DEFAULT_UI_SCALE
+var _high_contrast_hud: bool = false
 var _is_fullscreen: bool = false
 var _resolution_index: int = 0
 var _default_key_bindings: Dictionary = {}
@@ -64,6 +70,8 @@ func _ready() -> void:
 		_master_volume = clampf(float(config.get_value("audio", "master_volume", DEFAULT_MASTER_VOLUME)), 0.0, 1.0)
 		_music_volume = clampf(float(config.get_value("audio", "music_volume", DEFAULT_MUSIC_VOLUME)), 0.0, 1.0)
 		_effects_volume = clampf(float(config.get_value("audio", "effects_volume", DEFAULT_EFFECTS_VOLUME)), 0.0, 1.0)
+		_ui_scale = clampf(float(config.get_value("accessibility", "ui_scale", DEFAULT_UI_SCALE)), MIN_UI_SCALE, MAX_UI_SCALE)
+		_high_contrast_hud = bool(config.get_value("accessibility", "high_contrast_hud", false))
 		_is_fullscreen = bool(config.get_value("display", "fullscreen", false))
 		_resolution_index = clampi(int(config.get_value("display", "resolution_index", 0)), 0, RESOLUTION_PRESETS.size() - 1)
 		_load_saved_key_bindings(config)
@@ -73,6 +81,7 @@ func _ready() -> void:
 	_apply_mouse_sensitivity()
 	_apply_master_volume()
 	_apply_display_settings()
+	_apply_ui_scale()
 
 
 func get_locale() -> String:
@@ -148,12 +157,46 @@ func _save_settings() -> void:
 	config.set_value("audio", "master_volume", _master_volume)
 	config.set_value("audio", "music_volume", _music_volume)
 	config.set_value("audio", "effects_volume", _effects_volume)
+	config.set_value("accessibility", "ui_scale", _ui_scale)
+	config.set_value("accessibility", "high_contrast_hud", _high_contrast_hud)
 	for action: StringName in _custom_key_bindings.keys():
 		config.set_value("input", String(action), int(_custom_key_bindings[action]))
 	var save_error: Error = config.save(SETTINGS_PATH)
 	if save_error != OK:
 		push_warning("Could not save user settings (error %d)." % save_error)
 
+
+
+func get_ui_scale() -> float:
+	return _ui_scale
+
+
+func set_ui_scale(value: float) -> void:
+	var next_value: float = clampf(value, MIN_UI_SCALE, MAX_UI_SCALE)
+	if is_equal_approx(_ui_scale, next_value):
+		return
+	_ui_scale = next_value
+	_apply_ui_scale()
+	_save_settings()
+	accessibility_changed.emit(_ui_scale, _high_contrast_hud)
+
+
+func get_high_contrast_hud() -> bool:
+	return _high_contrast_hud
+
+
+func set_high_contrast_hud(enabled: bool) -> void:
+	if _high_contrast_hud == enabled:
+		return
+	_high_contrast_hud = enabled
+	_save_settings()
+	accessibility_changed.emit(_ui_scale, _high_contrast_hud)
+
+
+func _apply_ui_scale() -> void:
+	var root_window: Window = get_tree().root
+	if is_instance_valid(root_window):
+		root_window.content_scale_factor = _ui_scale
 
 
 func get_master_volume() -> float:
