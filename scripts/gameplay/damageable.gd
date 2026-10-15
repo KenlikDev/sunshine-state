@@ -21,6 +21,7 @@ func apply_damage(amount: int, instigator: Node = null) -> bool:
 		return false
 
 	current_health = maxi(0, current_health - amount)
+	AudioService.play_actor_hit()
 	health_changed.emit(current_health, max_health)
 	if current_health > 0:
 		return true
