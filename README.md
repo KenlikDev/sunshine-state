@@ -28,7 +28,7 @@ The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). Th
 - Escape: open/resume the pause menu; the mouse is recaptured when gameplay resumes
 - F5: save progress; F9: load progress; F8: restart an active/failed mission (also available in the pause menu)
 - F6: toggle English/Russian UI language (saved in settings); Settings includes keyboard remapping with conflict checks and reset defaults
-- Controller: left stick move/drive; right stick camera; L3 sprint; A jump/brake; X interact; LB aim; RB fire; Y recover vehicle; D-pad right reload; R3 first-aid kit; B pause/back
+- Controller: left stick move/drive; right stick camera; camera sensitivity and Y inversion configurable in Settings; L3 sprint; A jump/brake; X interact; LB aim; RB fire; Y recover vehicle; D-pad right reload; R3 first-aid kit; B pause/back
 
 ## Documentation
 
