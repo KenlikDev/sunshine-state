@@ -15,6 +15,8 @@ func _run_tests() -> void:
 	var original_locale: String = SettingsService.get_locale()
 	var original_sensitivity: float = SettingsService.get_mouse_sensitivity()
 	var original_master_volume: float = SettingsService.get_master_volume()
+	var original_music_volume: float = SettingsService.get_music_volume()
+	var original_effects_volume: float = SettingsService.get_effects_volume()
 	var original_fullscreen: bool = SettingsService.get_is_fullscreen()
 	var original_resolution_index: int = SettingsService.get_resolution_index()
 	var original_bindings: Dictionary = {}
@@ -23,6 +25,8 @@ func _run_tests() -> void:
 	SettingsService.set_locale("en")
 	SettingsService.set_mouse_sensitivity(0.0025)
 	SettingsService.set_master_volume(0.8)
+	SettingsService.set_music_volume(0.28)
+	SettingsService.set_effects_volume(0.75)
 	SettingsService.set_is_fullscreen(false)
 	SettingsService.set_resolution_index(0)
 
@@ -44,6 +48,8 @@ func _run_tests() -> void:
 	var resolution_option: OptionButton = menu.find_child("ResolutionOption", true, false) as OptionButton
 	var fullscreen_checkbox: CheckBox = menu.find_child("FullscreenCheckBox", true, false) as CheckBox
 	var master_volume_slider: HSlider = menu.find_child("MasterVolumeSlider", true, false) as HSlider
+	var music_volume_slider: HSlider = menu.find_child("MusicVolumeSlider", true, false) as HSlider
+	var effects_volume_slider: HSlider = menu.find_child("EffectsVolumeSlider", true, false) as HSlider
 	var keyboard_controls_button: Button = menu.find_child("KeyboardControlsButton", true, false) as Button
 	var bindings_panel: Control = menu.find_child("InputBindingsPanel", true, false) as Control
 	_check(title != null, "Main menu displays a title.")
@@ -53,6 +59,8 @@ func _run_tests() -> void:
 	_check(resolution_option != null, "Settings expose supported window resolutions.")
 	_check(fullscreen_checkbox != null, "Settings expose a fullscreen toggle.")
 	_check(master_volume_slider != null, "Settings expose a master-volume slider.")
+	_check(music_volume_slider != null, "Settings expose a separate music-volume slider.")
+	_check(effects_volume_slider != null, "Settings expose a separate effects-volume slider.")
 	_check(keyboard_controls_button != null, "Settings expose a keyboard-controls panel.")
 	_check(bindings_panel != null and not bindings_panel.visible, "Keyboard bindings panel begins closed.")
 	if title != null:
@@ -87,6 +95,12 @@ func _run_tests() -> void:
 			is_equal_approx(SettingsService.get_master_volume(), 0.65),
 			"Changing master volume updates AudioServer settings."
 		)
+	if music_volume_slider != null:
+		music_volume_slider.value = 35.0
+		_check(is_equal_approx(SettingsService.get_music_volume(), 0.35), "Music volume changes independently.")
+	if effects_volume_slider != null:
+		effects_volume_slider.value = 60.0
+		_check(is_equal_approx(SettingsService.get_effects_volume(), 0.60), "Effects volume changes independently.")
 	if resolution_option != null:
 		resolution_option.select(1)
 		resolution_option.item_selected.emit(1)
@@ -99,6 +113,8 @@ func _run_tests() -> void:
 	var display_config := ConfigFile.new()
 	_check(display_config.load(SettingsService.SETTINGS_PATH) == OK, "Display and audio settings are saved.")
 	_check(is_equal_approx(float(display_config.get_value("audio", "master_volume", 0.0)), 0.65), "Master volume persists.")
+	_check(is_equal_approx(float(display_config.get_value("audio", "music_volume", 0.0)), 0.35), "Music volume persists independently.")
+	_check(is_equal_approx(float(display_config.get_value("audio", "effects_volume", 0.0)), 0.60), "Effects volume persists independently.")
 	_check(int(display_config.get_value("display", "resolution_index", -1)) == 1, "Resolution choice persists.")
 	_check(bool(display_config.get_value("display", "fullscreen", false)), "Fullscreen state persists.")
 
@@ -224,6 +240,8 @@ func _run_tests() -> void:
 	SettingsService.set_locale(original_locale)
 	SettingsService.set_mouse_sensitivity(original_sensitivity)
 	SettingsService.set_master_volume(original_master_volume)
+	SettingsService.set_music_volume(original_music_volume)
+	SettingsService.set_effects_volume(original_effects_volume)
 	SettingsService.set_is_fullscreen(original_fullscreen)
 	SettingsService.set_resolution_index(original_resolution_index)
 	SaveService.delete_save_files()
