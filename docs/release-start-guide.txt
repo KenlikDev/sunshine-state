@@ -1,0 +1,76 @@
+SUNSHINE STATE — DEVELOPMENT BUILD
+=================================
+
+This is a development prototype built with Godot 4.7.2. It is not a final release candidate. The game currently uses greybox geometry and prototype gameplay systems.
+
+STARTING
+--------
+1. Extract the downloaded artifact to a folder where you have write access.
+2. On Windows, launch SunshineState.exe. On Linux, launch SunshineState.x86_64.
+3. Choose New Game for a fresh session or Continue to restore a valid saved game.
+4. If a valid save exists, New Game asks for confirmation before resetting the in-memory mission, money, inventory, and wanted state.
+
+DEFAULT KEYBOARD CONTROLS
+-------------------------
+W / A / S / D       Move on foot; accelerate/reverse and steer in a vehicle
+Left Shift          Sprint
+Space               Jump on foot; brake in a vehicle
+Mouse               Orbit the active camera
+E                   Interact; enter or exit a vehicle
+R                   Recover a blocked/overturned vehicle
+Left mouse button   Fire the weapon
+Right mouse button  Aim
+T                   Reload
+H                   Use one first-aid kit
+Escape              Open/resume the pause menu
+F5                  Save progress
+F9                  Load progress
+F8                  Restart the active/failed mission
+F6                  Toggle English/Russian interface language
+
+CONTROLLER
+----------
+Left stick          Move/drive/steer
+Right stick         Camera look
+L3                  Sprint
+A                   Jump/brake
+X                   Interact
+LB / RB             Aim / fire
+Y                   Recover vehicle
+D-pad right         Reload
+R3                  Use first-aid kit
+B                   Pause/back
+
+Controller layout, keyboard assignments, camera sensitivity, UI scale, HUD contrast, display mode, and audio levels can be configured in Settings. Some keyboard bindings may differ if they were remapped previously; the settings file is stored per user.
+
+FIRST PLAYTHROUGH
+-----------------
+1. Start a new game and inspect the district information board.
+2. Follow the mission waypoint to each objective and verify that guidance changes after objectives complete.
+3. Visit the marked property-damage site and report the incident.
+4. Purchase a first-aid kit from the vendor, take damage if needed, and test the kit with H.
+5. Enter each of the three prototype vehicles, drive, brake, steer, reverse, exit, collide with a barrier, and use vehicle recovery.
+6. Observe the wanted/police response to a crime report.
+7. Save, quit the application, relaunch it, and use Continue. Confirm that mission progress, economy, day-night time, and vehicle health are restored. Vehicle position, rotation, velocity, and individual NPC transforms are not saved.
+8. Open Settings and test language, input rebinding, high-contrast HUD, UI scale, resolution/fullscreen, and the separate music/effects levels.
+
+USER DATA
+---------
+The game stores data in the operating system's Godot user-data directory. Important filenames include:
+- sunshine_state_save.json — primary save
+- sunshine_state_save.bak — last known-good save backup
+- sunshine_state_settings.cfg — user preferences and custom keyboard bindings
+
+KNOWN LIMITATIONS
+-----------------
+- The district and vehicles are greybox prototypes; final art, animation and content are not included.
+- Mission, police, traffic, and combat systems are early single-player prototypes.
+- Vehicle health and repair state are persisted across save/load and Continue. Vehicle positions, rotations, velocities, and individual NPC transforms are not yet included in the saved world state.
+- Audio is procedural and needs subjective listening and mix review on real audio hardware.
+- The day-night cycle changes lighting only; weather, moon/stars, and time-based NPC schedules are not included.
+- CI export/smoke tests do not replace a full interactive playthrough on a clean machine.
+- The release acceptance checklist is supplied in ReleaseDocs/RELEASE-ACCEPTANCE-CHECKLIST.md.
+
+LICENSE AND FEEDBACK
+--------------------
+The current asset/license inventory and Godot Engine license notice are supplied in ReleaseDocs/. Review these notices before redistributing a build. Do not treat this prototype as ready for commercial release.

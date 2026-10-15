@@ -1,0 +1,41 @@
+[
+  {
+    "id": "district_orientation",
+    "title_key": "MISSION_ORIENTATION_TITLE",
+    "objective_key": "MISSION_ORIENTATION_OBJECTIVE",
+    "objective_event": "INTERACT",
+    "objective_source": "DISTRICT_BOARD",
+    "target_node_name": "DistrictInformationBoard",
+    "failure_event": "PLAYER_DEATH",
+    "failure_message_key": "MESSAGE_MISSION_FAILED",
+    "reward": 100,
+    "prerequisites": [],
+    "next_mission": "property_report"
+  },
+  {
+    "id": "property_report",
+    "title_key": "MISSION_PROPERTY_REPORT_TITLE",
+    "objective_key": "MISSION_PROPERTY_REPORT_OBJECTIVE",
+    "objective_event": "CRIME_REPORTED",
+    "objective_source": "GRAFFITI_SITE",
+    "target_node_name": "GraffitiSpot",
+    "failure_event": "PLAYER_DEATH",
+    "failure_message_key": "MESSAGE_MISSION_FAILED",
+    "reward": 200,
+    "prerequisites": ["district_orientation"],
+    "next_mission": "supply_run"
+  },
+  {
+    "id": "supply_run",
+    "title_key": "MISSION_SUPPLY_RUN_TITLE",
+    "objective_key": "MISSION_SUPPLY_RUN_OBJECTIVE",
+    "objective_event": "PURCHASE_ITEM",
+    "objective_source": "first_aid_kit",
+    "target_node_name": "FirstAidVendor",
+    "failure_event": "PLAYER_DEATH",
+    "failure_message_key": "MESSAGE_MISSION_FAILED",
+    "reward": 300,
+    "prerequisites": ["property_report"],
+    "next_mission": ""
+  }
+]

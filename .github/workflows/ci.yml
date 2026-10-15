@@ -1,0 +1,365 @@
+name: Repository checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - develop
+      - main
+      - "codex/**"
+  workflow_dispatch:
+    inputs:
+      run_living_district_soak:
+        description: "Run the 15-minute living-district stability test"
+        type: boolean
+        required: true
+        default: false
+
+jobs:
+  docs-and-policy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check required project documents
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in \
+            README.md \
+            docs/vision.md \
+            docs/mvp-scope.md \
+            docs/architecture.md \
+            docs/gameplay-systems.md \
+            docs/art-pipeline.md \
+            docs/testing-strategy.md \
+            docs/release-builds.md \
+            docs/release-start-guide.txt \
+            docs/release-manifest.md \
+            docs/release-acceptance-checklist.md \
+            docs/asset-license-inventory.md \
+            LICENSES/GODOT_ENGINE_LICENSE.txt \
+            export_presets.cfg \
+            docs/performance-budgets.md \
+            docs/source-register.md \
+            docs/roadmap.md \
+            docs/development-workflow.md \
+            docs/vertical-slice.md \
+            docs/vehicle-system.md \
+            docs/living-district.md \
+            docs/day-night-cycle.md \
+            scripts/world/day_night_cycle.gd \
+            docs/wanted-system.md \
+            docs/combat-system.md \
+            docs/progression-system.md \
+            docs/ui-flow.md \
+            scripts/ui/settings_service.gd \
+            scripts/ui/main_menu.gd \
+            scripts/ui/pause_menu.gd \
+            scripts/ui/input_bindings_panel.gd \
+            scenes/ui/input_bindings_panel.tscn \
+            scenes/ui/main_menu.tscn \
+            scenes/ui/pause_menu.tscn \
+            tests/test_ui_flow.gd \
+            tests/test_ui_flow.tscn \
+            scripts/systems/economy_service.gd \
+            scripts/systems/mission_service.gd \
+            scripts/systems/save_service.gd \
+            scripts/systems/audio_service.gd \
+            tests/test_audio_system.gd \
+            tests/test_audio_system.tscn \
+            scripts/gameplay/shop_interactable.gd \
+            data/items/items.json \
+            data/missions/missions.json \
+            scenes/economy/shop_interactable.tscn \
+            tests/test_progression_system.gd \
+            tests/test_progression_system.tscn \
+            scripts/gameplay/damageable.gd \
+            scripts/gameplay/weapon_controller.gd \
+            tests/test_combat_system.gd \
+            tests/test_combat_system.tscn \
+            scripts/gameplay/wanted_system.gd \
+            scripts/gameplay/police_controller.gd \
+            scripts/gameplay/crime_interactable.gd \
+            scenes/police/police_officer.tscn \
+            scenes/crime/graffiti_spot.tscn \
+            tests/test_wanted_system.gd \
+            tests/test_wanted_system.tscn \
+            scripts/gameplay/pedestrian_controller.gd \
+            scripts/gameplay/traffic_controller.gd \
+            scenes/pedestrians/pedestrian.tscn \
+            scenes/traffic/traffic_vehicle.tscn \
+            tests/test_living_district.gd \
+            tests/test_living_district.tscn \
+            tests/living_district_soak.gd \
+            tests/living_district_soak.tscn \
+            scenes/vehicles/compact.tscn \
+            scenes/vehicles/pickup.tscn \
+            localization/ui_table.txt \
+            scripts/ui/localization_service.gd \
+            tests/test_vertical_slice.gd \
+            tests/test_vertical_slice.tscn \
+            tests/test_vehicle_system.gd \
+            tests/test_vehicle_system.tscn
+          do
+            test -s "$file" || { echo "Missing or empty required file: $file"; exit 1; }
+          done
+
+      - name: Check changed lines for whitespace errors
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            git diff --check "origin/$GITHUB_BASE_REF...HEAD"
+          elif git rev-parse --verify HEAD^ >/dev/null 2>&1; then
+            git diff --check HEAD^ HEAD
+          else
+            git diff --check
+          fi
+
+  godot-smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pinned Godot version
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.7.2
+          use-dotnet: false
+
+      - name: Report engine version
+        run: godot --version
+
+      - name: Import and validate project resources
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          godot --headless --editor --path . --quit 2>&1 | tee build/editor-import.log
+          if grep -E "SCRIPT ERROR:|ERROR:" build/editor-import.log; then
+            echo "Godot reported script or resource errors during import."
+            exit 1
+          fi
+
+      - name: Launch main scene headlessly
+        run: godot --headless --path . --quit-after 2
+
+      - name: Run vertical-slice regression checks
+        run: godot --headless --path . res://tests/test_vertical_slice.tscn
+
+      - name: Run vehicle-system regression checks
+        run: godot --headless --path . res://tests/test_vehicle_system.tscn
+
+      - name: Run living-district regression checks
+        run: godot --headless --path . res://tests/test_living_district.tscn
+
+      - name: Run wanted-system regression checks
+        run: godot --headless --path . res://tests/test_wanted_system.tscn
+
+      - name: Run combat-system regression checks
+        run: timeout 45s godot --headless --path . res://tests/test_combat_system.tscn
+
+      - name: Run progression-system regression checks
+        run: timeout 45s godot --headless --path . res://tests/test_progression_system.tscn
+
+      - name: Run UI-flow regression checks
+        run: timeout 30s godot --headless --path . res://tests/test_ui_flow.tscn
+
+      - name: Run procedural audio regression checks
+        run: timeout 30s godot --headless --path . res://tests/test_audio_system.tscn
+
+  desktop-export-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Godot and desktop export templates
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.7.2
+          use-dotnet: false
+          include-templates: true
+
+      - name: Import and validate project resources
+        run: godot --headless --editor --path . --quit
+
+      - name: Export Windows Desktop package
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          godot --headless --path . --export-release "Windows Desktop" build/SunshineState.exe
+          test -s build/SunshineState.exe
+
+      - name: Export Linux/X11 package
+        shell: bash
+        run: |
+          set -euo pipefail
+          godot --headless --path . --export-release "Linux/X11" build/SunshineState.x86_64
+          test -s build/SunshineState.x86_64
+          test -x build/SunshineState.x86_64
+
+      - name: Smoke-test exported Linux build without the editor
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 30s env SUNSHINE_STATE_SMOKE_TEST=1 build/SunshineState.x86_64 --headless --quit-after 120 2>&1 | tee build/exported-linux-smoke.log
+          if grep -E "SCRIPT ERROR:|ERROR:" build/exported-linux-smoke.log; then
+            echo "The exported Linux application reported runtime errors."
+            exit 1
+          fi
+
+      - name: Generate and validate build manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          generated_at_utc="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          cat > build/build-manifest.json <<EOF
+          {
+            "schema_version": 1,
+            "project_name": "Sunshine State",
+            "project_version": "0.1.0",
+            "commit_sha": "${GITHUB_SHA}",
+            "workflow_run_id": "${GITHUB_RUN_ID}",
+            "workflow_run_attempt": "${GITHUB_RUN_ATTEMPT}",
+            "workflow_url": "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}",
+            "engine_version": "4.7.2-stable",
+            "platform_targets": ["Windows Desktop", "Linux/X11"],
+            "checks_performed": ["Windows export", "Linux export", "Linux headless runtime smoke"],
+            "generated_at_utc": "${generated_at_utc}"
+          }
+          EOF
+          jq -e --arg sha "$GITHUB_SHA" '.schema_version == 1 and .commit_sha == $sha and .engine_version == "4.7.2-stable" and (.platform_targets | length == 2)' build/build-manifest.json > /dev/null
+
+      - name: Package tester guide and notices
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/ReleaseDocs
+          cp docs/release-start-guide.txt build/README.txt
+          cp docs/release-acceptance-checklist.md build/ReleaseDocs/RELEASE-ACCEPTANCE-CHECKLIST.md
+          cp docs/asset-license-inventory.md build/ReleaseDocs/ASSET-LICENSE-INVENTORY.md
+          cp LICENSES/GODOT_ENGINE_LICENSE.txt build/ReleaseDocs/GODOT_ENGINE_LICENSE.txt
+          cp docs/release-manifest.md build/ReleaseDocs/BUILD-MANIFEST-SCHEMA.md
+
+      - name: Upload desktop build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sunshine-state-desktop-builds
+          path: build/
+          if-no-files-found: error
+          retention-days: 7
+
+  windows-runtime-smoke:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Godot and Windows export templates
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.7.2
+          use-dotnet: false
+          include-templates: true
+
+      - name: Import and validate project resources
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force build | Out-Null
+          $godotExe = Join-Path $env:USERPROFILE "godot\Godot_v4.7.2-stable_win64.exe"
+          & $godotExe --headless --editor --path . --quit 2>&1 | Tee-Object -FilePath build/editor-import.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (Select-String -Path build/editor-import.log -Pattern 'SCRIPT ERROR:|ERROR:') {
+            Write-Error "Godot reported script or resource errors during import."
+            exit 1
+          }
+
+      - name: Export Windows Desktop package
+        shell: pwsh
+        run: |
+          $godotExe = Join-Path $env:USERPROFILE "godot\Godot_v4.7.2-stable_win64.exe"
+          & $godotExe --headless --path . --export-release "Windows Desktop" build/SunshineState.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (-not (Test-Path build/SunshineState.exe) -or (Get-Item build/SunshineState.exe).Length -le 0) {
+            Write-Error "Windows executable was not generated."
+            exit 1
+          }
+
+      - name: Smoke-test exported Windows gameplay without the editor
+        shell: pwsh
+        run: |
+          $env:SUNSHINE_STATE_SMOKE_TEST = "1"
+          & build/SunshineState.exe --headless --quit-after 120 2>&1 | Tee-Object -FilePath build/windows-smoke.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (Select-String -Path build/windows-smoke.log -Pattern 'SCRIPT ERROR:|ERROR:') {
+            Write-Error "The exported Windows application reported runtime errors."
+            exit 1
+          }
+
+      - name: Generate and validate build manifest
+        shell: pwsh
+        run: |
+          $manifest = [ordered]@{
+            schema_version = 1
+            project_name = "Sunshine State"
+            project_version = "0.1.0"
+            commit_sha = $env:GITHUB_SHA
+            workflow_run_id = $env:GITHUB_RUN_ID
+            workflow_run_attempt = $env:GITHUB_RUN_ATTEMPT
+            workflow_url = "https://github.com/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
+            engine_version = "4.7.2-stable"
+            platform_targets = @("Windows Desktop")
+            checks_performed = @("Windows export", "Windows headless runtime smoke")
+            generated_at_utc = [DateTime]::UtcNow.ToString("o")
+          }
+          $manifest | ConvertTo-Json -Depth 4 | Set-Content -Encoding utf8 build/build-manifest.json
+          $writtenManifest = Get-Content -Raw build/build-manifest.json | ConvertFrom-Json
+          if ($writtenManifest.commit_sha -ne $env:GITHUB_SHA) { throw "Build manifest commit SHA does not match the checked out revision." }
+          if ($writtenManifest.schema_version -ne 1) { throw "Unsupported build manifest schema." }
+
+      - name: Package tester guide and notices
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force build/ReleaseDocs | Out-Null
+          Copy-Item docs/release-start-guide.txt build/README.txt
+          Copy-Item docs/release-acceptance-checklist.md build/ReleaseDocs/RELEASE-ACCEPTANCE-CHECKLIST.md
+          Copy-Item docs/asset-license-inventory.md build/ReleaseDocs/ASSET-LICENSE-INVENTORY.md
+          Copy-Item LICENSES/GODOT_ENGINE_LICENSE.txt build/ReleaseDocs/GODOT_ENGINE_LICENSE.txt
+          Copy-Item docs/release-manifest.md build/ReleaseDocs/BUILD-MANIFEST-SCHEMA.md
+
+      - name: Upload Windows build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sunshine-state-windows-build
+          path: |
+            build/SunshineState.exe
+            build/build-manifest.json
+            build/README.txt
+            build/ReleaseDocs/
+          if-no-files-found: error
+          retention-days: 7
+
+  living-district-soak:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_living_district_soak }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pinned Godot version
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.7.2
+          use-dotnet: false
+
+      - name: Run 15-minute living-district soak test
+        run: godot --headless --path . res://tests/living_district_soak.tscn

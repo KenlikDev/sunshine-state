@@ -1,0 +1,23 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/shop_interactable.gd" id="1_shop"]
+
+[sub_resource type="BoxShape3D" id="ShopCollision"]
+size = Vector3(1.6, 1.8, 0.8)
+
+[sub_resource type="BoxMesh" id="ShopMesh"]
+size = Vector3(1.6, 1.8, 0.8)
+
+[sub_resource type="StandardMaterial3D" id="ShopMaterial"]
+albedo_color = Color(0.19, 0.42, 0.48, 1)
+roughness = 0.9
+
+[node name="ShopInteractable" type="StaticBody3D"]
+script = ExtResource("1_shop")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("ShopCollision")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("ShopMesh")
+material_override = SubResource("ShopMaterial")
