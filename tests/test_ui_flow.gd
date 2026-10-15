@@ -17,6 +17,9 @@ func _run_tests() -> void:
 	var original_master_volume: float = SettingsService.get_master_volume()
 	var original_fullscreen: bool = SettingsService.get_is_fullscreen()
 	var original_resolution_index: int = SettingsService.get_resolution_index()
+	var original_bindings: Dictionary = {}
+	for action: StringName in SettingsService.REMAPPABLE_ACTIONS:
+		original_bindings[action] = SettingsService.get_binding_keycode(action)
 	SettingsService.set_locale("en")
 	SettingsService.set_mouse_sensitivity(0.0025)
 	SettingsService.set_master_volume(0.8)
@@ -41,6 +44,8 @@ func _run_tests() -> void:
 	var resolution_option: OptionButton = menu.find_child("ResolutionOption", true, false) as OptionButton
 	var fullscreen_checkbox: CheckBox = menu.find_child("FullscreenCheckBox", true, false) as CheckBox
 	var master_volume_slider: HSlider = menu.find_child("MasterVolumeSlider", true, false) as HSlider
+	var keyboard_controls_button: Button = menu.find_child("KeyboardControlsButton", true, false) as Button
+	var bindings_panel: Control = menu.find_child("InputBindingsPanel", true, false) as Control
 	_check(title != null, "Main menu displays a title.")
 	_check(continue_button != null, "Main menu exposes a continue action.")
 	_check(settings_button != null, "Main menu exposes settings.")
@@ -48,6 +53,8 @@ func _run_tests() -> void:
 	_check(resolution_option != null, "Settings expose supported window resolutions.")
 	_check(fullscreen_checkbox != null, "Settings expose a fullscreen toggle.")
 	_check(master_volume_slider != null, "Settings expose a master-volume slider.")
+	_check(keyboard_controls_button != null, "Settings expose a keyboard-controls panel.")
+	_check(bindings_panel != null and not bindings_panel.visible, "Keyboard bindings panel begins closed.")
 	if title != null:
 		_check(title.text == Localization.translate_key("MENU_TITLE"), "Main menu text follows the active locale.")
 	if continue_button != null:
@@ -94,6 +101,55 @@ func _run_tests() -> void:
 	_check(is_equal_approx(float(display_config.get_value("audio", "master_volume", 0.0)), 0.65), "Master volume persists.")
 	_check(int(display_config.get_value("display", "resolution_index", -1)) == 1, "Resolution choice persists.")
 	_check(bool(display_config.get_value("display", "fullscreen", false)), "Fullscreen state persists.")
+
+	if keyboard_controls_button != null and bindings_panel != null:
+		keyboard_controls_button.pressed.emit()
+		_check(bindings_panel.visible, "Keyboard controls panel opens from settings.")
+		var forward_row: Control = bindings_panel.find_child("BindingRow_move_forward", true, false) as Control
+		var forward_change_button: Button = (
+			forward_row.find_child("ChangeButton", true, false) as Button
+			if forward_row != null else null
+		)
+		_check(forward_change_button != null, "Movement rows expose a rebind action.")
+		if forward_change_button != null:
+			forward_change_button.pressed.emit()
+			var up_event := InputEventKey.new()
+			up_event.pressed = true
+			up_event.physical_keycode = KEY_UP
+			up_event.keycode = KEY_UP
+			SettingsService.call("_input", up_event)
+			_check(
+				SettingsService.get_binding_keycode(&"move_forward") == KEY_UP,
+				"A captured key replaces the default movement binding."
+			)
+			var binding_config := ConfigFile.new()
+			_check(binding_config.load(SettingsService.SETTINGS_PATH) == OK, "Key bindings are persisted to disk.")
+			_check(
+				int(binding_config.get_value("input", "move_forward", 0)) == KEY_UP,
+				"The new movement key code is saved in user settings."
+			)
+			SettingsService.begin_rebind(&"move_forward")
+			var duplicate_event := InputEventKey.new()
+			duplicate_event.pressed = true
+			duplicate_event.physical_keycode = SettingsService.get_binding_keycode(&"move_backward")
+			duplicate_event.keycode = duplicate_event.physical_keycode
+			SettingsService.call("_input", duplicate_event)
+			_check(
+				SettingsService.get_binding_keycode(&"move_forward") == KEY_UP,
+				"A key already used by another action is rejected."
+			)
+		SettingsService.reset_all_bindings()
+		_check(
+			SettingsService.get_binding_keycode(&"move_forward") == SettingsService.get_default_binding_keycode(&"move_forward"),
+			"Reset Defaults restores the original movement binding."
+		)
+		for action: StringName in SettingsService.REMAPPABLE_ACTIONS:
+			var original_code: int = int(original_bindings[action])
+			if original_code == SettingsService.get_default_binding_keycode(action):
+				SettingsService.reset_binding(action)
+			else:
+				SettingsService.set_binding_keycode(action, original_code)
+		bindings_panel.visible = false
 
 	if language_button != null:
 		language_button.pressed.emit()
