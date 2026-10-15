@@ -20,7 +20,7 @@ godot --headless --path . --export-release "Linux/X11" build/SunshineState.x86_6
 On Linux, the executable can be smoke-tested with:
 
 ```sh
-timeout 30s build/SunshineState.x86_64 --headless --quit-after 2
+SUNSHINE_STATE_SMOKE_TEST=1 timeout 30s build/SunshineState.x86_64 --headless --quit-after 120
 ```
 
 Godot's official [project export guide](https://docs.godotengine.org/en/4.7/tutorials/export/exporting_projects.html) explains export templates, committed presets, and command-line export flags.
