@@ -203,6 +203,8 @@ func _run_tests() -> void:
 		var pause_menu: CanvasLayer = pause_scene.instantiate() as CanvasLayer
 		add_child(pause_menu)
 		await get_tree().process_frame
+		var restart_mission_button: Button = pause_menu.find_child("RestartMissionButton", true, false) as Button
+		_check(restart_mission_button != null, "Pause menu exposes mission restart without a keyboard shortcut.")
 		var pause_event := InputEventAction.new()
 		pause_event.action = &"ui_cancel"
 		pause_event.pressed = true
@@ -217,6 +219,16 @@ func _run_tests() -> void:
 		pause_menu.call("_toggle_settings")
 		pause_menu.call("_input", pause_event)
 		_check(not get_tree().paused, "Escape resumes gameplay and restores scene processing.")
+		var mission_id_before_restart: String = MissionService.get_current_mission_id()
+		if restart_mission_button != null and not mission_id_before_restart.is_empty():
+			pause_menu.call("open_pause_menu")
+			_check(not restart_mission_button.disabled, "The active mission can be restarted from the pause menu.")
+			restart_mission_button.pressed.emit()
+			_check(not get_tree().paused, "Restarting a mission resumes gameplay.")
+			_check(
+				MissionService.get_mission_state(mission_id_before_restart) == "ACTIVE",
+				"The pause-menu action returns the current mission to its active state."
+			)
 		pause_menu.queue_free()
 
 	_check(SaveService.save_game(false), "The UI regression can create a valid save for overwrite-protection checks.")
