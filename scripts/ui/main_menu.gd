@@ -41,6 +41,8 @@ func _ready() -> void:
 	_refresh_texts()
 	if DisplayServer.get_name() != "headless":
 		_new_game_button.grab_focus()
+	if OS.get_environment("SUNSHINE_STATE_SMOKE_TEST") == "1":
+		call_deferred("_start_new_game")
 
 
 func _build_ui() -> void:
