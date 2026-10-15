@@ -67,9 +67,10 @@ The items below are required scope, not a claim that they are implemented. If a 
 ### UI and audio
 - Main menu, pause menu, settings, HUD, mission notifications, and completion/failure feedback.
 - Original or appropriately licensed sound effects and music. An original procedural ambient/SFX baseline is implemented; composition quality, mixing, and contextual coverage still require review.
+- Basic accessibility controls for UI scale and HUD contrast, plus gamepad look sensitivity and optional inverted Y.
 - Localization-ready UI; user-facing language support is a separate content layer, not hard-coded into game logic.
 
-**Acceptance:** UI remains navigable with keyboard/controller as scoped, remappable keys persist and reject conflicts, the UI does not trap input, all critical game states have clear feedback, and audio cues are audible and mixed appropriately in an exported desktop build.
+**Acceptance:** UI remains navigable with keyboard/controller as scoped; remappable keys, UI scale, and HUD contrast persist and apply correctly; the UI does not trap input; critical game states have clear feedback; and audio cues are audible and mixed appropriately in an exported desktop build.
 
 ### Release
 - Exported desktop build, clean-machine smoke test, installation/run instructions, known-issues list, and asset-license inventory.
