@@ -96,6 +96,26 @@ func _run_tests() -> void:
 				"Pedestrians react to a nearby player with the alert state."
 			)
 
+		var crossing_pedestrian: Node3D = instance.get_node_or_null("World/PedestrianEast02") as Node3D
+		var crossing_traffic: Node3D = instance.get_node_or_null("World/TrafficEastbound") as Node3D
+		if is_instance_valid(crossing_pedestrian) and is_instance_valid(crossing_traffic):
+			crossing_pedestrian.global_position = Vector3(9.1, 0.0, 4.4)
+			crossing_pedestrian.set("_route_index", 3)
+			crossing_traffic.global_position = Vector3(9.1, 0.65, 2.0)
+			crossing_traffic.set_physics_process(false)
+			var crossing_start_z: float = crossing_pedestrian.global_position.z
+			_check(
+				(crossing_pedestrian.collision_mask & 2) == 0 and (crossing_traffic.collision_layer & 2) != 0,
+				"Pedestrians ignore the background-traffic collision layer."
+			)
+			for _frame: int in range(120):
+				await get_tree().physics_frame
+			_check(
+				crossing_pedestrian.global_position.z < crossing_start_z - 1.0,
+				"A stationary traffic car cannot permanently block an authored pedestrian route."
+			)
+			crossing_traffic.set_physics_process(true)
+
 		var recovery_traffic: Node3D = instance.get_node_or_null("World/TrafficEastbound") as Node3D
 		if is_instance_valid(player) and is_instance_valid(recovery_traffic):
 			recovery_traffic.global_position = Vector3(-50.0, 0.65, -2.0)
