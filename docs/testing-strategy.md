@@ -12,7 +12,7 @@ The GitHub Actions workflow performs these checks:
 5. Runs M3 district checks for day/night lighting, pedestrian/traffic routes, population bounds, right-of-way, obstruction recovery, and world boundaries.
 6. Runs M4 wanted/police checks for crime severity, detection, pursuit/search, occlusion, decay, and state clearing.
 7. Runs M4 combat checks for weapon input, rate/ammo/reload, damage, police attacks, player death, wanted reset, and respawn.
-8. Runs M5 progression checks for purchases, duplicate transactions/rewards, three-mission sequencing, first-aid consumption, vehicle repair, save round-trip, numeric validation, and backup recovery.
+8. Runs M5 progression checks for purchases, duplicate transactions/rewards, three-mission sequencing, first-aid consumption, vehicle repair, save round-trip including world time, numeric/range validation, and backup recovery.
 9. Runs M6 UI-flow checks for save availability, overwrite confirmation, language/settings persistence, keyboard remapping/conflicts/reset, pause/resume, and the display/audio preferences.
 10. Checks required documents and changed-line whitespace.
 
@@ -52,7 +52,7 @@ Cover pure logic and state transitions:
 - NPC death, police attack conditions, player incapacitation, wanted reset, and respawn
 - mission completion grants one reward exactly once
 - police detection creates and clears a pursuit correctly
-- save/load restores progression after restart; corrupt primary save recovery uses the last known-good backup
+- save/load restores progression and world time after relaunch; invalid day-time values are rejected and corrupt primary recovery uses the last known-good backup
 
 ### Acceptance tests
 
