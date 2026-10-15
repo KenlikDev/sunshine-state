@@ -16,7 +16,7 @@ The items below are required scope, not a claim that they are implemented. If a 
 
 ### Player
 - Third-person movement, walking, running, jumping, camera orbit, collision, interaction prompt, health, death, and respawn.
-- Input remapping and sensitivity settings where supported by the selected input architecture.
+- Keyboard input remapping, persistent camera sensitivity, and display/audio settings.
 
 **Acceptance:** movement and camera behave consistently at the target frame rate and after respawn; input does not remain stuck after UI transitions.
 
@@ -69,7 +69,7 @@ The items below are required scope, not a claim that they are implemented. If a 
 - Original or appropriately licensed sound effects and music.
 - Localization-ready UI; user-facing language support is a separate content layer, not hard-coded into game logic.
 
-**Acceptance:** UI remains navigable with keyboard/controller as scoped, does not trap input, and all critical game states have clear feedback.
+**Acceptance:** UI remains navigable with keyboard/controller as scoped, remappable keys persist and reject conflicts, the UI does not trap input, and all critical game states have clear feedback.
 
 ### Release
 - Exported desktop build, clean-machine smoke test, installation/run instructions, known-issues list, and asset-license inventory.
