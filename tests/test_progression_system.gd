@@ -69,6 +69,16 @@ func _run_tests() -> void:
 	_check(player != null, "Bootstrap creates the player for interaction missions.")
 	_check(world != null, "Bootstrap creates the world and objective interactables.")
 	_check(day_night != null, "The active world exposes its day-night clock.")
+	var first_target: Node3D = MissionService.get_active_target_node()
+	_check(
+		is_instance_valid(first_target) and first_target.name == "DistrictInformationBoard",
+		"The active orientation mission points at the district information board."
+	)
+	var hud: Node = instance.get_node_or_null("HUD")
+	var waypoint_label: Label = hud.find_child("MissionWaypoint", true, false) as Label if hud != null else null
+	_check(waypoint_label != null, "HUD exposes an active mission waypoint label.")
+	if waypoint_label != null:
+		_check(not waypoint_label.text.is_empty(), "HUD shows a direction and distance for the active target.")
 	if player == null or world == null:
 		_finish(1, instance)
 		return
@@ -84,6 +94,11 @@ func _run_tests() -> void:
 		board.call("interact", player)
 	_check(MissionService.is_mission_completed("district_orientation"), "Reading the district board completes mission one.")
 	_check(MissionService.get_current_mission_id() == "property_report", "Mission two activates after mission one.")
+	var property_target: Node3D = MissionService.get_active_target_node()
+	_check(
+		is_instance_valid(property_target) and property_target.name == "GraffitiSpot",
+		"Completing mission one redirects the waypoint to the property-damage site."
+	)
 	_check(EconomyService.get_balance() == 400, "Mission one grants its reward exactly once.")
 	EconomyService.grant_reward(100, "mission_reward:district_orientation")
 	_check(EconomyService.get_balance() == 400, "A duplicate reward transaction cannot increase the balance.")
@@ -94,6 +109,11 @@ func _run_tests() -> void:
 		crime_site.call("interact", player)
 	_check(MissionService.is_mission_completed("property_report"), "Reporting property damage completes mission two.")
 	_check(MissionService.get_current_mission_id() == "supply_run", "Mission three activates after mission two.")
+	var supply_target: Node3D = MissionService.get_active_target_node()
+	_check(
+		is_instance_valid(supply_target) and supply_target.name == "FirstAidVendor",
+		"Completing mission two redirects the waypoint to the first-aid vendor."
+	)
 	_check(EconomyService.get_balance() == 600, "Mission two reward is credited through the economy service.")
 
 	var vendor: Node = world.get_node_or_null("FirstAidVendor")
@@ -102,6 +122,10 @@ func _run_tests() -> void:
 		vendor.call("interact", player)
 	_check(MissionService.is_mission_completed("supply_run"), "Purchasing a first-aid kit completes mission three.")
 	_check(MissionService.get_current_mission_id().is_empty(), "The mission chain reaches a stable completion state.")
+	_check(
+		MissionService.get_active_target_node() == null,
+		"Finishing the mission chain removes the active waypoint target."
+	)
 	_check(EconomyService.get_balance() == 800, "Mission three reward and purchase debit are both applied.")
 	_check(EconomyService.get_item_count("first_aid_kit") == 1, "Purchased supplies persist in inventory state.")
 	MissionService.record_event(&"PURCHASE_ITEM", &"first_aid_kit")
