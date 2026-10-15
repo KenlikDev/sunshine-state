@@ -30,6 +30,9 @@ var _sensitivity_slider: HSlider
 var _controller_sensitivity_label: Label
 var _controller_sensitivity_slider: HSlider
 var _invert_controller_y_checkbox: CheckBox
+var _ui_scale_label: Label
+var _ui_scale_slider: HSlider
+var _high_contrast_hud_checkbox: CheckBox
 var _settings_back_button: Button
 var _status_label: Label
 var _status_key: String = ""
@@ -244,6 +247,23 @@ func _build_ui() -> void:
 	_invert_controller_y_checkbox.toggled.connect(_on_invert_controller_y_toggled)
 	settings_stack.add_child(_invert_controller_y_checkbox)
 
+	_ui_scale_label = Label.new()
+	_ui_scale_label.name = "UIScaleLabel"
+	settings_stack.add_child(_ui_scale_label)
+	_ui_scale_slider = HSlider.new()
+	_ui_scale_slider.name = "UIScaleSlider"
+	_ui_scale_slider.min_value = SettingsService.MIN_UI_SCALE
+	_ui_scale_slider.max_value = SettingsService.MAX_UI_SCALE
+	_ui_scale_slider.step = 0.05
+	_ui_scale_slider.value = SettingsService.get_ui_scale()
+	_ui_scale_slider.value_changed.connect(_on_ui_scale_changed)
+	settings_stack.add_child(_ui_scale_slider)
+
+	_high_contrast_hud_checkbox = CheckBox.new()
+	_high_contrast_hud_checkbox.name = "HighContrastHUDCheckBox"
+	_high_contrast_hud_checkbox.toggled.connect(_on_high_contrast_hud_toggled)
+	settings_stack.add_child(_high_contrast_hud_checkbox)
+
 	_settings_back_button = _make_button("SettingsBackButton", Callable(self, "_toggle_settings"))
 	settings_stack.add_child(_settings_back_button)
 
@@ -309,6 +329,10 @@ func _refresh_texts() -> void:
 	_update_effects_volume_label(SettingsService.get_effects_volume() * 100.0)
 	_effects_volume_slider.set_value_no_signal(SettingsService.get_effects_volume() * 100.0)
 	_settings_back_button.text = Localization.translate_key("SETTINGS_BACK")
+	_ui_scale_label.text = Localization.format_key("SETTINGS_UI_SCALE_VALUE", [int(roundf(SettingsService.get_ui_scale() * 100.0))])
+	_ui_scale_slider.set_value_no_signal(SettingsService.get_ui_scale())
+	_high_contrast_hud_checkbox.text = Localization.translate_key("SETTINGS_HIGH_CONTRAST_HUD")
+	_high_contrast_hud_checkbox.set_pressed_no_signal(SettingsService.get_high_contrast_hud())
 	_update_sensitivity_label(SettingsService.get_mouse_sensitivity())
 	_update_controller_sensitivity_label(SettingsService.get_controller_look_sensitivity())
 	_controller_sensitivity_slider.set_value_no_signal(SettingsService.get_controller_look_sensitivity())
@@ -446,3 +470,13 @@ func _update_controller_sensitivity_label(value: float) -> void:
 
 func _on_invert_controller_y_toggled(enabled: bool) -> void:
 	SettingsService.set_invert_controller_look_y(enabled)
+
+
+
+func _on_ui_scale_changed(value: float) -> void:
+	SettingsService.set_ui_scale(value)
+	_ui_scale_label.text = Localization.format_key("SETTINGS_UI_SCALE_VALUE", [int(roundf(value * 100.0))])
+
+
+func _on_high_contrast_hud_toggled(enabled: bool) -> void:
+	SettingsService.set_high_contrast_hud(enabled)
