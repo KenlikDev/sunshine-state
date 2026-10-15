@@ -184,6 +184,15 @@ func _run_tests() -> void:
 				else:
 					tracking_physical_reverse = false
 
+			print(
+				"Off-screen traffic diagnostic: pos=", recovery_traffic.global_position,
+				" state=", recovery_traffic.call("get_ai_state"),
+				" route_index=", recovery_traffic.call("get_route_index"),
+				" stalled=", recovery_traffic.call("get_stalled_seconds"),
+				" reverse_remaining=", recovery_traffic.get("_reverse_remaining"),
+				" near_camera=", recovery_traffic.call("_is_near_camera"),
+				" obstacle=", offscreen_obstacle.global_position
+			)
 			_check(
 				saw_physical_stall and saw_physical_recovery,
 				"Off-screen traffic detects a physical stall without an obstacle ray and starts recovery."
