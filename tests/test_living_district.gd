@@ -146,6 +146,50 @@ func _run_tests() -> void:
 				"Traffic resumes its route after the blocking obstacle is removed."
 			)
 
+			# Repeat the obstruction test outside the camera range, where ray-based
+			# avoidance is intentionally disabled and physical progress must detect stalls.
+			recovery_traffic.global_position = Vector3(-65.0, 0.65, -2.0)
+			recovery_traffic.global_rotation = Vector3(0.0, -PI / 2.0, 0.0)
+			player.global_position = Vector3(0.0, 0.0, 12.0)
+			var offscreen_obstacle := StaticBody3D.new()
+			offscreen_obstacle.name = "OffscreenTrafficRecoveryObstacle"
+			offscreen_obstacle.position = recovery_traffic.global_position + Vector3(3.0, 0.35, 0.0)
+			var offscreen_collision := CollisionShape3D.new()
+			var offscreen_shape := BoxShape3D.new()
+			offscreen_shape.size = Vector3(0.8, 2.0, 5.0)
+			offscreen_collision.shape = offscreen_shape
+			offscreen_obstacle.add_child(offscreen_collision)
+			instance.add_child(offscreen_obstacle)
+
+			var saw_physical_stall: bool = false
+			var saw_physical_recovery: bool = false
+			var saw_physical_reverse: bool = false
+			var physical_recovery_start_x: float = recovery_traffic.global_position.x
+			var tracking_physical_reverse: bool = false
+			for _frame: int in range(300):
+				await get_tree().physics_frame
+				var physical_state: String = String(recovery_traffic.call("get_ai_state"))
+				saw_physical_stall = saw_physical_stall or physical_state == "WAITING"
+				if physical_state == "RECOVERING":
+					saw_physical_recovery = true
+					if not tracking_physical_reverse:
+						physical_recovery_start_x = recovery_traffic.global_position.x
+						tracking_physical_reverse = true
+					elif recovery_traffic.global_position.x < physical_recovery_start_x - 0.05:
+						saw_physical_reverse = true
+				else:
+					tracking_physical_reverse = false
+
+			_check(
+				saw_physical_stall and saw_physical_recovery,
+				"Off-screen traffic detects a physical stall without an obstacle ray and starts recovery."
+			)
+			_check(
+				saw_physical_reverse,
+				"Off-screen traffic reverses to escape a physical collision."
+			)
+			offscreen_obstacle.queue_free()
+
 		if is_instance_valid(first_pedestrian):
 			_check(
 				String(first_pedestrian.call("get_ai_state")) == "PATROL",
