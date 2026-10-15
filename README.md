@@ -62,4 +62,4 @@ The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). Th
 
 ## Validation
 
-GitHub Actions runs Godot headless resource import, a main-scene smoke test, vertical-slice, vehicle-system, living-district, wanted-system, combat-system, progression-system, and UI-flow regression tests. An opt-in manual workflow runs the 15-minute living-district soak test; it has not yet been accepted as passed. Manual vehicle handling tests and export checks are still required; the game is not yet a packaged release build.
+GitHub Actions runs the M1–M6 regression suites, a 15-minute living-district soak on a dedicated validation branch, and Windows/Linux desktop export tests that launch the gameplay scene without the editor. The soak-test result is still pending. User-machine playthrough, visual/audio review, asset-license inventory, and installer/signing work remain release gates; these CI artifacts are development builds, not a final release.
