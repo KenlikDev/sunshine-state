@@ -65,6 +65,9 @@ jobs:
             scripts/systems/economy_service.gd \
             scripts/systems/mission_service.gd \
             scripts/systems/save_service.gd \
+            scripts/systems/audio_service.gd \
+            tests/test_audio_system.gd \
+            tests/test_audio_system.tscn \
             scripts/gameplay/shop_interactable.gd \
             data/items/items.json \
             data/missions/missions.json \
@@ -163,6 +166,9 @@ jobs:
 
       - name: Run UI-flow regression checks
         run: timeout 30s godot --headless --path . res://tests/test_ui_flow.tscn
+
+      - name: Run procedural audio regression checks
+        run: timeout 30s godot --headless --path . res://tests/test_audio_system.tscn
 
   desktop-export-smoke:
     runs-on: ubuntu-latest
