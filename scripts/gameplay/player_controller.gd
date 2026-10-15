@@ -46,11 +46,13 @@ func _process(delta: float) -> void:
 	var device_id: int = connected_joypads[0]
 	var look_x: float = _apply_look_deadzone(Input.get_joy_axis(device_id, JOY_AXIS_RIGHT_X))
 	var look_y: float = _apply_look_deadzone(Input.get_joy_axis(device_id, JOY_AXIS_RIGHT_Y))
+	if SettingsService.get_invert_controller_look_y():
+		look_y = -look_y
 	if absf(look_x) > 0.0:
 		rotate_y(-look_x * 2.5 * delta)
 	if absf(look_y) > 0.0:
 		_camera_pivot.rotation.x = clampf(
-			_camera_pivot.rotation.x - look_y * 2.0 * delta,
+			_camera_pivot.rotation.x - look_y * SettingsService.get_controller_look_sensitivity() * delta,
 			deg_to_rad(-55.0),
 			deg_to_rad(35.0)
 		)
