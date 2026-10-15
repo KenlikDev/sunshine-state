@@ -95,6 +95,8 @@ func _ready() -> void:
 	MissionService.mission_restarted.connect(_on_mission_restarted)
 	SaveService.save_status_changed.connect(_on_save_status_changed)
 	SettingsService.locale_changed.connect(_on_settings_locale_changed)
+	if not Input.joy_connection_changed.is_connected(_on_joy_connection_changed):
+		Input.joy_connection_changed.connect(_on_joy_connection_changed)
 
 	var crosshair := Label.new()
 	crosshair.name = "Crosshair"
@@ -181,6 +183,8 @@ func _refresh_localized_texts() -> void:
 	_title_label.text = Localization.translate_key("HUD_TITLE")
 	_objective_label.text = Localization.translate_key("HUD_OBJECTIVE")
 	_controls_label.text = Localization.translate_key("HUD_CONTROLS")
+	if not Input.get_connected_joypads().is_empty():
+		_controls_label.text += "\n" + Localization.translate_key("HUD_CONTROLLER_CONTROLS")
 	_language_button.text = "%s: %s" % [
 		Localization.translate_key("HUD_LANGUAGE_LABEL"),
 		"RU" if Localization.get_locale().begins_with("ru") else "EN"
@@ -328,4 +332,8 @@ func _on_economy_inventory_changed(_item_id: String, _count: int) -> void:
 
 
 func _on_settings_locale_changed(_locale: String) -> void:
+	_refresh_localized_texts()
+
+
+func _on_joy_connection_changed(_device: int, _connected: bool) -> void:
 	_refresh_localized_texts()
