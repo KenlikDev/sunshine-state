@@ -21,8 +21,10 @@ var _time_of_day_hours: float = 9.5
 
 
 func _ready() -> void:
+	add_to_group("day_night_cycle")
 	_time_of_day_hours = fposmod(starting_hour, 24.0)
 	_apply_time_of_day()
+	SaveService.restore_pending_world_time(self)
 
 
 func _process(delta: float) -> void:
