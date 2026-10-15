@@ -14,7 +14,7 @@ Starting a new game shows a localized confirmation if a valid save exists; cance
 
 Settings provide English/Russian locale selection, mouse-camera sensitivity, window resolution presets, fullscreen mode, master volume, and a dedicated keyboard-bindings panel. Supported actions can be rebound to physical keys, conflicts are rejected, Escape cancels an in-progress capture, and bindings persist with the other user settings. Mouse fire/aim remain available while optional keyboard bindings can be added. Values are saved to `user://sunshine_state_settings.cfg`. Sensitivity changes apply immediately to the player and vehicle cameras; volume changes update the Master audio bus immediately. The settings service clamps numeric values to supported ranges and ignores unsupported locale codes. Display-mode changes are skipped in headless mode.
 
-The language remains a presentation setting and does not alter mission, economy, or save-data identifiers.
+The bilingual English/Russian key table is maintained as CSV-formatted text in `localization/ui_table.txt`. It is parsed by the localization service at runtime and included in desktop exports as a non-resource data file. The language remains a presentation setting and does not alter mission, economy, or save-data identifiers.
 
 ## Automated coverage
 
