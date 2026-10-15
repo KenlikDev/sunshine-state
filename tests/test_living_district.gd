@@ -87,6 +87,29 @@ func _run_tests() -> void:
 				"East-west traffic yields to nearby north-south traffic at the junction."
 			)
 
+			# Keep a cross-traffic vehicle inside the conflict zone to ensure
+			# the right-of-way policy cannot starve the east-west route forever.
+			north_south.set_physics_process(false)
+			north_south.global_position = Vector3(-2.0, 0.65, -2.0)
+			east_west.global_position = Vector3(-8.0, 0.65, -2.0)
+			east_west.global_rotation = Vector3(0.0, -PI / 2.0, 0.0)
+			east_west.set("_route_index", 1)
+			east_west.set("_route_direction", 1)
+			east_west.set("_yielding_seconds", 0.0)
+			east_west.set("_stalled_seconds", 0.0)
+			var yield_test_start_x: float = east_west.global_position.x
+			var observed_yield: bool = false
+			for _frame: int in range(420):
+				await get_tree().physics_frame
+				observed_yield = observed_yield or String(east_west.call("get_ai_state")) == "YIELDING"
+			_check(observed_yield, "The conflict timeout test begins in a yielding state.")
+			_check(
+				String(east_west.call("get_ai_state")) == "DRIVING"
+				and east_west.global_position.x > yield_test_start_x + 1.0,
+				"Traffic resumes after its bounded yield timeout when cross traffic remains stalled."
+			)
+			north_south.set_physics_process(true)
+
 		if is_instance_valid(player) and is_instance_valid(first_pedestrian):
 			player.global_position = first_pedestrian.global_position + Vector3(0.0, 0.0, 2.0)
 			for _frame: int in range(3):
