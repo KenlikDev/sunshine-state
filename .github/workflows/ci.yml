@@ -90,7 +90,7 @@ jobs:
             tests/living_district_soak.tscn \
             scenes/vehicles/compact.tscn \
             scenes/vehicles/pickup.tscn \
-            localization/ui.csv \
+            localization/ui_table.txt \
             scripts/ui/localization_service.gd \
             tests/test_vertical_slice.gd \
             tests/test_vertical_slice.tscn \
