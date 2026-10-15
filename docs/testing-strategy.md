@@ -13,7 +13,7 @@ The GitHub Actions workflow performs these checks:
 6. Runs M4 wanted/police checks for crime severity, detection, pursuit/search, occlusion, decay, and state clearing.
 7. Runs M4 combat checks for weapon input, rate/ammo/reload, damage, police attacks, player death, wanted reset, and respawn.
 8. Runs M5 progression checks for purchases, duplicate transactions/rewards, three-mission sequencing, first-aid consumption, vehicle repair, save round-trip including world time, numeric/range validation, and backup recovery.
-9. Runs M6 UI-flow checks for save availability, overwrite confirmation, language/settings persistence, keyboard remapping/conflicts/reset, pause/resume, and the display/audio preferences.
+9. Runs M6 UI-flow checks for save availability, overwrite confirmation, language/settings persistence, keyboard remapping/conflicts/reset, standard gamepad mappings and UI navigation, pause/resume, and display/audio preferences.
 10. Checks required documents and changed-line whitespace.
 11. Builds Windows Desktop and Linux/X11 packages using pinned Godot 4.7.2 export templates, validates that both artifacts are non-empty, and launches both exported builds headlessly into the gameplay scene on Linux and Windows runners.
 
@@ -75,6 +75,7 @@ Run a scripted critical path:
 
 - main-menu Continue availability, new-game confirmation/cancel, settings persistence, pause/resume, and no gameplay processing while paused
 - keyboard binding changes across relaunch, duplicate-key rejection, reset-to-default, and Escape cancellation
+- gamepad movement axes, combat/interaction buttons, pause/back, and UI focus navigation mappings
 - run exported Windows build on a clean Windows machine; a CI export alone does not satisfy this manual acceptance check
 - keyboard/mouse and supported controller
 - camera clipping and inaccessible geometry
