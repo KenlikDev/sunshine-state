@@ -90,6 +90,13 @@ func _run_tests() -> void:
 			# Keep a cross-traffic vehicle inside the conflict zone to ensure
 			# the right-of-way policy cannot starve the east-west route forever.
 			north_south.set_physics_process(false)
+			var north_south_layer: int = north_south.collision_layer
+			var north_south_mask: int = north_south.collision_mask
+			north_south.collision_layer = 0
+			north_south.collision_mask = 0
+			var timeout_ray: RayCast3D = east_west.get_node("ObstacleRay") as RayCast3D
+			var timeout_ray_was_enabled: bool = timeout_ray.enabled
+			timeout_ray.enabled = false
 			north_south.global_position = Vector3(-2.0, 0.65, -2.0)
 			east_west.global_position = Vector3(-8.0, 0.65, -2.0)
 			east_west.global_rotation = Vector3(0.0, -PI / 2.0, 0.0)
@@ -110,6 +117,9 @@ func _run_tests() -> void:
 				and east_west.global_position.x > yield_test_start_x + 1.0,
 				"Traffic resumes after its bounded yield timeout when cross traffic remains stalled."
 			)
+			timeout_ray.enabled = timeout_ray_was_enabled
+			north_south.collision_layer = north_south_layer
+			north_south.collision_mask = north_south_mask
 			north_south.set_physics_process(true)
 
 		if is_instance_valid(player) and is_instance_valid(first_pedestrian):
