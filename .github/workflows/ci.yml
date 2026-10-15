@@ -128,7 +128,15 @@ jobs:
         run: godot --version
 
       - name: Import and validate project resources
-        run: godot --headless --editor --path . --quit
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          godot --headless --editor --path . --quit 2>&1 | tee build/editor-import.log
+          if grep -E "SCRIPT ERROR:|ERROR:" build/editor-import.log; then
+            echo "Godot reported script or resource errors during import."
+            exit 1
+          fi
 
       - name: Launch main scene headlessly
         run: godot --headless --path . --quit-after 2
@@ -188,7 +196,13 @@ jobs:
 
       - name: Smoke-test exported Linux build without the editor
         shell: bash
-        run: timeout 30s build/SunshineState.x86_64 --headless --quit-after 2
+        run: |
+          set -euo pipefail
+          timeout 30s build/SunshineState.x86_64 --headless --quit-after 30 2>&1 | tee build/exported-linux-smoke.log
+          if grep -E "SCRIPT ERROR:|ERROR:" build/exported-linux-smoke.log; then
+            echo "The exported Linux application reported runtime errors."
+            exit 1
+          fi
 
       - name: Upload desktop build artifacts
         uses: actions/upload-artifact@v4
