@@ -14,6 +14,9 @@ signal binding_change_rejected(action: StringName, message_key: String)
 const SETTINGS_PATH: String = "user://sunshine_state_settings.cfg"
 const DEFAULT_LOCALE: String = "en"
 const DEFAULT_MOUSE_SENSITIVITY: float = 0.0025
+const DEFAULT_CONTROLLER_LOOK_SENSITIVITY: float = 2.5
+const MIN_CONTROLLER_LOOK_SENSITIVITY: float = 0.5
+const MAX_CONTROLLER_LOOK_SENSITIVITY: float = 6.0
 const MIN_MOUSE_SENSITIVITY: float = 0.001
 const MAX_MOUSE_SENSITIVITY: float = 0.01
 const DEFAULT_MASTER_VOLUME: float = 0.8
@@ -28,6 +31,8 @@ const REMAPPABLE_ACTIONS: Array[StringName] = [
 ]
 
 var _mouse_sensitivity: float = DEFAULT_MOUSE_SENSITIVITY
+var _controller_look_sensitivity: float = DEFAULT_CONTROLLER_LOOK_SENSITIVITY
+var _invert_controller_look_y: bool = false
 var _master_volume: float = DEFAULT_MASTER_VOLUME
 var _music_volume: float = DEFAULT_MUSIC_VOLUME
 var _effects_volume: float = DEFAULT_EFFECTS_VOLUME
@@ -50,6 +55,12 @@ func _ready() -> void:
 			MIN_MOUSE_SENSITIVITY,
 			MAX_MOUSE_SENSITIVITY
 		)
+		_controller_look_sensitivity = clampf(
+			float(config.get_value("controls", "controller_look_sensitivity", DEFAULT_CONTROLLER_LOOK_SENSITIVITY)),
+			MIN_CONTROLLER_LOOK_SENSITIVITY,
+			MAX_CONTROLLER_LOOK_SENSITIVITY
+		)
+		_invert_controller_look_y = bool(config.get_value("controls", "invert_controller_look_y", false))
 		_master_volume = clampf(float(config.get_value("audio", "master_volume", DEFAULT_MASTER_VOLUME)), 0.0, 1.0)
 		_music_volume = clampf(float(config.get_value("audio", "music_volume", DEFAULT_MUSIC_VOLUME)), 0.0, 1.0)
 		_effects_volume = clampf(float(config.get_value("audio", "effects_volume", DEFAULT_EFFECTS_VOLUME)), 0.0, 1.0)
@@ -92,6 +103,33 @@ func set_mouse_sensitivity(value: float) -> void:
 	mouse_sensitivity_changed.emit(_mouse_sensitivity)
 
 
+func get_controller_look_sensitivity() -> float:
+	return _controller_look_sensitivity
+
+
+func set_controller_look_sensitivity(value: float) -> void:
+	var next_value: float = clampf(
+		value,
+		MIN_CONTROLLER_LOOK_SENSITIVITY,
+		MAX_CONTROLLER_LOOK_SENSITIVITY
+	)
+	if is_equal_approx(_controller_look_sensitivity, next_value):
+		return
+	_controller_look_sensitivity = next_value
+	_save_settings()
+
+
+func get_invert_controller_look_y() -> bool:
+	return _invert_controller_look_y
+
+
+func set_invert_controller_look_y(enabled: bool) -> void:
+	if _invert_controller_look_y == enabled:
+		return
+	_invert_controller_look_y = enabled
+	_save_settings()
+
+
 func _apply_mouse_sensitivity() -> void:
 	for player: Node in get_tree().get_nodes_in_group("player"):
 		player.set("mouse_sensitivity", _mouse_sensitivity)
@@ -105,6 +143,8 @@ func _save_settings() -> void:
 	config.set_value("display", "fullscreen", _is_fullscreen)
 	config.set_value("display", "resolution_index", _resolution_index)
 	config.set_value("controls", "mouse_sensitivity", _mouse_sensitivity)
+	config.set_value("controls", "controller_look_sensitivity", _controller_look_sensitivity)
+	config.set_value("controls", "invert_controller_look_y", _invert_controller_look_y)
 	config.set_value("audio", "master_volume", _master_volume)
 	config.set_value("audio", "music_volume", _music_volume)
 	config.set_value("audio", "effects_volume", _effects_volume)
