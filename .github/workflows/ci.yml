@@ -341,6 +341,7 @@ jobs:
           name: sunshine-state-windows-build
           path: |
             build/SunshineState.exe
+            build/build-manifest.json
             build/README.txt
             build/ReleaseDocs/
           if-no-files-found: error
