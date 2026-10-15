@@ -97,6 +97,8 @@ func _run_tests() -> void:
 			east_west.set("_route_direction", 1)
 			east_west.set("_yielding_seconds", 0.0)
 			east_west.set("_stalled_seconds", 0.0)
+			east_west.set("_reverse_remaining", 0.0)
+			east_west.set("velocity", Vector3.ZERO)
 			var yield_test_start_x: float = east_west.global_position.x
 			var observed_yield: bool = false
 			for _frame: int in range(420):
@@ -111,7 +113,8 @@ func _run_tests() -> void:
 				" yield_seconds=", east_west.call("get_yielding_seconds"),
 				" reverse_remaining=", east_west.get("_reverse_remaining"),
 				" stalled_seconds=", east_west.call("get_stalled_seconds"),
-				" ray_colliding=", east_west.get_node("ObstacleRay").get("is_colliding")
+				" ray_colliding=", east_west.get_node("ObstacleRay").call("is_colliding"),
+				" ray_collider=", (east_west.get_node("ObstacleRay") as RayCast3D).get_collider()
 			)
 			_check(
 				String(east_west.call("get_ai_state")) == "DRIVING"
