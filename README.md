@@ -4,16 +4,27 @@ Sunshine State is an original, single-player, third-person open-world crime-acti
 
 ## Project status
 
-**Current milestone:** M6 — menu/pause, persistent control/display/audio settings, accessible UI scaling and high-contrast HUD, procedural ambient music and gameplay/UI sound effects, with presentation review still in progress.
+**Review branch:** `codex/integrated-review-candidate`
 
-The current branch contains a controllable third-person character, a bounded greybox coastal district with a real-time day-night lighting cycle, an information board, an English/Russian HUD, three drivable vehicle prototypes (sedan, compact coupe, and utility pickup), four route-following pedestrians, four background traffic agents, and an initial wanted/police loop, one raycast-based sidearm, health/damage, automatic player respawn, and an initial three-mission/economy/save-load loop. This is an intermediate prototype, not the complete MVP.
+**Status:** consolidated playable greybox prototype integrating milestones M1–M9. This branch is a single review entry point for the current work. It is **not yet accepted as the complete MVP or a production release**.
 
-The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). The three vehicle types are greybox prototypes and still need manual handling and visual review. Pedestrian and traffic agents are an early bounded simulation prototype; the isolated 15-minute stability test has passed on the dedicated validation branch, while manual world traversal and visual review remain pending. The wanted/police loop covers crime reports, wanted levels, line-of-sight pursuit, searching and decay. The combat prototype covers one weapon, aiming, ammo/reload, damage, police attacks and player respawn; procedural weapon/impact sounds and ambient audio exist, but their mix/quality and broader combat balance still need desktop review. Mission, economy and save/load foundations are now present but require regression and manual review. Original Blender art, manual audio quality/mixing review, world polish, and clean-machine release validation remain required.
+The branch contains a controllable third-person character, a bounded greybox coastal district, a day/night lighting cycle, an information board, an English/Russian HUD, three drivable vehicle prototypes (sedan, compact coupe, and utility pickup), four route-following pedestrians, four background traffic agents, an initial wanted/police loop, one raycast-based sidearm, health/damage and respawn, three connected missions, an economy and recoverable save/load, main and pause menus, persistent settings, accessibility controls, procedural audio, mission waypoints, and vehicle-health persistence.
+
+### Open acceptance gates
+
+- Complete an interactive playthrough on a clean Windows machine using the exported build, not the editor.
+- Verify the critical path end to end: new game, driving and vehicle recovery, police/wanted behaviour, combat and respawn, all missions, economy interactions, save/load, and Continue after restarting the application.
+- Run the 15-minute living-district stability soak against the final integrated candidate; results from a separate earlier validation branch are useful evidence but do not replace this gate.
+- Review driving feel, traffic/pedestrian behaviour, UI layout at target display sizes, gamepad controls, accessibility, and the music/effects mix.
+- Complete the final asset/license audit and triage any critical or progression-blocking issues.
+- Review the persistence boundary: progression and selected world data plus vehicle health are saved, but vehicle transforms/velocities, NPC transforms, and a complete world snapshot are not currently persisted.
+
+The full scope and measurable acceptance criteria remain in [docs/mvp-scope.md](docs/mvp-scope.md). Do not describe the project as an accepted complete MVP until the required gates have passed or any scope change has been explicitly approved and documented.
 
 ## Run locally
 
 1. Install [Godot 4.7.2-stable](https://godotengine.org/download/archive/4.7.2-stable/).
-2. Clone the repository and open `project.godot` in Godot.
+2. Clone this repository or download the ZIP for the `codex/integrated-review-candidate` branch, then open `project.godot` in Godot.
 3. Run the project from the editor (F5); the main menu opens first. Starting a new game asks for confirmation when a valid save exists; Continue retains access to the existing save.
 
 ## Controls
@@ -66,4 +77,4 @@ The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). Th
 
 ## Validation
 
-GitHub Actions runs the M1–M6 regression suites, a 15-minute living-district soak on a dedicated validation branch, and Windows/Linux desktop export tests that launch the gameplay scene without the editor. The isolated 15-minute soak test passed on the dedicated validation branch. User-machine playthrough, visual/audio review, final asset-license audit, and installer/signing work remain release gates; these CI artifacts are development builds, not a final release.
+The latest full automated CI run on the parent M9 commit passed Godot import/startup, gameplay regression suites, documentation checks, and Linux/Windows export/runtime smoke checks. This is automated evidence, not a clean-machine interactive playthrough. The open acceptance gates above still apply to this integrated review candidate.
