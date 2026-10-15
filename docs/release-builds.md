@@ -4,7 +4,7 @@
 
 The committed `export_presets.cfg` defines two 64-bit desktop presets: **Windows Desktop** and **Linux/X11**. The non-resource export filter includes `*.txt` and `*.json`, which are loaded directly at runtime. The bilingual key table is stored as CSV-formatted plain text in `localization/ui_table.txt` so Godot's CSV translation importer does not convert it into a resource that `FileAccess` cannot open from the exported pack. The presets contain no signing certificates, encryption keys, or per-machine credentials. Both export presets explicitly include `LICENSES/GODOT_ENGINE_LICENSE.txt`, and the repository's [asset/license inventory](asset-license-inventory.md) records the current provenance baseline. Local export credentials, if ever added, belong in Godot's ignored credentials file and must not be committed.
 
-The Linux CI export job uses Godot 4.7.2 and installs the matching export templates. It creates both desktop packages under `build/`, validates that the files are non-empty, and starts the exported Linux executable in headless mode without the editor. A separate `windows-latest` job independently exports and launches the Windows executable with the same gameplay smoke mode, so the Windows artifact is exercised on a Windows runner without the editor. For the smoke run, `SUNSHINE_STATE_SMOKE_TEST=1` makes the initial menu start a fresh in-memory game and transition into the district; the runtime log is scanned for script/resource errors. This exercises the exported menu, localization, data catalogs, audio service initialization, and gameplay scene boot rather than checking only process startup. The Linux job uploads both artifacts as `sunshine-state-desktop-builds` for seven days; the Windows runner separately uploads `sunshine-state-windows-build` for seven days.
+The Linux CI export job uses Godot 4.7.2 and installs the matching export templates. It creates both desktop packages under `build/`, validates that the files are non-empty, and starts the exported Linux executable in headless mode without the editor. A separate `windows-latest` job independently exports and launches the Windows executable with the same gameplay smoke mode, so the Windows artifact is exercised on a Windows runner without the editor. For the smoke run, `SUNSHINE_STATE_SMOKE_TEST=1` makes the initial menu start a fresh in-memory game and transition into the district; the runtime log is scanned for script/resource errors. This exercises the exported menu, localization, data catalogs, audio service initialization, and gameplay scene boot rather than checking only process startup. The Linux job uploads both artifacts as `sunshine-state-desktop-builds` for seven days; the Windows runner separately uploads `sunshine-state-windows-build` for seven days. Each artifact also contains a plain-text run guide, the release acceptance checklist, the current asset-license inventory, and the Godot Engine license notice.
 
 ## Local build commands
 
@@ -28,6 +28,10 @@ Godot's official [project export guide](https://docs.godotengine.org/en/4.7/tuto
 ## What CI proves—and what it does not
 
 CI verifies that the two desktop packages can be exported, that both binaries start headlessly into gameplay, and that the resource/script, settings, and procedural-audio regression suites still pass. It does not prove a complete Windows playthrough on a player's own clean machine, visual/audio quality, signing, installer behaviour, graphics-driver compatibility, controller support, or performance on a player's machine.
+
+## Manual acceptance checklist
+
+Use [Release Acceptance Checklist](release-acceptance-checklist.md) with the downloaded Windows/Linux artifacts. Record the hardware and OS used, then retain the completed checklist with the tested commit SHA.
 
 ## Remaining release gates
 

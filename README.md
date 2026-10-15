@@ -49,6 +49,7 @@ The full MVP scope remains defined in [docs/mvp-scope.md](docs/mvp-scope.md). Th
 - [Testing strategy](docs/testing-strategy.md)
 - [Performance budgets](docs/performance-budgets.md)
 - [Desktop export and release smoke tests](docs/release-builds.md)
+- [Release acceptance checklist](docs/release-acceptance-checklist.md)
 - [Source register](docs/source-register.md)
 - [Roadmap](docs/roadmap.md)
 - [Branching and contribution workflow](docs/development-workflow.md)

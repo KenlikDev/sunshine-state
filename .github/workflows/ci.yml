@@ -37,6 +37,8 @@ jobs:
             docs/art-pipeline.md \
             docs/testing-strategy.md \
             docs/release-builds.md \
+            docs/release-start-guide.txt \
+            docs/release-acceptance-checklist.md \
             docs/asset-license-inventory.md \
             LICENSES/GODOT_ENGINE_LICENSE.txt \
             export_presets.cfg \
@@ -212,6 +214,16 @@ jobs:
             exit 1
           fi
 
+      - name: Package tester guide and notices
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/ReleaseDocs
+          cp docs/release-start-guide.txt build/README.txt
+          cp docs/release-acceptance-checklist.md build/ReleaseDocs/RELEASE-ACCEPTANCE-CHECKLIST.md
+          cp docs/asset-license-inventory.md build/ReleaseDocs/ASSET-LICENSE-INVENTORY.md
+          cp LICENSES/GODOT_ENGINE_LICENSE.txt build/ReleaseDocs/GODOT_ENGINE_LICENSE.txt
+
       - name: Upload desktop build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -268,11 +280,23 @@ jobs:
             exit 1
           }
 
+      - name: Package tester guide and notices
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force build/ReleaseDocs | Out-Null
+          Copy-Item docs/release-start-guide.txt build/README.txt
+          Copy-Item docs/release-acceptance-checklist.md build/ReleaseDocs/RELEASE-ACCEPTANCE-CHECKLIST.md
+          Copy-Item docs/asset-license-inventory.md build/ReleaseDocs/ASSET-LICENSE-INVENTORY.md
+          Copy-Item LICENSES/GODOT_ENGINE_LICENSE.txt build/ReleaseDocs/GODOT_ENGINE_LICENSE.txt
+
       - name: Upload Windows build artifact
         uses: actions/upload-artifact@v4
         with:
           name: sunshine-state-windows-build
-          path: build/SunshineState.exe
+          path: |
+            build/SunshineState.exe
+            build/README.txt
+            build/ReleaseDocs/
           if-no-files-found: error
           retention-days: 7
 
