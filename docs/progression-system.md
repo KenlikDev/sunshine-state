@@ -2,7 +2,7 @@
 
 ## Mission chain
 
-Three data-driven missions are defined in `data/missions/missions.json`. Each definition names a target node in the district, allowing the HUD to show a directional arrow and distance that updates as the player moves. Advancing or completing a mission automatically redirects or clears the active waypoint.
+Three data-driven missions are defined in `data/missions/missions.json`. Each definition names a target node in the district, allowing the HUD to show a directional arrow and distance. Guidance measures position and heading from the player while on foot and from the driven vehicle while seated. Advancing or completing a mission automatically redirects or clears the active waypoint.
 
 1. **District orientation** — interact with the district information board; reward: 100.
 2. **Property report** — use the property-damage interaction; reward: 200.
