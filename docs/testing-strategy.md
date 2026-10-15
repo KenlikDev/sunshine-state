@@ -6,10 +6,15 @@ The initial project baseline uses **Godot 4.7.2-stable**. CI uses the same exact
 
 The GitHub Actions workflow performs these checks:
 1. Imports editor resources in headless editor mode.
-2. Launches the configured main scene headlessly and exits after a short run.
-3. Runs the M1 vertical-slice regression scene for bootstrap composition, movement, interaction, and Russian localization.
-4. Runs the M2 vehicle regression scene for all three vehicle configurations, distinct power tuning, vehicle entry/driver ownership, throttle movement, braking deceleration, steering response, static-barrier collision, impact feedback, safe recovery, exit restoration, and HUD feedback.
-5. Checks required documents and changed-line whitespace.
+2. Launches the configured main menu scene and verifies the gameplay scene can still be loaded headlessly.
+3. Runs M1 vertical-slice checks for movement, interaction, HUD feedback, and localization.
+4. Runs M2 vehicle checks for all three configurations, driver/input ownership, throttle, braking, steering, collision feedback, recovery, safe exit, and HUD state.
+5. Runs M3 district checks for day/night lighting, pedestrian/traffic routes, population bounds, right-of-way, obstruction recovery, and world boundaries.
+6. Runs M4 wanted/police checks for crime severity, detection, pursuit/search, occlusion, decay, and state clearing.
+7. Runs M4 combat checks for weapon input, rate/ammo/reload, damage, police attacks, player death, wanted reset, and respawn.
+8. Runs M5 progression checks for purchases, duplicate transactions/rewards, three-mission sequencing, first-aid consumption, vehicle repair, save round-trip, numeric validation, and backup recovery.
+9. Runs M6 UI-flow checks for save availability, overwrite confirmation, language/settings persistence, keyboard remapping/conflicts/reset, pause/resume, and the display/audio preferences.
+10. Checks required documents and changed-line whitespace.
 
 These checks verify project loading and selected contracts. They do not prove visual quality, feel, export success, or target-machine performance.
 
@@ -67,7 +72,8 @@ Run a scripted critical path:
 
 - 15-minute living-district soak test with fixed agent counts, route progress, junction yielding, and no systemic traffic deadlock. Run locally with `godot --headless --path . res://tests/living_district_soak.tscn` or dispatch GitHub Actions with `run_living_district_soak` enabled.
 
-- main-menu Continue availability, settings persistence, pause/resume, and no gameplay processing while paused
+- main-menu Continue availability, new-game confirmation/cancel, settings persistence, pause/resume, and no gameplay processing while paused
+- keyboard binding changes across relaunch, duplicate-key rejection, reset-to-default, and Escape cancellation
 - keyboard/mouse and supported controller
 - camera clipping and inaccessible geometry
 - vehicle steering, braking, suspension, collisions, and safe exit clearance
