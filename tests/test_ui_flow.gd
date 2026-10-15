@@ -30,6 +30,21 @@ func _run_tests() -> void:
 	SettingsService.set_is_fullscreen(false)
 	SettingsService.set_resolution_index(0)
 
+	_check(
+		_has_joypad_motion(&"move_forward", JOY_AXIS_LEFT_Y, -1.0),
+		"Gamepad left-stick input accelerates or moves forward."
+	)
+	_check(
+		_has_joypad_motion(&"move_right", JOY_AXIS_LEFT_X, 1.0),
+		"Gamepad left-stick input steers or moves right."
+	)
+	_check(_has_joypad_button(&"jump", JOY_BUTTON_A), "Gamepad A performs jump or vehicle braking.")
+	_check(_has_joypad_button(&"interact", JOY_BUTTON_X), "Gamepad X performs interaction.")
+	_check(_has_joypad_button(&"aim_weapon", JOY_BUTTON_LEFT_SHOULDER), "Gamepad left shoulder aims.")
+	_check(_has_joypad_button(&"fire_weapon", JOY_BUTTON_RIGHT_SHOULDER), "Gamepad right shoulder fires.")
+	_check(_has_joypad_button(&"ui_accept", JOY_BUTTON_A), "Gamepad A activates focused UI controls.")
+	_check(_has_joypad_button(&"ui_cancel", JOY_BUTTON_B), "Gamepad B backs out or toggles pause.")
+
 	var menu_scene: PackedScene = load("res://scenes/ui/main_menu.tscn")
 	_check(menu_scene != null, "Main menu scene loads.")
 	if menu_scene == null:
@@ -249,6 +264,26 @@ func _run_tests() -> void:
 	menu.queue_free()
 	await get_tree().process_frame
 	_finish(0 if _failures.is_empty() else 1)
+
+
+func _has_joypad_button(action: StringName, button_index: int) -> bool:
+	if not InputMap.has_action(action):
+		return false
+	for event: InputEvent in InputMap.action_get_events(action):
+		if event is InputEventJoypadButton and (event as InputEventJoypadButton).button_index == button_index:
+			return true
+	return false
+
+
+func _has_joypad_motion(action: StringName, axis: int, axis_value: float) -> bool:
+	if not InputMap.has_action(action):
+		return false
+	for event: InputEvent in InputMap.action_get_events(action):
+		if event is InputEventJoypadMotion:
+			var motion: InputEventJoypadMotion = event as InputEventJoypadMotion
+			if motion.axis == axis and is_equal_approx(motion.axis_value, axis_value):
+				return true
+	return false
 
 
 func _check(condition: bool, description: String) -> void:
