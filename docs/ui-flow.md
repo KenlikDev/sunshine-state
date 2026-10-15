@@ -6,7 +6,7 @@ The project boots into a dedicated menu with **New Game**, **Continue**, **Setti
 
 ## Pause menu
 
-Press Escape during gameplay to pause the scene tree and open a pause overlay. The overlay supports Resume, Save, Load, Settings, Return to Main Menu, and Quit. The pause UI remains responsive while gameplay simulation is paused. Returning to gameplay restores the captured mouse cursor when running outside headless mode.
+Press Escape during gameplay to pause the scene tree and open a pause overlay. The overlay supports Resume, Save, Load, Restart Current Mission, Settings, Return to Main Menu, and Quit. Restart is enabled only while a mission is active or failed; using it resets the current mission to active and resumes gameplay. The pause UI remains responsive while gameplay simulation is paused. Returning to gameplay restores the captured mouse cursor when running outside headless mode.
 
 ## Settings
 
@@ -20,8 +20,8 @@ The bilingual English/Russian key table is maintained as CSV-formatted text in `
 
 ## Automated coverage
 
-The UI-flow regression validates menu loading, Continue disabled without a save and enabled with one, new-game confirmation/cancel without losing in-memory progression, settings panel open/close, locale and sensitivity persistence, resolution/fullscreen/master/music/effects-volume/keyboard-binding persistence, gamepad axis/button mappings for movement, action controls, and UI navigation, procedural sound generation, conflict rejection, default reset, pause state, opening settings while paused, and returning to live gameplay.
+The UI-flow regression validates menu loading, Continue disabled without a save and enabled with one, new-game confirmation/cancel without losing in-memory progression, settings panel open/close, locale and sensitivity persistence, resolution/fullscreen/master/music/effects-volume/keyboard-binding persistence, gamepad axis/button mappings for movement/action/UI navigation, mission restart from the pause menu, procedural sound generation, conflict rejection, default reset, pause state, opening settings while paused, and returning to live gameplay.
 
 ## Remaining work
 
-Keyboard and gamepad focus-navigation/action mappings are configured, and the HUD exposes controller guidance while a pad is connected. Physical controller testing across Windows/Linux hardware, accessibility settings, polished visual transitions, production-quality sound/music and mixing, and packaged-build UX review remain outstanding. The presentation increment is not a release-ready UI.
+Keyboard and gamepad focus-navigation/action mappings are configured, the active/failed mission can be restarted from the pause UI without a keyboard shortcut, and the HUD exposes controller guidance while a pad is connected. Physical controller testing across Windows/Linux hardware, accessibility settings, polished visual transitions, production-quality sound/music and mixing, and packaged-build UX review remain outstanding. The presentation increment is not a release-ready UI.
