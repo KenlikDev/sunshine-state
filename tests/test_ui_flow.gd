@@ -21,6 +21,8 @@ func _run_tests() -> void:
 	var original_effects_volume: float = SettingsService.get_effects_volume()
 	var original_fullscreen: bool = SettingsService.get_is_fullscreen()
 	var original_resolution_index: int = SettingsService.get_resolution_index()
+	var original_ui_scale: float = SettingsService.get_ui_scale()
+	var original_high_contrast_hud: bool = SettingsService.get_high_contrast_hud()
 	var original_bindings: Dictionary = {}
 	for action: StringName in SettingsService.REMAPPABLE_ACTIONS:
 		original_bindings[action] = SettingsService.get_binding_keycode(action)
@@ -33,6 +35,8 @@ func _run_tests() -> void:
 	SettingsService.set_effects_volume(0.75)
 	SettingsService.set_is_fullscreen(false)
 	SettingsService.set_resolution_index(0)
+	SettingsService.set_ui_scale(1.0)
+	SettingsService.set_high_contrast_hud(false)
 
 	_check(
 		_has_joypad_motion(&"move_forward", JOY_AXIS_LEFT_Y, -1.0),
@@ -56,6 +60,10 @@ func _run_tests() -> void:
 		return
 	var menu: Control = menu_scene.instantiate() as Control
 	add_child(menu)
+	var hud_scene: PackedScene = load("res://scenes/ui/game_hud.tscn")
+	var hud: CanvasLayer = hud_scene.instantiate() as CanvasLayer if hud_scene != null else null
+	if hud != null:
+		add_child(hud)
 	await get_tree().process_frame
 
 	var title: Label = menu.find_child("Title", true, false) as Label
@@ -71,6 +79,8 @@ func _run_tests() -> void:
 	var master_volume_slider: HSlider = menu.find_child("MasterVolumeSlider", true, false) as HSlider
 	var music_volume_slider: HSlider = menu.find_child("MusicVolumeSlider", true, false) as HSlider
 	var effects_volume_slider: HSlider = menu.find_child("EffectsVolumeSlider", true, false) as HSlider
+	var ui_scale_slider: HSlider = menu.find_child("UIScaleSlider", true, false) as HSlider
+	var high_contrast_hud_checkbox: CheckBox = menu.find_child("HighContrastHUDCheckBox", true, false) as CheckBox
 	var keyboard_controls_button: Button = menu.find_child("KeyboardControlsButton", true, false) as Button
 	var bindings_panel: Control = menu.find_child("InputBindingsPanel", true, false) as Control
 	_check(title != null, "Main menu displays a title.")
@@ -84,6 +94,9 @@ func _run_tests() -> void:
 	_check(master_volume_slider != null, "Settings expose a master-volume slider.")
 	_check(music_volume_slider != null, "Settings expose a separate music-volume slider.")
 	_check(effects_volume_slider != null, "Settings expose a separate effects-volume slider.")
+	_check(ui_scale_slider != null, "Accessibility settings expose a UI-scale slider.")
+	_check(high_contrast_hud_checkbox != null, "Accessibility settings expose a high-contrast HUD toggle.")
+	_check(hud != null, "The game HUD loads for accessibility regression checks.")
 	_check(keyboard_controls_button != null, "Settings expose a keyboard-controls panel.")
 	_check(bindings_panel != null and not bindings_panel.visible, "Keyboard bindings panel begins closed.")
 	if title != null:
@@ -124,6 +137,25 @@ func _run_tests() -> void:
 	if effects_volume_slider != null:
 		effects_volume_slider.value = 60.0
 		_check(is_equal_approx(SettingsService.get_effects_volume(), 0.60), "Effects volume changes independently.")
+	if ui_scale_slider != null:
+		ui_scale_slider.value = 1.2
+		_check(
+			is_equal_approx(SettingsService.get_ui_scale(), 1.2),
+			"UI scaling follows the accessibility slider."
+		)
+		_check(
+			is_equal_approx(get_tree().root.content_scale_factor, 1.2),
+			"UI scale is applied to the root window."
+		)
+	if high_contrast_hud_checkbox != null:
+		high_contrast_hud_checkbox.set_pressed_no_signal(true)
+		high_contrast_hud_checkbox.toggled.emit(true)
+		_check(SettingsService.get_high_contrast_hud(), "High-contrast HUD mode is saved.")
+		if hud != null:
+			_check(
+				bool(hud.call("is_high_contrast_hud_active")),
+				"An active HUD applies the high-contrast palette immediately."
+			)
 	if resolution_option != null:
 		resolution_option.select(1)
 		resolution_option.item_selected.emit(1)
@@ -162,6 +194,8 @@ func _run_tests() -> void:
 	_check(is_equal_approx(float(display_config.get_value("audio", "effects_volume", 0.0)), 0.60), "Effects volume persists independently.")
 	_check(int(display_config.get_value("display", "resolution_index", -1)) == 1, "Resolution choice persists.")
 	_check(bool(display_config.get_value("display", "fullscreen", false)), "Fullscreen state persists.")
+	_check(is_equal_approx(float(display_config.get_value("accessibility", "ui_scale", 0.0)), 1.2), "UI scaling persists.")
+	_check(bool(display_config.get_value("accessibility", "high_contrast_hud", false)), "High-contrast HUD preference persists.")
 
 	if keyboard_controls_button != null and bindings_panel != null:
 		keyboard_controls_button.pressed.emit()
@@ -303,9 +337,13 @@ func _run_tests() -> void:
 	SettingsService.set_effects_volume(original_effects_volume)
 	SettingsService.set_is_fullscreen(original_fullscreen)
 	SettingsService.set_resolution_index(original_resolution_index)
+	SettingsService.set_ui_scale(original_ui_scale)
+	SettingsService.set_high_contrast_hud(original_high_contrast_hud)
 	SaveService.delete_save_files()
 	save_menu.queue_free()
 	menu.queue_free()
+	if is_instance_valid(hud):
+		hud.queue_free()
 	await get_tree().process_frame
 	_finish(0 if _failures.is_empty() else 1)
 
