@@ -60,12 +60,19 @@ func _physics_process(delta: float) -> void:
 	var near_camera: bool = _is_near_camera()
 	var blocked: bool = false
 
+	var yield_timeout_elapsed: bool = (
+		conflict_requires_yield
+		and _yielding_seconds >= intersection_yield_timeout_seconds
+	)
 	if near_camera:
 		_obstacle_ray.force_raycast_update()
 		if _obstacle_ray.is_colliding():
 			var collider: Object = _obstacle_ray.get_collider()
 			if collider is Node and collider != self:
-				blocked = true
+				blocked = not (
+					yield_timeout_elapsed
+					and _is_timed_out_cross_traffic(collider as Node)
+				)
 
 	if _reverse_remaining > 0.0:
 		_reverse_remaining = maxf(0.0, _reverse_remaining - delta)
@@ -172,6 +179,17 @@ func _should_yield_for_intersection() -> bool:
 		if absf((other as Node3D).global_position.x) < 8.0 and absf((other as Node3D).global_position.z) < 20.0:
 			return true
 	return false
+
+
+func _is_timed_out_cross_traffic(candidate: Node) -> bool:
+	if not candidate.is_in_group("traffic_vehicles"):
+		return false
+	if int(candidate.get("route_axis")) != RouteAxis.NORTH_SOUTH:
+		return false
+	if not candidate is Node3D:
+		return false
+	var candidate_position: Vector3 = (candidate as Node3D).global_position
+	return absf(candidate_position.x) < 8.0 and absf(candidate_position.z) < 20.0
 
 
 func _is_near_camera() -> bool:
