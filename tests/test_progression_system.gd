@@ -200,10 +200,20 @@ func _run_tests() -> void:
 			"Autosaves record all three vehicles by stable ID."
 		)
 		repair_vehicle.set("current_vehicle_health", 100)
-		_check(SaveService.load_game(false), "Loading a save restores vehicle health in the active world.")
+		instance.remove_from_group("gameplay_scene")
+		_check(SaveService.load_game(false), "Loading a save without an active gameplay scene succeeds.")
+		_check(
+			int(repair_vehicle.call("get_vehicle_health")) == 100,
+			"Vehicle health restoration waits until a gameplay scene is available."
+		)
+		instance.add_to_group("gameplay_scene")
+		_check(
+			SaveService.restore_pending_vehicle_health(),
+			"Deferred vehicle health is applied when gameplay becomes available."
+		)
 		_check(
 			int(repair_vehicle.call("get_vehicle_health")) == expected_saved_vehicle_health,
-			"Vehicle health returns to the last saved value after an in-session change."
+			"Deferred restoration returns the vehicle to its last saved health."
 		)
 		_check(
 			int(compact_vehicle.call("get_vehicle_health")) == 100 and int(pickup_vehicle.call("get_vehicle_health")) == 100,
@@ -228,6 +238,14 @@ func _run_tests() -> void:
 	_check(
 		candidate_vehicle_health.has("compact_coupe") and candidate_vehicle_health.has("utility_pickup"),
 		"Save payload includes the three stable vehicle identities."
+	)
+	var legacy_payload: Dictionary = candidate_payload.duplicate(true)
+	var legacy_world: Dictionary = legacy_payload["world"]
+	legacy_world.erase("vehicle_health")
+	legacy_payload["world"] = legacy_world
+	_check(
+		bool(SaveService.call("_is_valid_payload", legacy_payload)),
+		"Existing schema-version-1 saves without vehicle health remain compatible."
 	)
 	var invalid_vehicle_payload: Dictionary = candidate_payload.duplicate(true)
 	var invalid_vehicle_world: Dictionary = invalid_vehicle_payload["world"]
