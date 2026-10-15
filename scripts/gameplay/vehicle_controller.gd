@@ -28,6 +28,7 @@ var _last_impact_feedback_msec: int = -1200
 
 
 func _ready() -> void:
+	collision_mask |= 2
 	mouse_sensitivity = SettingsService.get_mouse_sensitivity()
 	max_vehicle_health = maxi(1, max_vehicle_health)
 	current_vehicle_health = max_vehicle_health
