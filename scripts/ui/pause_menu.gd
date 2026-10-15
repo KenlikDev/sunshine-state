@@ -2,6 +2,7 @@ extends CanvasLayer
 
 const GAME_SCENE: String = "res://scenes/bootstrap/main.tscn"
 const MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
+const INPUT_BINDINGS_SCENE: PackedScene = preload("res://scenes/ui/input_bindings_panel.tscn")
 
 var _screen: Control
 var _pause_center: CenterContainer
@@ -16,6 +17,8 @@ var _quit_button: Button
 var _settings_title: Label
 var _language_label: Label
 var _language_button: Button
+var _keyboard_controls_button: Button
+var _input_bindings_panel: Control
 var _resolution_label: Label
 var _resolution_option: OptionButton
 var _fullscreen_checkbox: CheckBox
@@ -32,6 +35,9 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	set_process_input(true)
 	_build_ui()
+	_input_bindings_panel = INPUT_BINDINGS_SCENE.instantiate() as Control
+	_input_bindings_panel.name = "InputBindingsPanel"
+	add_child(_input_bindings_panel)
 	SaveService.save_status_changed.connect(_on_save_status_changed)
 	SettingsService.locale_changed.connect(_on_locale_changed)
 	_screen.visible = false
@@ -133,6 +139,8 @@ func _build_ui() -> void:
 	settings_stack.add_child(_language_label)
 	_language_button = _make_button("LanguageButton", Callable(self, "_toggle_locale"))
 	settings_stack.add_child(_language_button)
+	_keyboard_controls_button = _make_button("KeyboardControlsButton", Callable(self, "_toggle_input_bindings"))
+	settings_stack.add_child(_keyboard_controls_button)
 
 	_resolution_label = Label.new()
 	_resolution_label.name = "ResolutionLabel"
@@ -221,6 +229,7 @@ func _refresh_texts() -> void:
 	_settings_title.text = Localization.translate_key("SETTINGS_TITLE")
 	_language_label.text = Localization.translate_key("SETTINGS_LANGUAGE")
 	_language_button.text = Localization.translate_key("SETTINGS_LANGUAGE_BUTTON") + ": " + SettingsService.get_locale().to_upper()
+	_keyboard_controls_button.text = Localization.translate_key("SETTINGS_KEYBOARD_CONTROLS")
 	_resolution_label.text = Localization.translate_key("SETTINGS_RESOLUTION")
 	_resolution_option.select(SettingsService.get_resolution_index())
 	_fullscreen_checkbox.text = Localization.translate_key("SETTINGS_FULLSCREEN")
@@ -324,3 +333,10 @@ func _on_master_volume_changed(value: float) -> void:
 
 func _update_master_volume_label(value: float) -> void:
 	_master_volume_label.text = Localization.format_key("SETTINGS_MASTER_VOLUME_VALUE", [int(roundf(value))])
+
+
+
+func _toggle_input_bindings() -> void:
+	if not is_instance_valid(_input_bindings_panel):
+		return
+	_input_bindings_panel.visible = not _input_bindings_panel.visible
