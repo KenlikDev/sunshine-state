@@ -26,6 +26,9 @@ var _gravity: float = float(ProjectSettings.get_setting("physics/3d/default_grav
 
 
 func _ready() -> void:
+	# Traffic is its own layer: players and drivable cars collide with it, but it cannot block patrol pedestrians.
+	collision_layer = 2
+	collision_mask = 1
 	add_to_group("traffic_vehicles")
 	_obstacle_ray.add_exception(self)
 	if start_at_end and route_points.size() >= 2:
