@@ -16,7 +16,7 @@ Items and prices live in `data/items/items.json`. All transactions go through `E
 
 ## Save schema
 
-`SaveService` stores schema version 1 in `user://sunshine_state_save.json`. The payload contains currency/inventory/processed transactions, mission states/current mission, wanted level/last known position, a timestamp, selected world progression flags, and the day-night clock when the environment is active. The `time_of_day_hours` world field is optional for backward compatibility with existing schema-version-1 saves; when present it must be numeric and in the range 0–24 (exclusive at 24).
+`SaveService` stores schema version 1 in `user://sunshine_state_save.json`. The payload contains currency/inventory/processed transactions, mission states/current mission, wanted level/last known position, a timestamp, selected world progression flags, and the day-night clock when the environment is active. The `time_of_day_hours` and `vehicle_health` world fields are optional for backward compatibility with existing schema-version-1 saves. When present, time must be numeric and in the range 0–24 (exclusive at 24); vehicle health must be an integer from 0 to 500 keyed by stable vehicle IDs. The sedan, compact coupe, and utility pickup register their IDs and health changes trigger autosaves. On Continue, health restoration is deferred until the gameplay world and vehicles exist. Vehicle positions, rotations, velocities, and individual NPC transforms are not yet persisted.
 
 Writes go to a temporary file first. Before replacing a valid primary save, the previous valid version is rotated into `user://sunshine_state_save.bak`. Load validates the complete payload before applying data. If the primary is invalid, a validated backup is tried; if neither is valid, the service reports failure and leaves the in-memory state untouched. Unsupported schema versions are rejected rather than silently rewritten.
 
@@ -28,4 +28,4 @@ The progression test covers item catalogue loading, successful and repeated purc
 
 ## Remaining acceptance work
 
-This is an early progression foundation. Manual menu flows, mission failure variety, mission replay UI, a save-slot UI, schema migration beyond version 1, and full persistence policy for individual vehicle/NPC transforms remain outstanding. Vehicle damage currently persists only for the current session and is reset when the world is reconstructed. The project still requires manual play testing and the M3 15-minute simulation soak.
+This is an early progression foundation. Manual menu flows, mission failure variety, mission replay UI, a save-slot UI, schema migration beyond version 1, and full persistence policy for individual vehicle/NPC transforms remain outstanding. Vehicle health now persists across save/load, but individual vehicle transforms and NPC transforms are still reconstructed when the world is reloaded. The project still requires manual play testing and the M3 15-minute simulation soak.
