@@ -43,6 +43,8 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector3.ZERO
 		return
 
+	var frame_start_position: Vector3 = global_position
+	var was_recovering: bool = _reverse_remaining > 0.0
 	var direction: Vector3 = _get_route_direction()
 	var yielding: bool = _should_yield_for_intersection()
 	var near_camera: bool = _is_near_camera()
@@ -89,6 +91,22 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity.y -= _gravity * delta
 	move_and_slide()
+
+	# Off-screen traffic skips ray-based avoidance, so physical collision stalls
+	# need their own bounded recovery path instead of remaining in DRIVING forever.
+	if not was_recovering and not yielding and not blocked:
+		var horizontal_step: float = Vector2(
+			global_position.x - frame_start_position.x,
+			global_position.z - frame_start_position.z
+		).length()
+		if direction.length_squared() > 0.1 and horizontal_step < maxf(0.025, cruise_speed * delta * 0.15):
+			_stalled_seconds += delta
+			if _stalled_seconds >= obstacle_recovery_delay:
+				_stalled_seconds = 0.0
+				_reverse_remaining = reverse_recovery_duration
+				_set_ai_state("WAITING")
+		else:
+			_stalled_seconds = 0.0
 
 
 func get_ai_state() -> String:
