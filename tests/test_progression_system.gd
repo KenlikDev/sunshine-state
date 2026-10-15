@@ -173,6 +173,53 @@ func _run_tests() -> void:
 		_check(EconomyService.get_balance() == balance_before_repair - 150, "Rejected redundant repairs do not charge the player.")
 		_check(EconomyService.get_item_count("vehicle_repair") == 0, "A repair service is not stored as an inventory token.")
 
+	var expected_saved_vehicle_health: int = -1
+	var compact_vehicle: Node = world.get_node_or_null("CompactCoupe")
+	var pickup_vehicle: Node = world.get_node_or_null("UtilityPickup")
+	_check(compact_vehicle != null and pickup_vehicle != null, "Compact and pickup vehicles are present for persistence coverage.")
+	if repair_vehicle != null and compact_vehicle != null and pickup_vehicle != null:
+		_check(String(repair_vehicle.get("save_id")) == "sedan", "The sedan has a stable save identifier.")
+		_check(String(compact_vehicle.get("save_id")) == "compact_coupe", "The compact coupe has a stable save identifier.")
+		_check(String(pickup_vehicle.get("save_id")) == "utility_pickup", "The utility pickup has a stable save identifier.")
+		_check(
+			bool(repair_vehicle.call("apply_vehicle_damage", 35)),
+			"Additional vehicle damage is accepted for persistence validation."
+		)
+		expected_saved_vehicle_health = int(repair_vehicle.call("get_vehicle_health"))
+		_check(expected_saved_vehicle_health == 65, "Vehicle damage establishes a known health value for save tests.")
+		await get_tree().create_timer(0.15).timeout
+		var autosaved_payload: Dictionary = SaveService.call("_read_valid_payload", SaveService.get_save_data_path())
+		var autosaved_world: Dictionary = autosaved_payload.get("world", {})
+		var autosaved_vehicle_health: Dictionary = autosaved_world.get("vehicle_health", {})
+		_check(
+			int(autosaved_vehicle_health.get("sedan", -1)) == expected_saved_vehicle_health,
+			"Vehicle damage automatically updates the valid save."
+		)
+		_check(
+			autosaved_vehicle_health.has("compact_coupe") and autosaved_vehicle_health.has("utility_pickup"),
+			"Autosaves record all three vehicles by stable ID."
+		)
+		repair_vehicle.set("current_vehicle_health", 100)
+		instance.remove_from_group("gameplay_scene")
+		_check(SaveService.load_game(false), "Loading a save without an active gameplay scene succeeds.")
+		_check(
+			int(repair_vehicle.call("get_vehicle_health")) == 100,
+			"Vehicle health restoration waits until a gameplay scene is available."
+		)
+		instance.add_to_group("gameplay_scene")
+		_check(
+			SaveService.restore_pending_vehicle_health(),
+			"Deferred vehicle health is applied when gameplay becomes available."
+		)
+		_check(
+			int(repair_vehicle.call("get_vehicle_health")) == expected_saved_vehicle_health,
+			"Deferred restoration returns the vehicle to its last saved health."
+		)
+		_check(
+			int(compact_vehicle.call("get_vehicle_health")) == 100 and int(pickup_vehicle.call("get_vehicle_health")) == 100,
+			"Loading the save restores health for the other vehicle prototypes too."
+		)
+
 	var expected_time_of_day: float = -1.0
 	if day_night != null:
 		day_night.call("set_time_of_day", 21.5)
@@ -182,6 +229,43 @@ func _run_tests() -> void:
 	_check(
 		absf(float(candidate_world.get("time_of_day_hours", -1.0)) - expected_time_of_day) < 0.001,
 		"Save payload captures the current world clock."
+	)
+	var candidate_vehicle_health: Dictionary = candidate_world.get("vehicle_health", {})
+	_check(
+		int(candidate_vehicle_health.get("sedan", -1)) == expected_saved_vehicle_health,
+		"Save payload serializes the damaged vehicle's current health."
+	)
+	_check(
+		candidate_vehicle_health.has("compact_coupe") and candidate_vehicle_health.has("utility_pickup"),
+		"Save payload includes the three stable vehicle identities."
+	)
+	var legacy_payload: Dictionary = candidate_payload.duplicate(true)
+	var legacy_world: Dictionary = legacy_payload["world"]
+	legacy_world.erase("vehicle_health")
+	legacy_payload["world"] = legacy_world
+	_check(
+		bool(SaveService.call("_is_valid_payload", legacy_payload)),
+		"Existing schema-version-1 saves without vehicle health remain compatible."
+	)
+	var invalid_vehicle_payload: Dictionary = candidate_payload.duplicate(true)
+	var invalid_vehicle_world: Dictionary = invalid_vehicle_payload["world"]
+	var invalid_vehicle_health: Dictionary = invalid_vehicle_world["vehicle_health"]
+	invalid_vehicle_health["sedan"] = -1
+	invalid_vehicle_world["vehicle_health"] = invalid_vehicle_health
+	invalid_vehicle_payload["world"] = invalid_vehicle_world
+	_check(
+		not bool(SaveService.call("_is_valid_payload", invalid_vehicle_payload)),
+		"Save validation rejects out-of-range vehicle health."
+	)
+	var fractional_vehicle_payload: Dictionary = candidate_payload.duplicate(true)
+	var fractional_vehicle_world: Dictionary = fractional_vehicle_payload["world"]
+	var fractional_vehicle_health: Dictionary = fractional_vehicle_world["vehicle_health"]
+	fractional_vehicle_health["sedan"] = 65.5
+	fractional_vehicle_world["vehicle_health"] = fractional_vehicle_health
+	fractional_vehicle_payload["world"] = fractional_vehicle_world
+	_check(
+		not bool(SaveService.call("_is_valid_payload", fractional_vehicle_payload)),
+		"Save validation rejects fractional vehicle health while accepting whole-number JSON values."
 	)
 	var invalid_time_payload: Dictionary = candidate_payload.duplicate(true)
 	var invalid_time_world: Dictionary = invalid_time_payload["world"]
@@ -194,6 +278,10 @@ func _run_tests() -> void:
 	_check(SaveService.save_game(false), "The completed progression state can be saved.")
 	var expected_balance: int = EconomyService.get_balance()
 	var expected_inventory: int = EconomyService.get_item_count("first_aid_kit")
+	_check(
+		int(repair_vehicle.call("get_vehicle_health")) == expected_saved_vehicle_health,
+		"The vehicle health is intact at the save/backup checkpoint."
+	)
 	_check(EconomyService.grant_reward(75, "test_reward_before_backup"), "A committed currency transaction updates the save candidate.")
 	await get_tree().create_timer(0.15).timeout
 	_check(
@@ -218,6 +306,10 @@ func _run_tests() -> void:
 	_check(MissionService.is_mission_completed("district_orientation"), "Backup recovery preserves completed mission one.")
 	_check(MissionService.is_mission_completed("property_report"), "Backup recovery preserves completed mission two.")
 	_check(MissionService.is_mission_completed("supply_run"), "Backup recovery preserves completed mission three.")
+	_check(
+		int(repair_vehicle.call("get_vehicle_health")) == expected_saved_vehicle_health,
+		"Backup recovery restores the saved vehicle health."
+	)
 	if day_night != null:
 		_check(
 			absf(float(day_night.call("get_time_of_day")) - expected_time_of_day) < 0.01,

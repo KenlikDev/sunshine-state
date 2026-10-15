@@ -54,7 +54,7 @@ Cover pure logic and state transitions:
 - NPC death, police attack conditions, player incapacitation, wanted reset, and respawn
 - mission completion grants one reward exactly once
 - police detection creates and clears a pursuit correctly
-- save/load restores progression and world time after relaunch; invalid day-time values are rejected and corrupt primary recovery uses the last known-good backup
+- save/load restores progression, world time, and health for all three vehicle prototypes; vehicle damage queues an autosave, health values outside the supported integer range are rejected, and corrupt-primary recovery restores the last known-good vehicle-health snapshot
 
 ### Acceptance tests
 

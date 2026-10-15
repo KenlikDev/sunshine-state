@@ -12,6 +12,10 @@ func _ready() -> void:
 	var world: Node3D = WORLD_SCENE.instantiate()
 	world.name = "World"
 	add_child(world)
+	var day_night_cycle: Node = world.get_node_or_null("DayNightCycle")
+	if is_instance_valid(day_night_cycle):
+		SaveService.restore_pending_world_time(day_night_cycle)
+	SaveService.restore_pending_vehicle_health()
 
 	var player: CharacterBody3D = PLAYER_SCENE.instantiate()
 	player.name = "Player"

@@ -31,6 +31,7 @@ mass = 850.0
 linear_damp = 0.09
 angular_damp = 1.1
 script = ExtResource("1_vehicle")
+save_id = "compact_coupe"
 engine_power = 1750.0
 brake_power = 72.0
 max_steering_angle = 0.5

@@ -3,6 +3,7 @@ extends VehicleBody3D
 signal driver_changed(has_driver: bool)
 signal vehicle_health_changed(current_health: int, max_health: int)
 
+@export var save_id: String = ""
 @export var engine_power: float = 2400.0
 @export_range(1, 500, 1) var max_vehicle_health: int = 100
 @export var brake_power: float = 65.0
@@ -33,6 +34,7 @@ func _ready() -> void:
 	max_vehicle_health = maxi(1, max_vehicle_health)
 	current_vehicle_health = max_vehicle_health
 	add_to_group("vehicles")
+	SaveService.register_vehicle(self)
 	_vehicle_camera.current = false
 	_create_wheel_visuals()
 
@@ -141,6 +143,18 @@ func _emit_collision_feedback_if_needed() -> void:
 
 func get_vehicle_health() -> int:
 	return current_vehicle_health
+
+
+func restore_vehicle_health(health: int) -> bool:
+	if health < 0 or health > max_vehicle_health:
+		return false
+	if current_vehicle_health == health:
+		return true
+	current_vehicle_health = health
+	if current_vehicle_health == 0:
+		engine_force = 0.0
+	vehicle_health_changed.emit(current_vehicle_health, max_vehicle_health)
+	return true
 
 
 func apply_vehicle_damage(amount: int) -> bool:
