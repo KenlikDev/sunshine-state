@@ -230,7 +230,8 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force build | Out-Null
-          godot --headless --editor --path . --quit 2>&1 | Tee-Object -FilePath build/editor-import.log
+          $godotExe = Join-Path $env:USERPROFILE "godot\Godot_v4.7.2-stable_win64.exe"
+          & $godotExe --headless --editor --path . --quit 2>&1 | Tee-Object -FilePath build/editor-import.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           if (Select-String -Path build/editor-import.log -Pattern 'SCRIPT ERROR:|ERROR:') {
             Write-Error "Godot reported script or resource errors during import."
@@ -240,7 +241,8 @@ jobs:
       - name: Export Windows Desktop package
         shell: pwsh
         run: |
-          godot --headless --path . --export-release "Windows Desktop" build/SunshineState.exe
+          $godotExe = Join-Path $env:USERPROFILE "godot\Godot_v4.7.2-stable_win64.exe"
+          & $godotExe --headless --path . --export-release "Windows Desktop" build/SunshineState.exe
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           if (-not (Test-Path build/SunshineState.exe) -or (Get-Item build/SunshineState.exe).Length -le 0) {
             Write-Error "Windows executable was not generated."
