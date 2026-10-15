@@ -165,6 +165,25 @@ func get_binding_label(action: StringName) -> String:
 	return OS.get_keycode_string(physical_keycode)
 
 
+func get_default_binding_keycode(action: StringName) -> int:
+	return int(_default_key_bindings.get(action, 0))
+
+
+func set_binding_keycode(action: StringName, physical_keycode: int) -> bool:
+	if not REMAPPABLE_ACTIONS.has(action) or not _default_key_bindings.has(action):
+		return false
+	if physical_keycode <= 0 or _has_binding_conflict(action, physical_keycode):
+		return false
+	_replace_keyboard_binding(action, physical_keycode)
+	if physical_keycode == int(_default_key_bindings[action]):
+		_custom_key_bindings.erase(action)
+	else:
+		_custom_key_bindings[action] = physical_keycode
+	_save_settings()
+	binding_change_completed.emit(action, physical_keycode)
+	return true
+
+
 func begin_rebind(action: StringName) -> bool:
 	if not REMAPPABLE_ACTIONS.has(action) or not InputMap.has_action(action):
 		return false
