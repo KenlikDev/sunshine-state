@@ -161,7 +161,9 @@ func _run_tests() -> void:
 
 
 func _is_animated_rig(anchor: Node3D) -> bool:
-	var character := anchor.get_node_or_null("QuaterniusCharacter") as Node3D
+	# The imported rig is parented beneath CharacterMotionPivot so visual lean
+	# stays outside animation tracks; discover it recursively instead of by path.
+	var character := anchor.find_child("QuaterniusCharacter", true, false) as Node3D
 	if character == null:
 		return false
 	var skeletons := character.find_children("*", "Skeleton3D", true, false)
