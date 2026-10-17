@@ -134,6 +134,9 @@ func _run_tests() -> void:
 				"Police look around after reaching a last-known position."
 			)
 
+			# Restore the original test location before removing the occluder so
+			# unrelated moving pedestrians cannot make reacquisition nondeterministic.
+			player.global_position = last_known
 			wall.queue_free()
 			await get_tree().physics_frame
 			officer.global_position = player.global_position + Vector3(7.0, 0.0, 0.0)
