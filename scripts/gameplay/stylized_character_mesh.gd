@@ -276,6 +276,14 @@ func _find_locomotion_animations() -> void:
 			_run_animation = animation_name
 
 
+func get_locomotion_state() -> String:
+	if not _run_animation.is_empty() and _current_animation == _run_animation:
+		return "RUN"
+	if not _walk_animation.is_empty() and _current_animation == _walk_animation:
+		return "WALK"
+	return "IDLE"
+
+
 func _update_rig_animation(delta: float) -> void:
 	var actor := get_parent() as CharacterBody3D
 	if actor == null:
