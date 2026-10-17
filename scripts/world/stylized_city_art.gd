@@ -17,6 +17,24 @@ const _SIGN_COLORS: Array[Color] = [
 ]
 
 var _street_lamps: Array[OmniLight3D] = []
+var _palm_fronds: Array[Dictionary] = []
+var _animation_time: float = 0.0
+
+
+func _process(delta: float) -> void:
+	_animation_time += delta
+	for frond_data: Dictionary in _palm_fronds:
+		var frond: Node3D = frond_data.get("node") as Node3D
+		if not is_instance_valid(frond):
+			continue
+		var rest_rotation: Vector3 = frond_data["rest_rotation"]
+		var phase: float = float(frond_data["phase"])
+		frond.rotation.x = rest_rotation.x + sin(_animation_time * 0.57 + phase) * 0.045
+		frond.rotation.z = rest_rotation.z + sin(_animation_time * 0.73 + phase * 1.31) * 0.055
+
+
+func get_animated_palm_frond_count() -> int:
+	return _palm_fronds.size()
 
 
 func _ready() -> void:
@@ -286,6 +304,11 @@ func _add_palm(index: int, base: Vector3, trunk_material: Material, leaf_materia
 		leaf.position = to_local(crown + Vector3(0.0, -0.05, 0.0))
 		leaf.rotation = Vector3(deg_to_rad(20.0 + float(frond % 3) * 7.0), TAU * float(frond) / 8.0, deg_to_rad(-23.0))
 		add_child(leaf)
+		_palm_fronds.append({
+			"node": leaf,
+			"rest_rotation": leaf.rotation,
+			"phase": float(index) * 0.71 + float(frond) * 1.07
+		})
 
 	var fruit_material := _make_material(Color(0.31, 0.19, 0.09, 1.0), 0.82)
 	for fruit: int in range(3):
@@ -336,9 +359,21 @@ func _add_beach_objects() -> void:
 func _update_lamp_state(hour: float) -> void:
 	var solar_angle: float = TAU * (hour - 6.0) / 24.0
 	var daylight: float = clampf((sin(solar_angle) + 0.15) / 0.78, 0.0, 1.0)
-	var intensity: float = 1.15 if daylight < 0.24 else 0.0
+	var night_factor: float = 1.0 - smoothstep(0.05, 0.32, daylight)
+	var intensity: float = 1.15 * night_factor
 	for lamp: OmniLight3D in _street_lamps:
 		lamp.light_energy = intensity
+
+	# Let the coast and building windows respond continuously to the same clock.
+	var world: Node = get_parent()
+	if world != null:
+		var water := world.get_node_or_null("Water") as MeshInstance3D
+		if water != null and water.material_override is ShaderMaterial:
+			(water.material_override as ShaderMaterial).set_shader_parameter("night_factor", night_factor)
+		var warm_windows := get_node_or_null("WarmWindowGlass") as MultiMeshInstance3D
+		if warm_windows != null and warm_windows.material_override is StandardMaterial3D:
+			var window_material := warm_windows.material_override as StandardMaterial3D
+			window_material.emission_energy_multiplier = lerpf(0.04, 0.6, night_factor)
 
 
 func _add_multimesh(node_name: String, mesh: Mesh, transforms: Array[Transform3D], material: Material) -> void:
