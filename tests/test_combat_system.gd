@@ -164,7 +164,7 @@ func _run_tests() -> void:
 			"Respawn restores full health."
 		)
 		_check(
-			(player.get_node("MeshInstance3D") as MeshInstance3D).visible,
+			(player.get_node("MeshInstance3D") as Node3D).visible,
 			"Player presentation is restored after respawn."
 		)
 

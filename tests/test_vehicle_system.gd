@@ -73,7 +73,7 @@ func _run_tests() -> void:
 				)
 				hud.call("_refresh_waypoint_status")
 			_check(
-				not (player.get_node("MeshInstance3D") as MeshInstance3D).visible,
+				not (player.get_node("MeshInstance3D") as Node3D).visible,
 				"Player presentation is hidden while driving."
 			)
 
@@ -189,7 +189,7 @@ func _run_tests() -> void:
 				)
 				hud.call("_refresh_waypoint_status")
 			_check(
-				(player.get_node("MeshInstance3D") as MeshInstance3D).visible,
+				(player.get_node("MeshInstance3D") as Node3D).visible,
 				"Player presentation is restored after exit."
 			)
 			_check(

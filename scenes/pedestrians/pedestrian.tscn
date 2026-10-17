@@ -1,21 +1,12 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/pedestrian_controller.gd" id="1_pedestrian"]
 [ext_resource type="Script" path="res://scripts/gameplay/damageable.gd" id="2_damage"]
+[ext_resource type="Script" path="res://scripts/gameplay/stylized_character_mesh.gd" id="3_character"]
 
 [sub_resource type="CapsuleShape3D" id="PedestrianCollision"]
 radius = 0.3
 height = 1.55
-
-[sub_resource type="CapsuleMesh" id="PedestrianMesh"]
-radius = 0.3
-height = 1.55
-radial_segments = 12
-rings = 4
-
-[sub_resource type="StandardMaterial3D" id="PedestrianMaterial"]
-albedo_color = Color(0.77, 0.48, 0.24, 1)
-roughness = 0.92
 
 [node name="Pedestrian" type="CharacterBody3D"]
 script = ExtResource("1_pedestrian")
@@ -26,10 +17,11 @@ collision_mask = 1
 position = Vector3(0, 0.78, 0)
 shape = SubResource("PedestrianCollision")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+[node name="MeshInstance3D" type="Node3D" parent="."]
 position = Vector3(0, 0.78, 0)
-mesh = SubResource("PedestrianMesh")
-material_override = SubResource("PedestrianMaterial")
+script = ExtResource("3_character")
+character_style = "pedestrian"
+skin_tone = Color(0.68, 0.47, 0.32, 1)
 
 [node name="Damageable" type="Node" parent="."]
 script = ExtResource("2_damage")

@@ -1,6 +1,9 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/vehicle_controller.gd" id="1_vehicle"]
+[ext_resource type="Script" path="res://scripts/gameplay/vehicle_visual_details.gd" id="2_vehicle_visuals"]
+[ext_resource type="Script" path="res://scripts/gameplay/vehicle_glb_visual.gd" id="3_glb_visual"]
+[ext_resource type="PackedScene" path="res://assets/vehicles/kenney_sedan.glb" id="4_model"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_chassis"]
 size = Vector3(1.9, 0.85, 3.8)
@@ -112,6 +115,17 @@ position = Vector3(0, 1.5, 0)
 [node name="SpringArm3D" type="SpringArm3D" parent="CameraPivot"]
 spring_length = 5.5
 collision_mask = 1
+
+[node name="VehicleVisualModel" type="Node3D" parent="."]
+script = ExtResource("3_glb_visual")
+model_scene = ExtResource("4_model")
+target_dimensions = Vector3(1.82, 1.50, 3.60)
+target_bottom_y = -0.53
+yaw_degrees = 180.0
+
+[node name="VehicleVisualDetails" type="Node3D" parent="."]
+script = ExtResource("2_vehicle_visuals")
+imported_vehicle_model_active = true
 
 [node name="Camera3D" type="Camera3D" parent="CameraPivot/SpringArm3D"]
 current = false

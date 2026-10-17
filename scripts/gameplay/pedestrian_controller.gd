@@ -18,7 +18,7 @@ var _route_index: int = 0
 var _alert_time_remaining: float = 0.0
 var _gravity: float = float(ProjectSettings.get_setting("physics/3d/default_gravity"))
 
-@onready var _body_mesh: MeshInstance3D = $MeshInstance3D
+@onready var _body_mesh: Node3D = $MeshInstance3D
 
 
 func _ready() -> void:
@@ -132,9 +132,5 @@ func _set_state(next_state: AIState) -> void:
 
 
 func _apply_clothing_color() -> void:
-	var source: StandardMaterial3D = _body_mesh.material_override as StandardMaterial3D
-	if source == null:
-		source = StandardMaterial3D.new()
-	var material: StandardMaterial3D = source.duplicate() as StandardMaterial3D
-	material.albedo_color = clothing_color
-	_body_mesh.material_override = material
+	if _body_mesh.has_method("set_clothing_color"):
+		_body_mesh.call("set_clothing_color", clothing_color)

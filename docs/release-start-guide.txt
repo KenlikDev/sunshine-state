@@ -1,7 +1,7 @@
 SUNSHINE STATE — DEVELOPMENT BUILD
 =================================
 
-This is a development prototype built with Godot 4.7.2. It is not a final release candidate. The game currently uses greybox geometry and prototype gameplay systems.
+This is a development prototype built with Godot 4.7.2, not a final release candidate. The current build combines a procedural coastal district with CC0 low-poly vehicles and core buildings, plus a rigged Quaternius humanoid used for the player, pedestrians, and police. Gameplay systems and presentation are still under active development.
 
 STARTING
 --------
@@ -63,7 +63,7 @@ The game stores data in the operating system's Godot user-data directory. Import
 
 KNOWN LIMITATIONS
 -----------------
-- The district and vehicles are greybox prototypes; final art, animation and content are not included.
+- The roads, coastline, promenade dressing, and four secondary building facades are procedural/blockout geometry. Imported characters, vehicles, and core buildings are a first low-poly art pass, not bespoke final production art; character/combat animation quality needs manual review.
 - Mission, police, traffic, and combat systems are early single-player prototypes.
 - Vehicle health and repair state are persisted across save/load and Continue. Vehicle positions, rotations, velocities, and individual NPC transforms are not yet included in the saved world state.
 - Audio is procedural and needs subjective listening and mix review on real audio hardware.

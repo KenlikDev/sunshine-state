@@ -21,7 +21,7 @@ var _is_incapacitated: bool = false
 
 @onready var _camera_pivot: Node3D = $CameraPivot
 @onready var _interaction_ray: RayCast3D = $CameraPivot/InteractionRay
-@onready var _player_mesh: MeshInstance3D = $MeshInstance3D
+@onready var _player_mesh: Node3D = $MeshInstance3D
 @onready var _player_collision: CollisionShape3D = $CollisionShape3D
 @onready var _player_camera: Camera3D = $CameraPivot/SpringArm3D/Camera3D
 

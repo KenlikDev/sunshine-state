@@ -1,20 +1,13 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/player_controller.gd" id="1_player"]
 [ext_resource type="Script" path="res://scripts/gameplay/damageable.gd" id="2_damage"]
 [ext_resource type="Script" path="res://scripts/gameplay/weapon_controller.gd" id="3_weapon"]
+[ext_resource type="Script" path="res://scripts/gameplay/stylized_character_mesh.gd" id="4_character"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 radius = 0.38
 height = 1.8
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_player"]
-radius = 0.38
-height = 1.8
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_player"]
-albedo_color = Color(0.18, 0.55, 0.72, 1)
-roughness = 0.8
 
 [node name="Player" type="CharacterBody3D"]
 script = ExtResource("1_player")
@@ -23,10 +16,11 @@ script = ExtResource("1_player")
 position = Vector3(0, 0.9, 0)
 shape = SubResource("CapsuleShape3D_player")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+[node name="MeshInstance3D" type="Node3D" parent="."]
 position = Vector3(0, 0.9, 0)
-mesh = SubResource("CapsuleMesh_player")
-material_override = SubResource("StandardMaterial3D_player")
+script = ExtResource("4_character")
+character_style = "hero"
+skin_tone = Color(0.58, 0.38, 0.26, 1)
 
 [node name="CameraPivot" type="Node3D" parent="."]
 position = Vector3(0, 1.55, 0)

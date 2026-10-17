@@ -1,6 +1,9 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/gameplay/traffic_controller.gd" id="1_traffic"]
+[ext_resource type="Script" path="res://scripts/gameplay/vehicle_visual_details.gd" id="2_vehicle_visuals"]
+[ext_resource type="Script" path="res://scripts/gameplay/vehicle_glb_visual.gd" id="3_glb_visual"]
+[ext_resource type="PackedScene" path="res://assets/vehicles/kenney_sedan.glb" id="4_model"]
 
 [sub_resource type="BoxShape3D" id="TrafficCollision"]
 size = Vector3(1.8, 0.8, 3.6)
@@ -37,6 +40,24 @@ material_override = SubResource("TrafficBodyMaterial")
 position = Vector3(0, 0.52, -0.16)
 mesh = SubResource("TrafficCabinMesh")
 material_override = SubResource("TrafficGlassMaterial")
+
+[node name="VehicleVisualModel" type="Node3D" parent="."]
+script = ExtResource("3_glb_visual")
+model_scene = ExtResource("4_model")
+target_dimensions = Vector3(1.8, 1.35, 3.6)
+target_bottom_y = -0.64
+yaw_degrees = 180.0
+wheel_radius = 0.29
+
+[node name="VehicleVisualDetails" type="Node3D" parent="."]
+script = ExtResource("2_vehicle_visuals")
+traffic_vehicle = true
+body_width = 1.8
+body_length = 3.6
+body_height = 0.72
+wheel_radius = 0.29
+wheel_width = 0.16
+imported_vehicle_model_active = true
 
 [node name="ObstacleRay" type="RayCast3D" parent="."]
 position = Vector3(0, 0.18, 0)

@@ -20,7 +20,7 @@ var _last_attack_msec: int = -1500
 var _gravity: float = float(ProjectSettings.get_setting("physics/3d/default_gravity"))
 
 @onready var _wanted_system: Node = get_node("/root/WantedSystem")
-@onready var _body_mesh: MeshInstance3D = $BodyMesh
+@onready var _body_mesh: Node3D = $BodyMesh
 
 
 func _ready() -> void:
@@ -183,9 +183,5 @@ func _set_ai_state(next_state: String) -> void:
 
 
 func _apply_police_material() -> void:
-	var source: StandardMaterial3D = _body_mesh.material_override as StandardMaterial3D
-	if source == null:
-		source = StandardMaterial3D.new()
-	var material: StandardMaterial3D = source.duplicate() as StandardMaterial3D
-	material.albedo_color = Color(0.08, 0.17, 0.36, 1.0)
-	_body_mesh.material_override = material
+	if _body_mesh.has_method("set_clothing_color"):
+		_body_mesh.call("set_clothing_color", Color(0.035, 0.11, 0.23, 1.0))
