@@ -165,10 +165,7 @@ func _ray_has_obstacle(direction: Vector3, distance: float) -> bool:
 	var hit: Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
 	if hit.is_empty():
 		return false
-	var collider: Object = hit.get("collider") as Object
-	if collider == self:
-		return false
-	return true
+	return not hit.is_empty()
 
 
 func _apply_crowd_separation(desired_direction: Vector3) -> Vector3:
