@@ -243,22 +243,22 @@ func _create_information_board() -> void:
 	for face: float in [-1.0, 1.0]:
 		var face_z: float = face * 0.102
 		_add_local_box(
-			board, "InformationPanel" + str(face),
+			board, "InformationPanel" + str(int(face)),
 			Vector3(1.56, 1.30, 0.025), Vector3(0.0, 0.0, face_z),
 			panel_material
 		)
 		_add_local_box(
-			board, "InformationHeader" + str(face),
+			board, "InformationHeader" + str(int(face)),
 			Vector3(1.54, 0.23, 0.03), Vector3(0.0, 0.50, face_z + face * 0.02),
 			header_material
 		)
 		_add_local_box(
-			board, "InformationHeaderBadge" + str(face),
+			board, "InformationHeaderBadge" + str(int(face)),
 			Vector3(0.11, 0.11, 0.032), Vector3(-0.62, 0.50, face_z + face * 0.022),
 			gold_material
 		)
 		_add_local_box(
-			board, "InformationAccentStripe" + str(face),
+			board, "InformationAccentStripe" + str(int(face)),
 			Vector3(1.40, 0.045, 0.026), Vector3(0.0, 0.335, face_z + face * 0.022),
 			coral_material
 		)
@@ -266,7 +266,7 @@ func _create_information_board() -> void:
 			var line_widths: Array[float] = [1.16, 0.98, 0.79]
 			var line_heights: Array[float] = [0.095, -0.095, -0.285]
 			_add_local_box(
-				board, "InformationTextLine%s_%s" % [face, line_index],
+				board, "InformationTextLine%s_%s" % [int(face), line_index],
 				Vector3(line_widths[line_index], 0.052, 0.024),
 				Vector3(0.12, line_heights[line_index], face_z + face * 0.022),
 				line_material
@@ -309,45 +309,45 @@ func _create_crime_site() -> void:
 	for face: float in [-1.0, 1.0]:
 		var face_z: float = face * 0.151
 		_add_local_box(
-			crime_site, "GraffitiCanvas" + str(face),
+			crime_site, "GraffitiCanvas" + str(int(face)),
 			Vector3(1.14, 1.62, 0.025), Vector3(0.0, 0.0, face_z),
 			frame_material
 		)
 		for side: float in [-1.0, 1.0]:
 			_add_local_box(
-				crime_site, "GraffitiFrameSide%s_%s" % [face, side],
+				crime_site, "GraffitiFrameSide%s_%s" % [int(face), int(side)],
 				Vector3(0.07, 1.66, 0.035), Vector3(side * 0.60, 0.0, face * 0.174),
 				frame_material
 			)
 		for vertical: float in [-1.0, 1.0]:
 			_add_local_box(
-				crime_site, "GraffitiFrameRail%s_%s" % [face, vertical],
+				crime_site, "GraffitiFrameRail%s_%s" % [int(face), int(vertical)],
 				Vector3(1.22, 0.07, 0.035), Vector3(0.0, vertical * 0.82, face * 0.174),
 				frame_material
 			)
 
 		_add_local_box(
-			crime_site, "GraffitiAquaSlash" + str(face),
+			crime_site, "GraffitiAquaSlash" + str(int(face)),
 			Vector3(0.22, 0.98, 0.032), Vector3(-0.27, 0.02, face * 0.18),
 			paint_colors[0], deg_to_rad(-18.0)
 		)
 		_add_local_box(
-			crime_site, "GraffitiCoralSlash" + str(face),
+			crime_site, "GraffitiCoralSlash" + str(int(face)),
 			Vector3(0.17, 0.78, 0.032), Vector3(-0.02, 0.02, face * 0.198),
 			paint_colors[1], deg_to_rad(22.0)
 		)
 		_add_local_box(
-			crime_site, "GraffitiGoldTag" + str(face),
+			crime_site, "GraffitiGoldTag" + str(int(face)),
 			Vector3(0.48, 0.14, 0.032), Vector3(0.23, 0.25, face * 0.216),
 			paint_colors[2], deg_to_rad(-9.0)
 		)
 		_add_local_box(
-			crime_site, "GraffitiCreamTag" + str(face),
+			crime_site, "GraffitiCreamTag" + str(int(face)),
 			Vector3(0.43, 0.11, 0.032), Vector3(0.20, -0.14, face * 0.216),
 			paint_colors[3], deg_to_rad(13.0)
 		)
 		_add_local_box(
-			crime_site, "GraffitiCoralUnderline" + str(face),
+			crime_site, "GraffitiCoralUnderline" + str(int(face)),
 			Vector3(0.30, 0.075, 0.032), Vector3(0.14, -0.38, face * 0.216),
 			paint_colors[1], deg_to_rad(-12.0)
 		)
