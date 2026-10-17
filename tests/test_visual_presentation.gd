@@ -150,6 +150,42 @@ func _run_tests() -> void:
 				var night_water_factor: float = float(water_material.get_shader_parameter("night_factor"))
 				_check(night_water_factor > day_water_factor, "The water palette responds to the day-night cycle.")
 
+	# Background traffic lamp geometry should react to the shared clock and
+	# make braking/yielding visually legible, without spawning per-car light nodes.
+	var traffic_agents: Array[Node] = get_tree().get_nodes_in_group("traffic_vehicles")
+	_check(traffic_agents.size() == 4, "The district has four vehicles with signal-light presentation.")
+	if not traffic_agents.is_empty():
+		var traffic_sample := traffic_agents[0] as Node3D
+		_check(
+			traffic_sample.get_node_or_null("HeadlightLeft") is MeshInstance3D
+			and traffic_sample.get_node_or_null("HeadlightRight") is MeshInstance3D
+			and traffic_sample.get_node_or_null("TaillightLeft") is MeshInstance3D
+			and traffic_sample.get_node_or_null("TaillightRight") is MeshInstance3D,
+			"Background vehicles have visible headlight and taillight geometry."
+		)
+		var day_night_for_lights := instance.get_node_or_null("World/DayNightCycle")
+		if day_night_for_lights != null:
+			day_night_for_lights.call("set_time_of_day", 12.0)
+			var day_lights: Dictionary = traffic_sample.call("get_signal_light_state")
+			day_night_for_lights.call("set_time_of_day", 0.0)
+			var night_lights: Dictionary = traffic_sample.call("get_signal_light_state")
+			_check(
+				not bool(day_lights.get("headlights_visible", true))
+				and bool(night_lights.get("headlights_visible", false)),
+				"Background headlights switch on at night and remain off at midday."
+			)
+			traffic_sample.call("_set_ai_state", "DRIVING")
+			var steady_taillight_energy: float = float(traffic_sample.call("get_signal_light_state").get("taillight_energy", 0.0))
+			traffic_sample.call("_set_ai_state", "YIELDING")
+			var braking_lights: Dictionary = traffic_sample.call("get_signal_light_state")
+			_check(
+				bool(braking_lights.get("braking", false))
+				and float(braking_lights.get("taillight_energy", 0.0)) > steady_taillight_energy,
+				"Traffic taillights brighten during yielding and obstruction-recovery states."
+			)
+			traffic_sample.call("_set_ai_state", "DRIVING")
+			day_night_for_lights.call("set_time_of_day", 12.0)
+
 	var world_environment := instance.get_node_or_null("World/WorldEnvironment") as WorldEnvironment
 	_check(world_environment != null and world_environment.environment.background_mode == Environment.BG_SKY, "The world uses a procedural sky instead of a flat-color background.")
 	if world_environment != null:

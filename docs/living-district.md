@@ -17,13 +17,13 @@ M3 introduces a small, fixed population of background pedestrians and road traff
 - Vehicles use kinematic collision bodies for predictable background movement; the player-drivable vehicles remain physics-based `VehicleBody3D` scenes.
 - Background traffic uses its own collision layer. The player and drivable vehicles include that layer in their masks, while pedestrians exclude it so a cross-traffic car cannot permanently pin an authored patrol at the junction. Traffic still detects shared world/player bodies and the traffic AI retains bounded stall recovery.
 - East-west traffic yields near the central junction while north-south traffic is approaching or crossing. Yielding is bounded to 4.5 seconds per continuous conflict; if a cross-traffic agent remains stalled, the east-west vehicle proceeds so a single stale agent cannot starve the route indefinitely.
-- A forward obstacle ray causes an agent to wait; a sustained obstacle can trigger a short reverse-and-retry recovery.
+- A forward obstacle ray causes an agent to wait; a sustained obstacle can trigger a short reverse-and-retry recovery. Traffic body lamps follow the shared day/night clock, and brake lamps intensify during waiting, yielding, and recovery so AI decisions are visible without adding per-vehicle dynamic lights.
 - At route endpoints, agents reverse their waypoint direction rather than spawning replacements.
 
 ## Population and off-screen simulation
 
 - The current population is fixed at four pedestrians and four traffic vehicles. No timer-based or proximity-based spawning is enabled.
-- Distant agents use simpler movement updates and skip camera-proximity obstacle checks; agents near the camera or player use the full local behaviour.
+- Distant pedestrians keep collision-aware CharacterBody3D movement but skip steering raycasts and neighbour scans; agents near the camera or player use the full local avoidance behaviour. Traffic also uses bounded recovery if physical collision prevents progress.
 - Population counts are tested across repeated physics updates. Short regressions cover physical traffic stalls and pedestrian/traffic separation; these do not substitute for the full 15-minute acceptance soak.
 
 ## Automated checks
@@ -35,6 +35,9 @@ The M3 regression scene checks:
 - north-south right-of-way at the main junction
 - bounded yielding when a north-south agent remains stationary in the conflict zone
 - a pedestrian crossing alongside a stationary traffic body, ensuring the pedestrian keeps progressing
+- pedestrian local steering chooses a clear shoulder around a real physics obstacle
+- background headlights switch on after dusk and turn off at midday
+- traffic taillights brighten during yielding and obstruction-recovery states
 - off-screen traffic recovery from physical blockage with the obstacle ray intentionally disabled
 
 ## Running the long-duration soak test

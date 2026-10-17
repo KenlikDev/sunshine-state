@@ -17,7 +17,7 @@ Crimes use the shared `report_crime` API with type, severity, player position, w
 
 ## Police agent
 
-The current police prototype follows an authored patrol loop when no wanted level is active. During pursuit it performs a range-limited line-of-sight ray query and moves toward the player. After occlusion it moves toward the last-known position in the search state. The wanted service remains authoritative; the police agent reports detections but never changes the wanted level directly.
+The current police prototype follows an authored patrol loop when no wanted level is active. During pursuit it performs a range-limited line-of-sight ray query, steers around nearby world colliders, accelerates smoothly, and stops at a configurable on-foot standoff distance so melee range is usable. It continues approaching occupied vehicles because on-foot attacks are disabled there. After occlusion it moves toward the last-known position; within the arrival radius it brakes to a stop and scans its surroundings with a restrained yaw sweep until the shared search state expires or it reacquires the player. The wanted service remains authoritative; the police agent reports detections but never changes the wanted level directly.
 
 ## Example interaction
 
@@ -30,7 +30,7 @@ The wanted regression scene checks:
 - central police detector registration and pursuit/search transitions
 - search expiry, level-by-level decay, and clearing at level zero
 - player crime interaction and cooldown
-- police line-of-sight pursuit, occlusion-driven search, and reacquisition
+- police line-of-sight pursuit, occlusion-driven search, arrival at the last-known position, low-speed investigation scan, obstacle-side steering, and reacquisition
 - explicit wanted clearing with the `PLAYER_DEATH` reason
 
 ## Remaining acceptance work
