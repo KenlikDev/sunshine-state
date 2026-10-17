@@ -24,6 +24,7 @@ var _right_arm: Node3D
 var _left_leg: Node3D
 var _right_leg: Node3D
 var _walk_phase: float = 0.0
+var _initial_pose_synchronized: bool = false
 
 
 func _ready() -> void:
@@ -234,9 +235,30 @@ func _try_build_imported_character() -> bool:
 	if character_style == "police":
 		_add_imported_police_accessories()
 	if not _idle_animation.is_empty():
+		# AnimationPlayer.play() schedules evaluation for the next process tick.
+		# The first rendered frame could therefore show unposed skinned parts
+		# scattered in their import/rest transforms. Evaluate the idle pose now,
+		# before this model is visible to the renderer.
+		_imported_visual.visible = false
 		_animation_player.play(_idle_animation)
-		_current_animation = _idle_animation
+		_animation_player.advance(0.0)
+		for skeleton_node: Node in skeletons:
+			var skeleton := skeleton_node as Skeleton3D
+			if skeleton == null:
+				continue
+			skeleton.force_update_all_bone_transforms()
+			skeleton.force_update_transform()
+		_imported_visual.force_update_transform()
+		_motion_pivot.force_update_transform()
+		_initial_pose_synchronized = true
+		_imported_visual.visible = true
+	else:
+		_initial_pose_synchronized = true
 	return true
+
+
+func is_initial_pose_synchronized() -> bool:
+	return _initial_pose_synchronized
 
 
 func _calculate_imported_bounds(root: Node3D) -> AABB:

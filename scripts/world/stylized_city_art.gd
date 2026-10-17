@@ -95,9 +95,20 @@ func _add_building_trims(node_name: String, center: Vector3, dimensions: Vector3
 	var top: float = center.y + dimensions.y * 0.5
 	var wall_accent := _make_material(accent, 0.78)
 	var trim := _make_material(CREAM, 0.74)
-	var roof := BoxMesh.new()
-	roof.size = Vector3(dimensions.x + 0.34, 0.18, dimensions.z + 0.34)
-	_add_mesh(StringName(node_name + "RoofCoping"), roof, center + Vector3.UP * (dimensions.y * 0.5 + 0.02), trim)
+	# The four distant procedural buildings sit directly behind the taller
+	# imported core block. Their thin roof coping projected as detached wire-like
+	# rectangles above the skyline because the foreground facade hid the roof
+	# mass. Keep the roof edge on nearer facades only; the rear skyline reads
+	# cleaner with the authored building silhouette unobstructed.
+	if center.z > -40.0:
+		var roof := BoxMesh.new()
+		roof.size = Vector3(dimensions.x + 0.34, 0.18, dimensions.z + 0.34)
+		_add_mesh(
+			StringName(node_name + "RoofCoping"),
+			roof,
+			center + Vector3.UP * (dimensions.y * 0.5 + 0.02),
+			trim
+		)
 
 	_add_box(StringName(node_name + "BaseFront"), Vector3(dimensions.x + 0.08, 0.16, 0.14), center + Vector3(0.0, bottom + 0.56, half_z + 0.06), wall_accent)
 	_add_box(StringName(node_name + "BaseBack"), Vector3(dimensions.x + 0.08, 0.16, 0.14), center + Vector3(0.0, bottom + 0.56, -half_z - 0.06), wall_accent)

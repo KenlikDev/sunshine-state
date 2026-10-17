@@ -23,12 +23,20 @@ func _run_tests() -> void:
 	_check(player_visual != null, "The player has a dedicated visual root.")
 	if player_visual != null:
 		_check(_is_animated_rig(player_visual), "The player uses the bundled skinned humanoid with an animation library.")
+		_check(
+			bool(player_visual.call("is_initial_pose_synchronized")),
+			"The player's idle pose is evaluated synchronously before the first rendered frame."
+		)
 
 	var pedestrian_visuals: int = 0
 	for pedestrian: Node in get_tree().get_nodes_in_group("pedestrians"):
 		var visual := pedestrian.get_node_or_null("MeshInstance3D") as Node3D
 		if visual != null and _is_animated_rig(visual):
 			pedestrian_visuals += 1
+			_check(
+				bool(visual.call("is_initial_pose_synchronized")),
+				"Each pedestrian evaluates its initial skinned pose before rendering."
+			)
 	_check(pedestrian_visuals == 4, "All four pedestrians use the skinned humanoid rig.")
 
 	# Alert-state movement must select the run clip at the pedestrian's actual
@@ -52,6 +60,11 @@ func _run_tests() -> void:
 	var police_visual := instance.get_node_or_null("World/PoliceOfficer01/BodyMesh") as Node3D
 	_check(police_visual != null and police_visual.get_node_or_null("PoliceBadge") != null, "The police officer has role-specific uniform details.")
 	_check(police_visual != null and _is_animated_rig(police_visual), "The police officer uses the same animated humanoid rig.")
+	if police_visual != null:
+		_check(
+			bool(police_visual.call("is_initial_pose_synchronized")),
+			"The police officer evaluates its initial skinned pose before rendering."
+		)
 
 	var imported_building_count: int = 0
 	for building: Node in instance.get_node("World").get_children():
@@ -80,6 +93,56 @@ func _run_tests() -> void:
 		_check(int(visual.get("model_mesh_count")) >= 1, "Each imported city building has renderable mesh geometry.")
 		imported_building_count += 1
 	_check(imported_building_count == 8, "The eight buildings nearest the playable core use imported city models.")
+
+	# Review the first-run composition as well as the asset inventory: the
+	# objective board must be reachable without directly covering the player,
+	# and the crime scene must not regress to a single blank colored slab.
+	var start_player := instance.get_node_or_null("Player") as Node3D
+	var information_board := instance.get_node_or_null("World/DistrictInformationBoard") as StaticBody3D
+	_check(start_player != null and information_board != null, "The start scene contains both the player and the information board.")
+	if start_player != null and information_board != null:
+		_check(
+			absf(information_board.global_position.x - start_player.global_position.x) >= 0.5,
+			"The information board is offset from the player's center line."
+		)
+		_check(
+			start_player.global_position.distance_to(information_board.global_position) <= float(start_player.get("interaction_distance")),
+			"The information board remains within initial interaction reach."
+		)
+		_check(
+			information_board.get_node_or_null("InformationPanel1") != null
+			and information_board.get_node_or_null("InformationHeader1") != null
+			and information_board.get_node_or_null("InformationTextLine1_0") != null,
+			"The information board has a designed inset, header, and readable line details."
+		)
+		var board_collision: CollisionShape3D
+		for child: Node in information_board.get_children():
+			if child is CollisionShape3D:
+				board_collision = child as CollisionShape3D
+				break
+		_check(
+			board_collision != null and board_collision.shape != null,
+			"The information board retains a single simple interaction collider."
+		)
+
+	var graffiti_site := instance.get_node_or_null("World/GraffitiSpot") as StaticBody3D
+	_check(graffiti_site != null, "The authored crime interaction remains in the district.")
+	if graffiti_site != null:
+		_check(
+			graffiti_site.get_node_or_null("GraffitiAquaSlash1") != null
+			and graffiti_site.get_node_or_null("GraffitiGoldTag1") != null
+			and graffiti_site.get_node_or_null("GraffitiFrameSide1_-1") != null,
+			"The crime scene has a framed, multi-colour mural instead of a blank block."
+		)
+		var graffiti_collision: CollisionShape3D
+		for child: Node in graffiti_site.get_children():
+			if child is CollisionShape3D:
+				graffiti_collision = child as CollisionShape3D
+				break
+		_check(
+			graffiti_collision != null and graffiti_collision.shape != null,
+			"The crime interaction retains its authored collision shape."
+		)
 
 	var city_art := instance.get_node_or_null("World/StylizedCityArt") as Node3D
 	_check(city_art != null, "The city art pass is attached to the world.")
