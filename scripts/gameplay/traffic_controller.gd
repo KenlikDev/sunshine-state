@@ -22,6 +22,11 @@ var _reverse_remaining: float = 0.0
 var _yielding_seconds: float = 0.0
 var _ai_state: String = "DRIVING"
 var _gravity: float = float(ProjectSettings.get_setting("physics/3d/default_gravity"))
+var _headlight_nodes: Array[MeshInstance3D] = []
+var _taillight_nodes: Array[MeshInstance3D] = []
+var _headlight_material: StandardMaterial3D
+var _taillight_material: StandardMaterial3D
+var _night_factor: float = 0.0
 
 @onready var _obstacle_ray: RayCast3D = $ObstacleRay
 @onready var _body_mesh: MeshInstance3D = $BodyMesh
@@ -41,6 +46,8 @@ func _ready() -> void:
 		_route_direction = 1
 	_apply_body_color()
 	_create_wheel_visuals()
+	_create_signal_lights()
+	_connect_day_night_cycle()
 
 
 func _physics_process(delta: float) -> void:
@@ -212,6 +219,7 @@ func _set_ai_state(next_state: String) -> void:
 	if _ai_state == next_state:
 		return
 	_ai_state = next_state
+	_update_brake_lights()
 	ai_state_changed.emit(_ai_state)
 
 
@@ -222,6 +230,98 @@ func _apply_body_color() -> void:
 	var material: StandardMaterial3D = source.duplicate() as StandardMaterial3D
 	material.albedo_color = body_color
 	_body_mesh.material_override = material
+
+
+func _create_signal_lights() -> void:
+	_headlight_material = StandardMaterial3D.new()
+	_headlight_material.albedo_color = Color(1.0, 0.91, 0.69, 1.0)
+	_headlight_material.roughness = 0.3
+	_headlight_material.emission_enabled = true
+	_headlight_material.emission = Color(1.0, 0.82, 0.48, 1.0)
+	_headlight_material.emission_energy_multiplier = 1.6
+
+	_taillight_material = StandardMaterial3D.new()
+	_taillight_material.albedo_color = Color(0.55, 0.025, 0.018, 1.0)
+	_taillight_material.roughness = 0.36
+	_taillight_material.emission_enabled = true
+	_taillight_material.emission = Color(0.95, 0.025, 0.012, 1.0)
+	_taillight_material.emission_energy_multiplier = 0.55
+
+	for side: float in [-1.0, 1.0]:
+		_headlight_nodes.append(
+			_add_signal_lamp(
+				"Headlight" + ("Left" if side < 0.0 else "Right"),
+				Vector3(side * 0.53, 0.15, -1.79),
+				Vector3(0.25, 0.13, 0.045),
+				_headlight_material
+			)
+		)
+		_taillight_nodes.append(
+			_add_signal_lamp(
+				"Taillight" + ("Left" if side < 0.0 else "Right"),
+				Vector3(side * 0.57, 0.13, 1.79),
+				Vector3(0.22, 0.15, 0.045),
+				_taillight_material
+			)
+		)
+
+
+func _add_signal_lamp(
+	node_name: String,
+	local_position: Vector3,
+	dimensions: Vector3,
+	material: StandardMaterial3D
+) -> MeshInstance3D:
+	var lamp_mesh := BoxMesh.new()
+	lamp_mesh.size = dimensions
+	var lamp := MeshInstance3D.new()
+	lamp.name = node_name
+	lamp.mesh = lamp_mesh
+	lamp.position = local_position
+	lamp.material_override = material
+	lamp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(lamp)
+	return lamp
+
+
+func _connect_day_night_cycle() -> void:
+	var world: Node = get_parent()
+	if world == null:
+		return
+	var cycle: Node = world.get_node_or_null("DayNightCycle")
+	if cycle == null or not cycle.has_signal("time_of_day_changed"):
+		return
+	cycle.time_of_day_changed.connect(_apply_day_night_lights)
+	if cycle.has_method("get_time_of_day"):
+		_apply_day_night_lights(float(cycle.call("get_time_of_day")))
+
+
+func _apply_day_night_lights(hour: float) -> void:
+	var solar_angle: float = TAU * (hour - 6.0) / 24.0
+	var daylight: float = clampf((sin(solar_angle) + 0.15) / 0.78, 0.0, 1.0)
+	_night_factor = 1.0 - smoothstep(0.08, 0.34, daylight)
+	var headlights_on: bool = _night_factor > 0.28
+	for lamp: MeshInstance3D in _headlight_nodes:
+		lamp.visible = headlights_on
+	_headlight_material.emission_energy_multiplier = lerpf(0.0, 1.6, _night_factor)
+	_update_brake_lights()
+
+
+func _update_brake_lights() -> void:
+	if _taillight_material == null:
+		return
+	var braking: bool = _ai_state in ["WAITING", "YIELDING", "RECOVERING"]
+	var brake_energy: float = lerpf(0.55, 1.9, 1.0 if braking else 0.0)
+	_taillight_material.emission_energy_multiplier = brake_energy * maxf(_night_factor, 0.36)
+
+
+func get_signal_light_state() -> Dictionary:
+	return {
+		"night_factor": _night_factor,
+		"headlights_visible": not _headlight_nodes.is_empty() and _headlight_nodes[0].visible,
+		"braking": _ai_state in ["WAITING", "YIELDING", "RECOVERING"],
+		"taillight_energy": _taillight_material.emission_energy_multiplier if _taillight_material != null else 0.0
+	}
 
 
 func _create_wheel_visuals() -> void:
