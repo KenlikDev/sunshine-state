@@ -143,6 +143,40 @@ func _run_tests() -> void:
 				await get_tree().physics_frame
 			_check(String(system.call("get_state_name")) == "PURSUIT", "Police can reacquire the player after line of sight is restored.")
 
+			# Police stop at the configured on-foot standoff instead of pushing
+			# into the player, while remaining close enough for melee attacks.
+			officer.global_position = player.global_position + Vector3(1.0, 0.0, 0.0)
+			officer.velocity = Vector3.ZERO
+			for _frame: int in range(8):
+				await get_tree().physics_frame
+			_check(
+				Vector2(officer.velocity.x, officer.velocity.z).length() < 0.75,
+				"Police decelerate at the player standoff distance."
+			)
+
+			# Probe local police obstacle steering against a real, narrow collider.
+			var steering_obstacle := StaticBody3D.new()
+			steering_obstacle.name = "PoliceSteeringRegressionObstacle"
+			steering_obstacle.position = officer.global_position + Vector3(0.0, 1.0, -1.1)
+			var steering_collision := CollisionShape3D.new()
+			var steering_shape := BoxShape3D.new()
+			steering_shape.size = Vector3(0.8, 2.2, 0.6)
+			steering_collision.shape = steering_shape
+			steering_obstacle.add_child(steering_collision)
+			instance.add_child(steering_obstacle)
+			await get_tree().physics_frame
+			var steered_direction: Vector3 = officer.call(
+				"_steer_around_obstacles",
+				Vector3.FORWARD,
+				null
+			)
+			_check(
+				steered_direction.length_squared() > 0.5 and absf(steered_direction.x) > 0.25,
+				"Police select a clear shoulder when a world obstacle blocks their route."
+			)
+			steering_obstacle.queue_free()
+			await get_tree().physics_frame
+
 			system.call("clear_wanted", &"PLAYER_DEATH")
 			_check(int(system.call("get_wanted_level")) == 0, "Explicit player-death clearing resets wanted level.")
 			_check(String(system.call("get_state_name")) == "CLEAR", "Player-death clearing resets the wanted state.")
