@@ -23,7 +23,7 @@ M3 introduces a small, fixed population of background pedestrians and road traff
 ## Population and off-screen simulation
 
 - The current population is fixed at four pedestrians and four traffic vehicles. No timer-based or proximity-based spawning is enabled.
-- Distant agents use simpler movement updates and skip camera-proximity obstacle checks; agents near the camera or player use the full local behaviour.
+- Distant pedestrians keep collision-aware CharacterBody3D movement but skip steering raycasts and neighbour scans; agents near the camera or player use the full local avoidance behaviour. Traffic also uses bounded recovery if physical collision prevents progress.
 - Population counts are tested across repeated physics updates. Short regressions cover physical traffic stalls and pedestrian/traffic separation; these do not substitute for the full 15-minute acceptance soak.
 
 ## Automated checks
@@ -35,6 +35,7 @@ The M3 regression scene checks:
 - north-south right-of-way at the main junction
 - bounded yielding when a north-south agent remains stationary in the conflict zone
 - a pedestrian crossing alongside a stationary traffic body, ensuring the pedestrian keeps progressing
+- pedestrian local steering chooses a clear shoulder around a real physics obstacle
 - off-screen traffic recovery from physical blockage with the obstacle ray intentionally disabled
 
 ## Running the long-duration soak test
