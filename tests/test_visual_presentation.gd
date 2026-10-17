@@ -115,7 +115,11 @@ func _run_tests() -> void:
 			and information_board.get_node_or_null("InformationTextLine1_0") != null,
 			"The information board has a designed inset, header, and readable line details."
 		)
-		var board_collision := information_board.get_node_or_null("CollisionShape3D") as CollisionShape3D
+		var board_collision: CollisionShape3D
+		for child: Node in information_board.get_children():
+			if child is CollisionShape3D:
+				board_collision = child as CollisionShape3D
+				break
 		_check(
 			board_collision != null and board_collision.shape != null,
 			"The information board retains a single simple interaction collider."
@@ -130,7 +134,11 @@ func _run_tests() -> void:
 			and graffiti_site.get_node_or_null("GraffitiFrameSide1_-1") != null,
 			"The crime scene has a framed, multi-colour mural instead of a blank block."
 		)
-		var graffiti_collision := graffiti_site.get_node_or_null("CollisionShape3D") as CollisionShape3D
+		var graffiti_collision: CollisionShape3D
+		for child: Node in graffiti_site.get_children():
+			if child is CollisionShape3D:
+				graffiti_collision = child as CollisionShape3D
+				break
 		_check(
 			graffiti_collision != null and graffiti_collision.shape != null,
 			"The crime interaction retains its authored collision shape."
