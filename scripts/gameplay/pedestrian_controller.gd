@@ -74,8 +74,11 @@ func _physics_process(delta: float) -> void:
 	)
 
 	if direction.length_squared() > 0.001:
-		direction = _avoid_obstacles(direction)
+		# Reserve raycasts and neighbour scans for the near-field simulation tier.
+		# Distant actors still use CharacterBody3D collision so they cannot tunnel
+		# through walls, but avoid doing three steering rays every physics frame.
 		if near_camera or near_player:
+			direction = _avoid_obstacles(direction)
 			direction = _apply_crowd_separation(direction)
 		if direction.length_squared() > 0.001:
 			direction = direction.normalized()
