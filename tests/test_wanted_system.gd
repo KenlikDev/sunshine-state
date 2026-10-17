@@ -109,10 +109,36 @@ func _run_tests() -> void:
 				"Police switch from pursuit to their search behaviour after occlusion."
 			)
 
+			# Simulate the officer reaching the last-known position while the player
+			# remains out of sight beyond the same occluding wall.
+			var last_known: Vector3 = system.call("get_last_known_player_position")
+			player.global_position = last_known + Vector3(12.0, 0.0, 0.0)
+			officer.global_position = last_known + Vector3(0.65, 0.0, 0.0)
+			officer.velocity = Vector3.ZERO
+			officer.global_rotation = Vector3.ZERO
+			var scan_start_yaw: float = officer.rotation.y
+			for _frame: int in range(45):
+				await get_tree().physics_frame
+			var horizontal_search_speed: float = Vector2(officer.velocity.x, officer.velocity.z).length()
+			var scan_yaw_delta: float = absf(wrapf(officer.rotation.y - scan_start_yaw, -PI, PI))
+			_check(
+				String(officer.call("get_ai_state")) == "SEARCHING",
+				"Police retain the search state after reaching the last-known position."
+			)
+			_check(
+				horizontal_search_speed < 0.75,
+				"Police decelerate and stop near the last-known position instead of orbiting it."
+			)
+			_check(
+				scan_yaw_delta > 0.08,
+				"Police look around after reaching a last-known position."
+			)
+
 			wall.queue_free()
 			await get_tree().physics_frame
 			officer.global_position = player.global_position + Vector3(7.0, 0.0, 0.0)
 			officer.global_rotation = Vector3(0.0, PI / 2.0, 0.0)
+			officer.velocity = Vector3.ZERO
 			for _frame: int in range(3):
 				await get_tree().physics_frame
 			_check(String(system.call("get_state_name")) == "PURSUIT", "Police can reacquire the player after line of sight is restored.")
