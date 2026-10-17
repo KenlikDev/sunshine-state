@@ -204,22 +204,30 @@ func _create_coastline() -> void:
 
 
 func _create_information_board() -> void:
-	var board_material := _make_material(Color(0.12, 0.38, 0.43))
-	var post_material := _make_material(Color(0.27, 0.25, 0.21))
+	var frame_material := _make_material(Color(0.045, 0.15, 0.17, 1.0), 0.48)
+	var panel_material := _make_material(Color(0.83, 0.82, 0.73, 1.0), 0.82)
+	var header_material := _make_material(Color(0.07, 0.24, 0.26, 1.0), 0.55)
+	var line_material := _make_material(Color(0.23, 0.36, 0.34, 1.0), 0.88)
+	var gold_material := _make_material(Color(0.96, 0.71, 0.33, 1.0), 0.58)
+	var coral_material := _make_material(Color(0.90, 0.36, 0.28, 1.0), 0.65)
+	var post_material := _make_material(Color(0.19, 0.24, 0.23, 1.0), 0.78)
 
 	var board := StaticBody3D.new()
 	board.name = "DistrictInformationBoard"
-	board.position = Vector3(0.0, 1.05, 7.7)
+	# Keep the board inside the initial interaction reach but shift it off the
+	# player silhouette so it reads as a roadside sign rather than a solid block.
+	board.position = Vector3(0.75, 1.0, 7.7)
 	board.set_script(INTERACTABLE_SCRIPT)
 	board.set("interaction_prompt_key", "INTERACT_READ_BOARD")
 	board.set("interaction_message_key", "MESSAGE_BOARD_READ")
 	board.add_to_group("interactable")
 
-	var board_mesh := MeshInstance3D.new()
 	var board_box := BoxMesh.new()
-	board_box.size = Vector3(2.1, 1.7, 0.18)
+	board_box.size = Vector3(1.75, 1.5, 0.18)
+	var board_mesh := MeshInstance3D.new()
+	board_mesh.name = "InformationBoardFrame"
 	board_mesh.mesh = board_box
-	board_mesh.material_override = board_material
+	board_mesh.material_override = frame_material
 	board.add_child(board_mesh)
 
 	var board_collision := CollisionShape3D.new()
@@ -229,10 +237,50 @@ func _create_information_board() -> void:
 	board.add_child(board_collision)
 	add_child(board)
 
-	_add_static_box(
-		"InformationBoardPost",
-		Vector3(0.0, 0.35, 7.82),
-		Vector3(0.16, 0.7, 0.16),
+	# Build the same readable sign face on both sides; the player begins on the
+	# positive-Z side. Raised geometry is decorative only; the interaction body
+	# remains a single simple collider.
+	for face: float in [-1.0, 1.0]:
+		var face_z: float = face * 0.102
+		_add_local_box(
+			board, "InformationPanel" + str(face),
+			Vector3(1.56, 1.30, 0.025), Vector3(0.0, 0.0, face_z),
+			panel_material
+		)
+		_add_local_box(
+			board, "InformationHeader" + str(face),
+			Vector3(1.54, 0.23, 0.03), Vector3(0.0, 0.50, face_z + face * 0.02),
+			header_material
+		)
+		_add_local_box(
+			board, "InformationHeaderBadge" + str(face),
+			Vector3(0.11, 0.11, 0.032), Vector3(-0.62, 0.50, face_z + face * 0.022),
+			gold_material
+		)
+		_add_local_box(
+			board, "InformationAccentStripe" + str(face),
+			Vector3(1.40, 0.045, 0.026), Vector3(0.0, 0.335, face_z + face * 0.022),
+			coral_material
+		)
+		for line_index: int in range(3):
+			var line_widths: Array[float] = [1.16, 0.98, 0.79]
+			var line_heights: Array[float] = [0.095, -0.095, -0.285]
+			_add_local_box(
+				board, "InformationTextLine%s_%s" % [face, line_index],
+				Vector3(line_widths[line_index], 0.052, 0.024),
+				Vector3(0.12, line_heights[line_index], face_z + face * 0.022),
+				line_material
+			)
+
+	for side: float in [-1.0, 1.0]:
+		_add_local_box(
+			board, "InformationBoardLeg" + str(side),
+			Vector3(0.09, 0.95, 0.13), Vector3(side * 0.52, -0.55, 0.0),
+			post_material
+		)
+	_add_local_box(
+		board, "InformationBoardFoot",
+		Vector3(1.18, 0.09, 0.18), Vector3(0.0, -0.91, 0.0),
 		post_material
 	)
 
@@ -242,6 +290,67 @@ func _create_crime_site() -> void:
 	crime_site.name = "GraffitiSpot"
 	crime_site.position = Vector3(-4.0, 1.0, 8.0)
 	add_child(crime_site)
+
+	var wall_mesh := crime_site.get_node_or_null("MeshInstance3D") as MeshInstance3D
+	if wall_mesh != null:
+		wall_mesh.material_override = _make_material(Color(0.24, 0.25, 0.23, 1.0), 0.94)
+
+	var frame_material := _make_material(Color(0.09, 0.12, 0.12, 1.0), 0.78)
+	var paint_colors: Array[StandardMaterial3D] = [
+		_make_material(Color(0.08, 0.64, 0.67, 1.0), 0.6),
+		_make_material(Color(0.93, 0.36, 0.27, 1.0), 0.6),
+		_make_material(Color(0.97, 0.73, 0.31, 1.0), 0.65),
+		_make_material(Color(0.87, 0.84, 0.73, 1.0), 0.8)
+	]
+
+	# Turn the former plain rust-coloured placeholder into a small, framed
+	# graffiti panel. Both faces carry the mural because the promenade is
+	# traversable from either direction.
+	for face: float in [-1.0, 1.0]:
+		var face_z: float = face * 0.151
+		_add_local_box(
+			crime_site, "GraffitiCanvas" + str(face),
+			Vector3(1.14, 1.62, 0.025), Vector3(0.0, 0.0, face_z),
+			frame_material
+		)
+		for side: float in [-1.0, 1.0]:
+			_add_local_box(
+				crime_site, "GraffitiFrameSide%s_%s" % [face, side],
+				Vector3(0.07, 1.66, 0.035), Vector3(side * 0.60, 0.0, face * 0.174),
+				frame_material
+			)
+		for vertical: float in [-1.0, 1.0]:
+			_add_local_box(
+				crime_site, "GraffitiFrameRail%s_%s" % [face, vertical],
+				Vector3(1.22, 0.07, 0.035), Vector3(0.0, vertical * 0.82, face * 0.174),
+				frame_material
+			)
+
+		_add_local_box(
+			crime_site, "GraffitiAquaSlash" + str(face),
+			Vector3(0.22, 0.98, 0.032), Vector3(-0.27, 0.02, face * 0.18),
+			paint_colors[0], deg_to_rad(-18.0)
+		)
+		_add_local_box(
+			crime_site, "GraffitiCoralSlash" + str(face),
+			Vector3(0.17, 0.78, 0.032), Vector3(-0.02, 0.02, face * 0.198),
+			paint_colors[1], deg_to_rad(22.0)
+		)
+		_add_local_box(
+			crime_site, "GraffitiGoldTag" + str(face),
+			Vector3(0.48, 0.14, 0.032), Vector3(0.23, 0.25, face * 0.216),
+			paint_colors[2], deg_to_rad(-9.0)
+		)
+		_add_local_box(
+			crime_site, "GraffitiCreamTag" + str(face),
+			Vector3(0.43, 0.11, 0.032), Vector3(0.20, -0.14, face * 0.216),
+			paint_colors[3], deg_to_rad(13.0)
+		)
+		_add_local_box(
+			crime_site, "GraffitiCoralUnderline" + str(face),
+			Vector3(0.30, 0.075, 0.032), Vector3(0.14, -0.38, face * 0.216),
+			paint_colors[1], deg_to_rad(-12.0)
+		)
 
 
 func _create_shops() -> void:
@@ -418,6 +527,27 @@ func _make_material(color: Color, roughness: float = 0.92) -> StandardMaterial3D
 	material.albedo_color = color
 	material.roughness = roughness
 	return material
+
+
+func _add_local_box(
+	parent: Node3D,
+	node_name: String,
+	dimensions: Vector3,
+	local_position: Vector3,
+	material: Material,
+	local_rotation_z: float = 0.0
+) -> MeshInstance3D:
+	var mesh := BoxMesh.new()
+	mesh.size = dimensions
+	var instance := MeshInstance3D.new()
+	instance.name = node_name
+	instance.mesh = mesh
+	instance.material_override = material
+	instance.position = local_position
+	instance.rotation.z = local_rotation_z
+	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(instance)
+	return instance
 
 
 func _add_visual_box(
