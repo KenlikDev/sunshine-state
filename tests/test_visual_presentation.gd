@@ -110,9 +110,9 @@ func _run_tests() -> void:
 			"The information board remains within initial interaction reach."
 		)
 		_check(
-			information_board.get_node_or_null("InformationPanel1.0") != null
-			and information_board.get_node_or_null("InformationHeader1.0") != null
-			and information_board.get_node_or_null("InformationTextLine1.0_0") != null,
+			information_board.get_node_or_null("InformationPanel1") != null
+			and information_board.get_node_or_null("InformationHeader1") != null
+			and information_board.get_node_or_null("InformationTextLine1_0") != null,
 			"The information board has a designed inset, header, and readable line details."
 		)
 		var board_collision := information_board.get_node_or_null("CollisionShape3D") as CollisionShape3D
@@ -125,9 +125,9 @@ func _run_tests() -> void:
 	_check(graffiti_site != null, "The authored crime interaction remains in the district.")
 	if graffiti_site != null:
 		_check(
-			graffiti_site.get_node_or_null("GraffitiAquaSlash1.0") != null
-			and graffiti_site.get_node_or_null("GraffitiGoldTag1.0") != null
-			and graffiti_site.get_node_or_null("GraffitiFrameSide1.0_-1.0") != null,
+			graffiti_site.get_node_or_null("GraffitiAquaSlash1") != null
+			and graffiti_site.get_node_or_null("GraffitiGoldTag1") != null
+			and graffiti_site.get_node_or_null("GraffitiFrameSide1_-1") != null,
 			"The crime scene has a framed, multi-colour mural instead of a blank block."
 		)
 		var graffiti_collision := graffiti_site.get_node_or_null("CollisionShape3D") as CollisionShape3D
