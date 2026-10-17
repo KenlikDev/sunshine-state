@@ -31,6 +31,24 @@ func _run_tests() -> void:
 			pedestrian_visuals += 1
 	_check(pedestrian_visuals == 4, "All four pedestrians use the skinned humanoid rig.")
 
+	# Alert-state movement must select the run clip at the pedestrian's actual
+	# flee speed (3.3 m/s), rather than waiting for the player's sprint threshold.
+	var pedestrian_agents: Array[Node] = get_tree().get_nodes_in_group("pedestrians")
+	if not pedestrian_agents.is_empty():
+		var animation_test_actor := pedestrian_agents[0] as CharacterBody3D
+		var animation_test_visual := animation_test_actor.get_node_or_null("MeshInstance3D") as Node3D
+		if animation_test_visual != null and _is_animated_rig(animation_test_visual):
+			animation_test_actor.set("_ai_state", 1)
+			animation_test_actor.velocity = Vector3(0.0, 0.0, 3.3)
+			for _frame: int in range(6):
+				animation_test_visual.call("_update_rig_animation", 0.1)
+			_check(
+					String(animation_test_visual.call("get_locomotion_state")) == "RUN",
+					"Alerted pedestrians use a blended running animation at their flee speed."
+			)
+			animation_test_actor.set("_ai_state", 0)
+			animation_test_actor.velocity = Vector3.ZERO
+
 	var police_visual := instance.get_node_or_null("World/PoliceOfficer01/BodyMesh") as Node3D
 	_check(police_visual != null and police_visual.get_node_or_null("PoliceBadge") != null, "The police officer has role-specific uniform details.")
 	_check(police_visual != null and _is_animated_rig(police_visual), "The police officer uses the same animated humanoid rig.")
@@ -75,6 +93,10 @@ func _run_tests() -> void:
 		_check(_count_named_children(city_art, "Crosswalk") >= 28, "The intersection has painted pedestrian crossings.")
 		_check(_count_named_children(city_art, "BeachUmbrellaCanopy") == 8, "The beach contains a set of colorful umbrellas.")
 		_check(_count_named_children(city_art, "PromenadeBenchSeat") == 5, "The promenade has a consistent set of benches.")
+		_check(
+			int(city_art.call("get_animated_palm_frond_count")) == 96,
+			"All palm fronds have a lightweight, phase-offset wind animation."
+		)
 
 	var drivable_vehicle_count: int = 0
 	for vehicle: Node in get_tree().get_nodes_in_group("vehicles"):
@@ -111,8 +133,27 @@ func _run_tests() -> void:
 		traffic_details_count += 1
 	_check(traffic_details_count == 4, "All background traffic agents remain present after visual enhancement.")
 
+	var water := instance.get_node_or_null("World/Water") as MeshInstance3D
+	_check(water != null and water.mesh is PlaneMesh, "The ocean is a tessellated surface suitable for vertex-displaced waves.")
+	if water != null:
+		var water_mesh := water.mesh as PlaneMesh
+		_check(water_mesh.subdivide_width >= 32 and water_mesh.subdivide_depth >= 16, "The water has enough vertices for smooth, low-amplitude waves.")
+		var water_material := water.material_override as ShaderMaterial
+		_check(water_material != null and water_material.shader != null, "The ocean uses its dedicated stylized water shader.")
+		if water_material != null and water_material.shader != null:
+			_check(water_material.shader.code.contains("TIME") and water_material.shader.code.contains("VERTEX.y"), "Water highlights and surface displacement animate over time.")
+			var day_night := instance.get_node_or_null("World/DayNightCycle")
+			if day_night != null:
+				day_night.call("set_time_of_day", 12.0)
+				var day_water_factor: float = float(water_material.get_shader_parameter("night_factor"))
+				day_night.call("set_time_of_day", 0.0)
+				var night_water_factor: float = float(water_material.get_shader_parameter("night_factor"))
+				_check(night_water_factor > day_water_factor, "The water palette responds to the day-night cycle.")
+
 	var world_environment := instance.get_node_or_null("World/WorldEnvironment") as WorldEnvironment
 	_check(world_environment != null and world_environment.environment.background_mode == Environment.BG_SKY, "The world uses a procedural sky instead of a flat-color background.")
+	if world_environment != null:
+		_check(world_environment.environment.adjustment_enabled, "The environment applies a restrained contrast and saturation grade.")
 
 	instance.queue_free()
 	await get_tree().process_frame
