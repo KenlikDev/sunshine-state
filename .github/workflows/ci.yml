@@ -112,6 +112,7 @@ jobs:
             scripts/gameplay/stylized_character_mesh.gd \
             scripts/gameplay/vehicle_visual_details.gd \
             scripts/world/stylized_city_art.gd \
+            shaders/coastal_water.gdshader \
             scripts/gameplay/vehicle_glb_visual.gd \
             assets/characters/quaternius_animated_man.glb \
             assets/characters/QUATERNIUS_ANIMATED_MEN_LICENSE.txt \

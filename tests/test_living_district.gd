@@ -64,6 +64,32 @@ func _run_tests() -> void:
 			get_tree().get_nodes_in_group("traffic_vehicles").size() == 4,
 			"Traffic population stays bounded during the route simulation."
 		)
+
+		# Probe the steering helper with a real physics obstacle. This is a
+		# deterministic contract check separate from long route simulation.
+		if is_instance_valid(first_pedestrian):
+			var obstacle := StaticBody3D.new()
+			obstacle.name = "PedestrianSteeringRegressionObstacle"
+			obstacle.position = first_pedestrian.global_position + Vector3(0.0, 0.8, 1.2)
+			var obstacle_collision := CollisionShape3D.new()
+			var obstacle_shape := BoxShape3D.new()
+			obstacle_shape.size = Vector3(0.8, 1.8, 0.6)
+			obstacle_collision.shape = obstacle_shape
+			obstacle.add_child(obstacle_collision)
+			instance.add_child(obstacle)
+			await get_tree().physics_frame
+			var steered_direction: Vector3 = first_pedestrian.call(
+				"_avoid_obstacles",
+				Vector3(0.0, 0.0, 1.0)
+			)
+			_check(
+				steered_direction.length_squared() > 0.5
+				and absf(steered_direction.x) > 0.25,
+				"Pedestrian steering selects a clear shoulder instead of walking into an obstacle."
+			)
+			obstacle.queue_free()
+			await get_tree().physics_frame
+
 		if is_instance_valid(first_pedestrian):
 			_check(
 				first_pedestrian.global_position.distance_to(pedestrian_start) > 0.25,

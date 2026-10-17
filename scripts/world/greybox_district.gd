@@ -17,6 +17,7 @@ const SHOP_SCENE: PackedScene = preload("res://scenes/economy/shop_interactable.
 const DAY_NIGHT_SCRIPT: Script = preload("res://scripts/world/day_night_cycle.gd")
 const STYLIZED_CITY_ART_SCRIPT: Script = preload("res://scripts/world/stylized_city_art.gd")
 const BUILDING_VISUAL_SCRIPT: Script = preload("res://scripts/world/building_glb_visual.gd")
+const COASTAL_WATER_SHADER: Shader = preload("res://shaders/coastal_water.gdshader")
 const BUILDING_VISUAL_SCENES: Array[PackedScene] = [
 	preload("res://assets/environment/kenney_building_a.glb"),
 	preload("res://assets/environment/kenney_building_d.glb"),
@@ -66,6 +67,10 @@ func _create_environment() -> void:
 	environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	environment.tonemap_exposure = 1.0
 	environment.tonemap_white = 5.0
+	# A restrained grade keeps the pastel city legible without flattening shadow detail.
+	environment.adjustment_enabled = true
+	environment.adjustment_contrast = 1.045
+	environment.adjustment_saturation = 1.08
 	environment.fog_enabled = true
 	environment.fog_light_color = Color(0.58, 0.77, 0.82, 1.0)
 	environment.fog_density = 0.0015
@@ -179,9 +184,23 @@ func _create_buildings() -> void:
 
 func _create_coastline() -> void:
 	var sand_material := _make_material(Color(0.78, 0.69, 0.49))
-	var water_material := _make_material(Color(0.10, 0.43, 0.62), 0.35)
 	_add_visual_box("Beach", Vector3(0.0, 0.018, 60.5), Vector3(178.0, 0.036, 37.0), sand_material)
-	_add_visual_box("Water", Vector3(0.0, -0.12, 106.0), Vector3(220.0, 0.08, 55.0), water_material)
+
+	# A tessellated plane supports subtle vertex waves and animated sun glints
+	# while avoiding physics bodies and keeping the shoreline lightweight.
+	var water_mesh := PlaneMesh.new()
+	water_mesh.size = Vector2(220.0, 55.0)
+	water_mesh.subdivide_width = 64
+	water_mesh.subdivide_depth = 24
+	var water_visual := MeshInstance3D.new()
+	water_visual.name = "Water"
+	water_visual.mesh = water_mesh
+	water_visual.position = Vector3(0.0, 0.0, 106.0)
+	water_visual.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var water_material := ShaderMaterial.new()
+	water_material.shader = COASTAL_WATER_SHADER
+	water_visual.material_override = water_material
+	add_child(water_visual)
 
 
 func _create_information_board() -> void:

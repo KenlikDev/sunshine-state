@@ -9,6 +9,8 @@ const IMPORTED_CHARACTER_SCENE: PackedScene = preload("res://assets/characters/q
 @export var clothing_color: Color = Color(0.06, 0.35, 0.43, 1.0)
 
 var _imported_visual: Node3D
+var _motion_pivot: Node3D
+var _smoothed_horizontal_speed: float = 0.0
 var _animation_player: AnimationPlayer
 var _idle_animation: StringName = &""
 var _walk_animation: StringName = &""
@@ -33,7 +35,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if _imported_visual != null:
-		_update_rig_animation()
+		_update_rig_animation(delta)
 		return
 
 	var actor := get_parent() as CharacterBody3D
@@ -206,6 +208,14 @@ func _try_build_imported_character() -> bool:
 		-position.y - bounds.position.y * normalization_scale,
 		-bounds.get_center().z * normalization_scale
 	)
+	# Keep procedural movement lean outside the imported rig's animation paths.
+	var normalized_transform: Transform3D = _imported_visual.transform
+	remove_child(_imported_visual)
+	_motion_pivot = Node3D.new()
+	_motion_pivot.name = "CharacterMotionPivot"
+	add_child(_motion_pivot)
+	_motion_pivot.add_child(_imported_visual)
+	_imported_visual.transform = normalized_transform
 	# Godot uses -Z as forward; the source rig is oriented +Z.
 	_imported_visual.rotation.y = PI
 
@@ -266,29 +276,73 @@ func _find_locomotion_animations() -> void:
 			_run_animation = animation_name
 
 
-func _update_rig_animation() -> void:
-	if _animation_player == null:
-		return
+func get_locomotion_state() -> String:
+	if not _run_animation.is_empty() and _current_animation == _run_animation:
+		return "RUN"
+	if not _walk_animation.is_empty() and _current_animation == _walk_animation:
+		return "WALK"
+	return "IDLE"
+
+
+func _update_rig_animation(delta: float) -> void:
 	var actor := get_parent() as CharacterBody3D
 	if actor == null:
 		return
-	var horizontal_speed: float = Vector2(actor.velocity.x, actor.velocity.z).length()
+
+	var actual_speed: float = Vector2(actor.velocity.x, actor.velocity.z).length()
+	var speed_response: float = 15.0 if actual_speed < _smoothed_horizontal_speed else 10.0
+	_smoothed_horizontal_speed = move_toward(
+		_smoothed_horizontal_speed,
+		actual_speed,
+		speed_response * delta
+	)
+
+	# Fleeing pedestrians and pursuing officers should run even though their
+	# designed AI speeds are lower than the player's sprint speed.
+	var urgent_locomotion: bool = false
+	if actor.has_method("get_ai_state"):
+		var actor_state: String = String(actor.call("get_ai_state"))
+		urgent_locomotion = actor_state == "ALERT" or actor_state == "PURSUIT"
+	var run_threshold: float = 2.75 if urgent_locomotion else 5.4
 	var target_animation: StringName = _idle_animation
-	if horizontal_speed > 5.4 and not _run_animation.is_empty():
+	if not _run_animation.is_empty() and _smoothed_horizontal_speed >= run_threshold:
 		target_animation = _run_animation
-	elif horizontal_speed > 0.25 and not _walk_animation.is_empty():
+	elif not _walk_animation.is_empty() and _smoothed_horizontal_speed >= 0.18:
 		target_animation = _walk_animation
-	if target_animation.is_empty():
-		return
-	if target_animation != _current_animation:
-		_animation_player.play(target_animation, 0.18)
-		_current_animation = target_animation
-	if target_animation == _run_animation:
-		_animation_player.speed_scale = clampf(horizontal_speed / 6.5, 0.9, 1.45)
-	elif target_animation == _walk_animation:
-		_animation_player.speed_scale = clampf(horizontal_speed / 1.8, 0.75, 1.2)
-	else:
-		_animation_player.speed_scale = 1.0
+
+	# A small hysteresis band prevents speed changes at turns/collisions from
+	# rapidly flipping between walk and run clips.
+	if _current_animation == _run_animation and not _run_animation.is_empty():
+		if _smoothed_horizontal_speed >= run_threshold - 0.42:
+			target_animation = _run_animation
+	elif _current_animation == _walk_animation and not _walk_animation.is_empty():
+		if _smoothed_horizontal_speed >= 0.12 and target_animation == _idle_animation:
+			target_animation = _walk_animation
+
+	if not target_animation.is_empty():
+		if target_animation != _current_animation:
+			_animation_player.play(target_animation, 0.24)
+			_current_animation = target_animation
+		if target_animation == _run_animation:
+			_animation_player.speed_scale = clampf(_smoothed_horizontal_speed / 4.1, 0.82, 1.35)
+		elif target_animation == _walk_animation:
+			_animation_player.speed_scale = clampf(_smoothed_horizontal_speed / 1.8, 0.72, 1.22)
+		else:
+			_animation_player.speed_scale = 1.0
+
+	if _motion_pivot != null:
+		var local_velocity: Vector3 = actor.global_transform.basis.inverse() * Vector3(
+			actor.velocity.x,
+			0.0,
+			actor.velocity.z
+		)
+		var movement_amount: float = clampf(_smoothed_horizontal_speed / 4.5, 0.0, 1.0)
+		var target_lean: float = clampf(-local_velocity.x * 0.012, -0.045, 0.045) * movement_amount
+		_motion_pivot.rotation.z = lerpf(
+			_motion_pivot.rotation.z,
+			target_lean,
+			clampf(delta * 5.5, 0.0, 1.0)
+		)
 
 
 func _apply_imported_materials() -> void:
