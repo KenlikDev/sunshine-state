@@ -13,6 +13,14 @@ const DAY_AMBIENT: Color = Color(0.72, 0.77, 0.82, 1.0)
 const NIGHT_AMBIENT: Color = Color(0.18, 0.22, 0.36, 1.0)
 const TWILIGHT_SUN_COLOR: Color = Color(1.0, 0.46, 0.28, 1.0)
 const DAY_SUN_COLOR: Color = Color(1.0, 0.96, 0.86, 1.0)
+const DAY_SKY_TOP: Color = Color(0.11, 0.43, 0.70, 1.0)
+const TWILIGHT_SKY_TOP: Color = Color(0.36, 0.18, 0.36, 1.0)
+const NIGHT_SKY_TOP: Color = Color(0.012, 0.024, 0.075, 1.0)
+const DAY_SKY_HORIZON: Color = Color(0.71, 0.86, 0.90, 1.0)
+const TWILIGHT_SKY_HORIZON: Color = Color(0.98, 0.44, 0.31, 1.0)
+const NIGHT_SKY_HORIZON: Color = Color(0.075, 0.11, 0.22, 1.0)
+const DAY_GROUND_HORIZON: Color = Color(0.59, 0.68, 0.67, 1.0)
+const NIGHT_GROUND_HORIZON: Color = Color(0.045, 0.075, 0.13, 1.0)
 
 var _time_of_day_hours: float = 9.5
 
@@ -62,7 +70,15 @@ func _apply_time_of_day() -> void:
 		twilight * (1.0 - daylight) * 0.85
 	)
 	environment.ambient_light_color = NIGHT_AMBIENT.lerp(DAY_AMBIENT, daylight)
-	environment.ambient_light_energy = lerpf(0.22, 0.8, daylight)
+	environment.ambient_light_energy = lerpf(0.22, 0.82, daylight)
+	var sky_resource: Sky = environment.sky
+	if sky_resource != null and sky_resource.sky_material is ProceduralSkyMaterial:
+		var sky_material: ProceduralSkyMaterial = sky_resource.sky_material as ProceduralSkyMaterial
+		var twilight_mix: float = twilight * (1.0 - daylight)
+		sky_material.sky_top_color = NIGHT_SKY_TOP.lerp(DAY_SKY_TOP, daylight).lerp(TWILIGHT_SKY_TOP, twilight_mix)
+		sky_material.sky_horizon_color = NIGHT_SKY_HORIZON.lerp(DAY_SKY_HORIZON, daylight).lerp(TWILIGHT_SKY_HORIZON, twilight_mix)
+		sky_material.ground_horizon_color = NIGHT_GROUND_HORIZON.lerp(DAY_GROUND_HORIZON, daylight)
+		sky_material.ground_bottom_color = NIGHT_BACKGROUND.lerp(Color(0.18, 0.21, 0.22, 1.0), daylight)
 
 	_sunlight.rotation_degrees = Vector3(-sun_height * 70.0, 32.0, 0.0)
 	_sunlight.light_color = TWILIGHT_SUN_COLOR.lerp(DAY_SUN_COLOR, daylight)

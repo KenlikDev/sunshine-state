@@ -1,12 +1,17 @@
 name: Repository checks
 
+# Keep only the newest CI run for each pull request or directly pushed protected branch.
+# Feature branches are validated by pull_request runs to avoid duplicate push + PR jobs.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 on:
   pull_request:
   push:
     branches:
       - develop
       - main
-      - "codex/**"
   workflow_dispatch:
     inputs:
       run_living_district_soak:
@@ -103,7 +108,26 @@ jobs:
             tests/test_vertical_slice.gd \
             tests/test_vertical_slice.tscn \
             tests/test_vehicle_system.gd \
-            tests/test_vehicle_system.tscn
+            tests/test_vehicle_system.tscn \
+            scripts/gameplay/stylized_character_mesh.gd \
+            scripts/gameplay/vehicle_visual_details.gd \
+            scripts/world/stylized_city_art.gd \
+            scripts/gameplay/vehicle_glb_visual.gd \
+            assets/characters/quaternius_animated_man.glb \
+            assets/characters/QUATERNIUS_ANIMATED_MEN_LICENSE.txt \
+            assets/vehicles/kenney_sedan.glb \
+            assets/vehicles/kenney_hatchback_sports.glb \
+            assets/vehicles/kenney_utility_truck.glb \
+            assets/vehicles/KENNEY_CAR_KIT_LICENSE.txt \
+            scripts/world/building_glb_visual.gd \
+            assets/environment/kenney_building_a.glb \
+            assets/environment/kenney_building_d.glb \
+            assets/environment/kenney_building_f.glb \
+            assets/environment/kenney_building_h.glb \
+            assets/environment/kenney_building_skyscraper_a.glb \
+            assets/environment/KENNEY_CITY_KIT_LICENSE.txt \
+            tests/test_visual_presentation.gd \
+            tests/test_visual_presentation.tscn
           do
             test -s "$file" || { echo "Missing or empty required file: $file"; exit 1; }
           done
@@ -172,6 +196,9 @@ jobs:
 
       - name: Run procedural audio regression checks
         run: timeout 30s godot --headless --path . res://tests/test_audio_system.tscn
+
+      - name: Run visual presentation regression checks
+        run: timeout 60s godot --headless --path . res://tests/test_visual_presentation.tscn
 
   desktop-export-smoke:
     runs-on: ubuntu-latest

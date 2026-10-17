@@ -101,3 +101,8 @@ Pin the Godot version and test on a documented desktop environment. Keep automat
 ## Release gate
 
 No open P0/P1 defects. Required automated tests pass. The critical path succeeds in the packaged build. Known P2/P3 defects are documented and accepted explicitly.
+
+
+## Visual presentation regression checks
+
+Run `godot --headless --path . res://tests/test_visual_presentation.tscn` to verify that the player, four pedestrians, police officer, and three drivable vehicle variants retain their presentation components; that background traffic still receives its visible wheel geometry; that facade windows, promenade palms, lamps, crossings, benches, and beach umbrellas are present; and that the world uses a procedural sky. These assertions detect missing visual construction and integration regressions only. They do not measure artistic quality, silhouette readability at all camera distances, lighting quality, frame time on target hardware, or animation appeal; those require a manual exported-build review.

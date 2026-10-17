@@ -4,11 +4,13 @@ Sunshine State is an original, single-player, third-person open-world crime-acti
 
 ## Project status
 
-**Review branch:** `codex/integrated-review-candidate`
+**Review branch:** `codex/visual-foundation-pass`
 
-**Status:** consolidated playable greybox prototype integrating milestones M1–M9. This branch is a single review entry point for the current work. It is **not yet accepted as the complete MVP or a production release**.
+**Status:** consolidated playable coastal-district prototype integrating milestones M1–M9 with a first imported low-poly art pass. This branch is a single review entry point for the current work. It is **not yet accepted as the complete MVP or a production release**.
 
-The branch contains a controllable third-person character, a bounded greybox coastal district, a day/night lighting cycle, an information board, an English/Russian HUD, three drivable vehicle prototypes (sedan, compact coupe, and utility pickup), four route-following pedestrians, four background traffic agents, an initial wanted/police loop, one raycast-based sidearm, health/damage and respawn, three connected missions, an economy and recoverable save/load, main and pause menus, persistent settings, accessibility controls, procedural audio, mission waypoints, and vehicle-health persistence.
+The branch contains a controllable third-person character, a bounded coastal district, a day/night lighting cycle, an information board, an English/Russian HUD, three drivable vehicle prototypes, four route-following pedestrians, four background traffic agents, an initial wanted/police loop, one raycast-based sidearm, health/damage and respawn, three connected missions, an economy and recoverable save/load, main and pause menus, persistent settings, accessibility controls, procedural audio, mission waypoints, and vehicle-health persistence.
+
+The current visual-foundation branch imports a rigged, skinned Quaternius humanoid under CC0 1.0 with 11 embedded animations and speed-driven idle/walk/run selection, three Kenney CC0 low-poly vehicle models, and five reusable textured Kenney city-building models for the core district. It also adds a time-varying procedural sky, fog and dusk street lighting, palms, promenade/beach dressing, crossings and facade details for the remaining procedural buildings. Background traffic reuses the three low-poly vehicle models; roads and beach props remain procedural, and the humanoid is a reusable base rather than a bespoke final protagonist.
 
 ### Open acceptance gates
 
@@ -24,7 +26,7 @@ The full scope and measurable acceptance criteria remain in [docs/mvp-scope.md](
 ## Run locally
 
 1. Install [Godot 4.7.2-stable](https://godotengine.org/download/archive/4.7.2-stable/).
-2. Clone this repository or download the ZIP for the `codex/integrated-review-candidate` branch, then open `project.godot` in Godot.
+2. Clone this repository or download the ZIP for the `codex/visual-foundation-pass` branch, then open `project.godot` in Godot.
 3. Run the project from the editor (F5); the main menu opens first. Starting a new game asks for confirmation when a valid save exists; Continue retains access to the existing save.
 
 ## Controls
@@ -77,4 +79,4 @@ The full scope and measurable acceptance criteria remain in [docs/mvp-scope.md](
 
 ## Validation
 
-The latest full automated CI run on the parent M9 commit passed Godot import/startup, gameplay regression suites, documentation checks, and Linux/Windows export/runtime smoke checks. This is automated evidence, not a clean-machine interactive playthrough. The open acceptance gates above still apply to this integrated review candidate.
+CI validates the exact commit it runs against: resource import, launch, gameplay-regression suites, documentation/policy checks, and exported desktop smoke tests. Passing CI does not judge artistic quality or replace a clean-machine interactive playthrough, the living-district soak, or the open acceptance gates above. Record the tested commit SHA with each review.

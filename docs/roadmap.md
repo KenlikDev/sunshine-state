@@ -20,3 +20,8 @@ Do not build advanced systems on top of unstable interfaces. Vehicle, mission, a
 ## Implementation gate
 
 The current branch contains an intermediate vehicle prototype, not the complete MVP. At least three vehicle configurations and all remaining required capabilities in `docs/mvp-scope.md` must be implemented and validated before calling the game an MVP or asking for the final MVP acceptance review.
+
+
+## Visual presentation pass
+
+The current art pass adds a consistent stylized coastal palette, procedural sky/day-night colors, facade windows and trims, palms, beach objects, pedestrian crossings, street lamps, detailed vehicle presentation, and articulated character silhouettes. Treat this as a presentation foundation, not a final-art milestone. Production acceptance remains blocked on replacing the procedural characters and blockout vehicle/building geometry with quality-reviewed models, polishing animations/materials, and completing a manual exported-build visual review.
