@@ -229,8 +229,8 @@ func _ray_has_obstacle(direction: Vector3, distance: float, target_to_ignore: No
 		return false
 	var ray_origin: Vector3 = global_position + Vector3.UP * 0.9
 	var exclusions: Array[RID] = [get_rid()]
-	if is_instance_valid(target_to_ignore):
-		exclusions.append(target_to_ignore.get_rid())
+	if is_instance_valid(target_to_ignore) and target_to_ignore is CollisionObject3D:
+		exclusions.append((target_to_ignore as CollisionObject3D).get_rid())
 	var query := PhysicsRayQueryParameters3D.create(
 		ray_origin,
 		ray_origin + direction.normalized() * distance,
